@@ -1,0 +1,150 @@
+---
+title: "Analysis of Bryophyte Richness and Diversity in the Americas"
+author: Carter Powell, Jackie O'Malley, and Julia Eckberg
+output: html_notebook
+---
+
+```{r}
+require(knitr)
+require(BIEN)
+require(ape)
+require(maps)
+require(dplyr)
+require(maptools)
+require(raster)
+require(dismo)
+require(sp)
+require(rgdal)
+require(mapdata)
+require(mapproj)
+require(vegan)
+require(letsR)
+require(entropart)
+require(betapart)
+require(rgeos)
+require(CommEcol)
+require(rlist)
+```
+
+#Load and process data
+```{r, eval=TRUE, echo=FALSE}
+source("~/Documents/Bryophytes/Scripts/DataLoading.R")
+source("~/Documents/Bryophytes/Scripts/DataProcessing.R")
+```
+
+
+#Create occurrence by cell matrix by reshaping dataframe
+```{r}
+require(reshape2)
+
+SpeciesCellID <- BryophytePresence[,c(1,4)]
+melted <- melt(SpeciesCellID, id=c("Species", "CellID"), na.rm = TRUE)
+
+SpeciesCellMatrix <- acast(melted, CellID~Species, margins=TRUE)
+```
+
+
+#Using betadiver to compute B-diversity using Jaccard dissimilarity
+```{r}
+betaj <- betadiver(SpeciesCellMatrix, method = "j", order = FALSE, help = FALSE)
+head(betaj)
+#betavector <- as.vector(t(betaj))
+```
+
+
+#Using vegdist to compute B-diversity using presence-absence data
+```{r}
+#betapresab <-vegdist(SpeciesCellMatrix, method="jaccard", binary=TRUE, diag=FALSE, upper=TRUE, na.rm = FALSE)
+```
+
+
+#Identify cells that are adjacent
+```{r}
+cellID <- tally$CellID
+
+cellvector <- c(1:15038)
+neighbor <- function(cellvector) {(adjacent(BIENblank, cellvector, directions=8, pairs=FALSE, target=NULL, sorted=TRUE, include=FALSE, id=FALSE))}
+neighbors <- lapply(cellvector, neighbor)
+names(neighbors) <- cellvector
+
+bryneighbors <- neighbors[cellID]
+```
+
+#Separate out cells with 8 neighbors
+```{r}
+neighborvect <- unlist(lapply(bryneighbors, length))
+
+cell8 <- cellID[which(neighborvect==8)]
+
+betaj<-as.matrix(betaj)
+betaj[!cell8, !cell8, drop=TRUE]
+
+inx <- match(as.character(cell8), rownames(betaj))
+
+betaj <- betaj[inx,inx]
+
+neighbormatrix <- matrix(as.data.frame(cell8))
+```
+
+#Trying to extract the vector of neighbors for each cell with 8 neighbors
+```{r}
+#neighborvect <- unlist(lapply(bryneighbors))
+#mergedlist<-cbind(bryneighbors, as.vector(neighborlist))
+
+neighborlist <- as.list(cell8)
+bry8neighbors <- neighbors[cell8]
+```
+
+#Try out beta raster
+```{r}
+BetaRaster <- setValues(BIENblank, betavector)
+```
+
+#Trying out betadisper
+```{r}
+betadisper(betaj, group, type = c("median","centroid"), bias.adjust = FALSE,
+       sqrt.dist = FALSE, add = FALSE)
+```
+
+#Turn occurrence matrix into presence-absence matrix
+```{r}
+#SpeciesCellMatrix[SpeciesCellMatrix > 0] <- 1
+```
+
+#Compute Jaccard dissimilarity for all pairs of sites
+```{r}
+#JaccardMatrix <- vegdist(SpeciesCellMatrix, method="jaccard", binary=TRUE, upper=TRUE)
+```
+
+#Convert blank raster to shapefile
+```{r, eval=FALSE}
+crs_ref <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"  
+BIENblank_tmp <- projectRaster(BIENblank, crs = crs_ref)
+
+BIENpoints <- rasterToPoints(BIENblank_tmp, spatial  = TRUE)
+proj4string(BIENpoints)
+
+BIENpoints <- spTransform(BIENpoints, CRS(crs_ref))
+
+BIENpoints@data <- data.frame(BIENpoints@data, long=coordinates(BIENpoints) [,1], lat=coordinates(BIENpoints) [,2])
+head(BIENpoints@data, n=20)
+
+BIENpolygons <- rasterToPolygons(BIENblank_tmp, fun = NULL, na.rm = TRUE, n=8, digits = 12)
+BIENpolygons
+```
+
+
+#Trying out betagrid
+```{r}
+#print(betagrid)
+#betagrid(gridshp=BIENpolygons, comp = SpeciesCellMatrix, xfeature = 2, yfeature = 3, radius = 0.25,index = "jaccard")
+```
+
+
+#Trying out betagrid2
+```{r}
+#PresAbTable <- read.table(SpeciesCellMatrix, row.names=1, head=T)
+#print(betagrid2)
+#betagrid2(SpeciesCellMatrix, radius = 100)
+```
+#Turn occurrence matrix into presence-absence matrix

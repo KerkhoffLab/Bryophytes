@@ -28,8 +28,8 @@ require(rlist)
 
 #Load and process data
 ```{r, eval=TRUE, echo=FALSE}
-source("~/Documents/Bryophytes/Scripts/DataLoading.R")
-source("~/Documents/Bryophytes/Scripts/DataProcessing.R")
+source("Scripts/DataLoading.R")
+source("Scripts/DataProcessing.R")
 ```
 
 
@@ -43,12 +43,16 @@ melted <- melt(SpeciesCellID, id=c("Species", "CellID"), na.rm = TRUE)
 SpeciesCellMatrix <- acast(melted, CellID~Species, margins=TRUE)
 ```
 
+#The original betaj matrix for ALL CELL PAIRS!!!
+```{r}
+ogbetaj <- betadiver(SpeciesCellMatrix, method = "j", order = FALSE, help = FALSE)
+```
+
 
 #Using betadiver to compute B-diversity using Jaccard dissimilarity
 ```{r}
 betaj <- betadiver(SpeciesCellMatrix, method = "j", order = FALSE, help = FALSE)
 head(betaj)
-#betavector <- as.vector(t(betaj))
 ```
 
 
@@ -58,23 +62,24 @@ head(betaj)
 ```
 
 
-#Identify cells that are adjacent
+#Identify OCCUPPIED cells that are adjacent to each occuppied cell
 ```{r}
 cellID <- tally$CellID
 
 cellvector <- c(1:15038)
-neighbor <- function(cellvector) {(adjacent(BIENblank, cellvector, directions=8, pairs=FALSE, target=NULL, sorted=TRUE, include=FALSE, id=FALSE))}
+neighbor <- function(cellvector) {(adjacent(BIENblank, cellvector, directions=8, pairs=FALSE, target=cellID, sorted=TRUE, include=FALSE, id=FALSE))}
 neighbors <- lapply(cellvector, neighbor)
 names(neighbors) <- cellvector
 
 bryneighbors <- neighbors[cellID]
 ```
 
-#Separate out cells with 8 neighbors
-```{r}
-neighborvect <- unlist(lapply(bryneighbors, length))
 
-cell8 <- cellID[which(neighborvect==8)]
+#Separate out occuppied cells with 8 occuppied neighbors
+```{r}
+bryneighborvect <- unlist(lapply(bryneighbors, length))
+
+cell8 <- cellID[which(bryneighborvect==8)]
 
 betaj<-as.matrix(betaj)
 betaj[!cell8, !cell8, drop=TRUE]
@@ -82,21 +87,27 @@ betaj[!cell8, !cell8, drop=TRUE]
 inx <- match(as.character(cell8), rownames(betaj))
 
 betaj <- betaj[inx,inx]
-
-neighbormatrix <- matrix(as.data.frame(cell8))
 ```
 
 #Trying to extract the vector of neighbors for each cell with 8 neighbors
 ```{r}
-#neighborvect <- unlist(lapply(bryneighbors))
+for(i in cell8){
+  betaj[[i]]
+}
+bry8neighbors <-neighbors[cell8]
+
+row.names(betaj) <- cell8
+col.names(betaj) <- cell8
+
 #mergedlist<-cbind(bryneighbors, as.vector(neighborlist))
 
 neighborlist <- as.list(cell8)
-bry8neighbors <- neighbors[cell8]
 ```
 
 #Try out beta raster
 ```{r}
+#betavector <- as.vector(t(betaj))
+betavector <- as.vector(t(betaj))
 BetaRaster <- setValues(BIENblank, betavector)
 ```
 

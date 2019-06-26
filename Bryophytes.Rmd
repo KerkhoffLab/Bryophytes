@@ -40,7 +40,7 @@ require(reshape2)
 SpeciesCellID <- BryophytePresence[,c(1,4)]
 melted <- melt(SpeciesCellID, id=c("Species", "CellID"), na.rm = TRUE)
 
-SpeciesCellMatrix <- acast(melted, CellID~Species, margins=TRUE)
+SpeciesCellMatrix <- acast(melted, CellID~Species, margins=FALSE)
 ```
 
 #The original betaj matrix for ALL CELL PAIRS!!!
@@ -91,17 +91,37 @@ betaj <- betaj[inx,inx]
 
 #Trying to extract the vector of neighbors for each cell with 8 neighbors
 ```{r}
-for(i in cell8){
-  betaj[[i]]
-}
 bry8neighbors <-neighbors[cell8]
+bry8neighbors <- data.frame(bry8neighbors)
+names(bry8neighbors)[1:3788] <- cell8
 
 row.names(betaj) <- cell8
-col.names(betaj) <- cell8
+names(betaj)[1:3788] <- cell8
+
+betajmat <- as.matrix(ogbetaj)
+row.names(betajmat) <- cellID
+names(betajmat)[1:4761] <- cellID
 
 #mergedlist<-cbind(bryneighbors, as.vector(neighborlist))
 
 neighborlist <- as.list(cell8)
+```
+
+
+#Beta diversity for each cell and its 8neighbors
+```{r}
+for(val in cell8) { 
+  bry8neighbors[, c(val)]
+}
+
+
+for (cell8 in bry8neighbors) {
+mean(betajmat["cell8", bry8neighbors[c("cell8")]])
+ }
+
+for(cell8 in betajmat) {
+  betajmat["cell8", which(bry8neighbors[c("cell8")])]
+  }
 ```
 
 #Try out beta raster

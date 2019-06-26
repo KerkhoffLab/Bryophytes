@@ -33,7 +33,7 @@ source("Scripts/DataProcessing.R")
 ```
 
 
-#Create occurrence by cell matrix by reshaping dataframe
+#Create occurrence by cell matrix by reshaping dataframe, then convert to presence-absence matrix
 ```{r}
 require(reshape2)
 
@@ -41,24 +41,28 @@ SpeciesCellID <- BryophytePresence[,c(1,4)]
 melted <- melt(SpeciesCellID, id=c("Species", "CellID"), na.rm = TRUE)
 
 SpeciesCellMatrix <- acast(melted, CellID~Species, margins=FALSE)
+#SpeciesCellMatrix[SpeciesCellMatrix > 0] <- 1
+
 ```
 
-#The original betaj matrix for ALL CELL PAIRS!!!
+#The original beta matrix for ALL CELL PAIRS!!!
 ```{r}
-ogbetaj <- betadiver(SpeciesCellMatrix, method = "j", order = FALSE, help = FALSE)
+betadiver(help = TRUE)
+full.beta <- betadiver(SpeciesCellMatrix, method = "sor", order = FALSE, help = FALSE)
 ```
 
 
 #Using betadiver to compute B-diversity using Jaccard dissimilarity
 ```{r}
-betaj <- betadiver(SpeciesCellMatrix, method = "j", order = FALSE, help = FALSE)
-head(betaj)
+betamat <- betadiver(SpeciesCellMatrix, method = "j", order = FALSE, help = FALSE)
+head(betamat)
 ```
 
 
 #Using vegdist to compute B-diversity using presence-absence data
 ```{r}
-#betapresab <-vegdist(SpeciesCellMatrix, method="jaccard", binary=TRUE, diag=FALSE, upper=TRUE, na.rm = FALSE)
+#JaccardMatrix <- vegdist(SpeciesCellMatrix, method="jaccard", binary=TRUE, upper=FALSE)
+
 ```
 
 
@@ -81,12 +85,12 @@ bryneighborvect <- unlist(lapply(bryneighbors, length))
 
 cell8 <- cellID[which(bryneighborvect==8)]
 
-betaj<-as.matrix(betaj)
-betaj[!cell8, !cell8, drop=TRUE]
+betamat<-as.matrix(betamat)
+betamat[!cell8, !cell8, drop=TRUE]
 
-inx <- match(as.character(cell8), rownames(betaj))
+inx <- match(as.character(cell8), rownames(betamat))
 
-betaj <- betaj[inx,inx]
+betamat <- betamat[inx,inx]
 ```
 
 #Trying to extract the vector of neighbors for each cell with 8 neighbors
@@ -95,12 +99,12 @@ bry8neighbors <-neighbors[cell8]
 bry8neighbors <- data.frame(bry8neighbors)
 names(bry8neighbors)[1:3788] <- cell8
 
-row.names(betaj) <- cell8
-names(betaj)[1:3788] <- cell8
+row.names(betamat) <- cell8
+names(betamat)[1:3788] <- cell8
 
-betajmat <- as.matrix(ogbetaj)
-row.names(betajmat) <- cellID
-names(betajmat)[1:4761] <- cellID
+full.betamat <- as.matrix(full.beta)
+row.names(full.betamat) <- cellID
+names(full.betamat)[1:4761] <- cellID
 
 #mergedlist<-cbind(bryneighbors, as.vector(neighborlist))
 
@@ -110,37 +114,51 @@ neighborlist <- as.list(cell8)
 
 #Beta diversity for each cell and its 8neighbors
 ```{r}
-for(val in cell8) { 
-  bry8neighbors[, c(val)]
-}
+mean(full.betamat["767", as.character(bry8neighbors[,"767"])])
 
+cell8_ch <- as.character(cell8)
 
-for (cell8 in bry8neighbors) {
-mean(betajmat["cell8", bry8neighbors[c("cell8")]])
- }
-
-for(cell8 in betajmat) {
-  betajmat["cell8", which(bry8neighbors[c("cell8")])]
-  }
+ultimatebeta <- lapply(cell8_ch, function(x)mean(full.betamat[x, as.character(bry8neighbors[,x])]))
+names(ultimatebeta) <- cell8_ch
+plot(cell8_ch, neighbormats)
+#check on cell 767. it has crazy LOW value
 ```
+
+
+#Plot richness
+```{r}
+betavector<-unlist(ultimatebeta)
+
+cellmatrix <- as.matrix(cellvector)
+
+x <- rep(0,15038)
+x
+
+x[cell8]<-betavector
+x[x<0.6]<-0
+cellmatrix<-cbind(cellmatrix, x)
+cellmatrix<-cellmatrix[,-1]
+betavector<-as.vector(cellmatrix)
+
+BetaRaster <- setValues(BIENblank, betavector)
+BetaRaster[which(betavector==0)]=NA
+plot(BetaRaster, axes = F)
+```
+
 
 #Try out beta raster
 ```{r}
-#betavector <- as.vector(t(betaj))
-betavector <- as.vector(t(betaj))
-BetaRaster <- setValues(BIENblank, betavector)
+#betavector <- as.vector(t(beta))
+#betavector <- as.vector(t(beta))
+#BetaRaster <- setValues(BIENblank, betavector)
 ```
 
 #Trying out betadisper
 ```{r}
-betadisper(betaj, group, type = c("median","centroid"), bias.adjust = FALSE,
-       sqrt.dist = FALSE, add = FALSE)
+#betadisper(beta, group, type = c("median","centroid"), bias.adjust = FALSE,
+       #sqrt.dist = FALSE, add = FALSE)
 ```
 
-#Turn occurrence matrix into presence-absence matrix
-```{r}
-#SpeciesCellMatrix[SpeciesCellMatrix > 0] <- 1
-```
 
 #Compute Jaccard dissimilarity for all pairs of sites
 ```{r}
@@ -178,4 +196,3 @@ BIENpolygons
 #print(betagrid2)
 #betagrid2(SpeciesCellMatrix, radius = 100)
 ```
-#Turn occurrence matrix into presence-absence matrix

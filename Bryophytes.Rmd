@@ -41,20 +41,20 @@ SpeciesCellID <- BryophytePresence[,c(1,4)]
 melted <- melt(SpeciesCellID, id=c("Species", "CellID"), na.rm = TRUE)
 
 SpeciesCellMatrix <- acast(melted, CellID~Species, margins=FALSE)
-#SpeciesCellMatrix[SpeciesCellMatrix > 0] <- 1
+SpeciesCellMatrix[SpeciesCellMatrix > 0] <- 1
 
 ```
 
 #The original beta matrix for ALL CELL PAIRS!!!
 ```{r}
-betadiver(help = TRUE)
+#betadiver(help = TRUE)
 full.beta <- betadiver(SpeciesCellMatrix, method = "sor", order = FALSE, help = FALSE)
 ```
 
 
 #Using betadiver to compute B-diversity using Jaccard dissimilarity
 ```{r}
-betamat <- betadiver(SpeciesCellMatrix, method = "j", order = FALSE, help = FALSE)
+betamat <- betadiver(SpeciesCellMatrix, method = "sor", order = FALSE, help = FALSE)
 head(betamat)
 ```
 
@@ -84,67 +84,107 @@ bryneighbors <- neighbors[cellID]
 bryneighborvect <- unlist(lapply(bryneighbors, length))
 
 cell8 <- cellID[which(bryneighborvect==8)]
+cell7 <- cellID[which(bryneighborvect==7)]
 
-betamat<-as.matrix(betamat)
-betamat[!cell8, !cell8, drop=TRUE]
+betamat8<-as.matrix(betamat)
+betamat8[!cell8, !cell8, drop=TRUE]
 
-inx <- match(as.character(cell8), rownames(betamat))
+betamat7<-as.matrix(betamat)
+betamat7[!cell7, !cell7, drop=TRUE]
 
-betamat <- betamat[inx,inx]
+inx8 <- match(as.character(cell8), rownames(betamat8))
+inx7 <- match(as.character(cell7), rownames(betamat7))
+
+betamat8 <- betamat8[inx8,inx8]
+betamat7 <- betamat7[inx7,inx7]
 ```
 
 #Trying to extract the vector of neighbors for each cell with 8 neighbors
 ```{r}
 bry8neighbors <-neighbors[cell8]
+bry7neighbors <- neighbors[cell7]
+
 bry8neighbors <- data.frame(bry8neighbors)
 names(bry8neighbors)[1:3788] <- cell8
+bry7neighbors <- data.frame(bry7neighbors)
+names(bry7neighbors)[1:318] <- cell7
 
-row.names(betamat) <- cell8
-names(betamat)[1:3788] <- cell8
+row.names(betamat8) <- cell8
+names(betamat8)[1:3788] <- cell8
+row.names(betamat7) <- cell7
+names(betamat7)[1:318] <- cell7
+
 
 full.betamat <- as.matrix(full.beta)
 row.names(full.betamat) <- cellID
 names(full.betamat)[1:4761] <- cellID
 
-#mergedlist<-cbind(bryneighbors, as.vector(neighborlist))
-
-neighborlist <- as.list(cell8)
+#neighborlist <- as.list(cell8)
 ```
 
 
 #Beta diversity for each cell and its 8neighbors
 ```{r}
-mean(full.betamat["767", as.character(bry8neighbors[,"767"])])
-
 cell8_ch <- as.character(cell8)
+cell7_ch <- as.character(cell7)
 
-ultimatebeta <- lapply(cell8_ch, function(x)mean(full.betamat[x, as.character(bry8neighbors[,x])]))
-names(ultimatebeta) <- cell8_ch
-plot(cell8_ch, neighbormats)
+ultimatebeta8 <- lapply(cell8_ch, function(x)mean(full.betamat[x, as.character(bry8neighbors[,x])]))
+names(ultimatebeta8) <- cell8_ch
+
+ultimatebeta7 <- lapply(cell7_ch, function(x)mean(full.betamat[x, as.character(bry7neighbors[,x])]))
+names(ultimatebeta7) <- cell7_ch
+
+plot(cell8_ch, ultimatebeta8)
+plot(cell7_ch, ultimatebeta7)
+
+points(cell7_ch, ultimatebeta7)
+
 #check on cell 767. it has crazy LOW value
 ```
 
 
 #Plot richness
 ```{r}
-betavector<-unlist(ultimatebeta)
-
+betavector7<-unlist(ultimatebeta7)
+betavector8<-unlist(ultimatebeta8)
 cellmatrix <- as.matrix(cellvector)
-
 x <- rep(0,15038)
 x
+x[cell8]<-betavector8
+x[cell7]<-betavector7
+x[x==0]<-NA
+plot(cellvector, x)
 
-x[cell8]<-betavector
-x[x<0.6]<-0
+#MAP
+#require(RColorBrewer)
+#cols<-brewer.pal(5, "YlGn")
+require(wesanderson)
+cols <- rev(wes_palette("Zissou1", 500, type = "continuous"))
+require(rasterVis)
+#different way to plot, easier to mess with the breaks
+
+x[x<0.5]<-NA
 cellmatrix<-cbind(cellmatrix, x)
 cellmatrix<-cellmatrix[,-1]
-betavector<-as.vector(cellmatrix)
 
+betavector<-as.vector(cellmatrix)
 BetaRaster <- setValues(BIENblank, betavector)
-BetaRaster[which(betavector==0)]=NA
-plot(BetaRaster, axes = F)
+spplot(BetaRaster,  maxpixels=15038, col.regions=cols)
+gplot(BetaRaster,  maxpixels=15038)
+
+library(ggplot2)
+
+theme_set(theme_void())
+gplot(BetaRaster) + geom_raster(aes(fill = value))+ scale_fill_gradientn(colours=cols) +
+          coord_equal()
+
+#plot(BetaRaster, col=rev(cols), axes = F)
 ```
 
+#RasterVis test
+```{r}
+require(rasterVis)
+```
 
 #Try out beta raster
 ```{r}

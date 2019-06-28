@@ -15,40 +15,38 @@ require(mapdata)
 require(mapproj)
 
 #Table of all bryophyte occurrences
-allbryophytes <- BIEN_taxonomy_higher_plant_group("bryophytes", print.query = FALSE)
+BrySpecies <- BIEN_taxonomy_higher_plant_group("bryophytes", print.query = FALSE)
 SpeciesPresence$Species <- gsub("_", " ", SpeciesPresence$Species)
-BryophytePresence=SpeciesPresence[SpeciesPresence$Species %in% unique(allbryophytes$scrubbed_species_binomial), ]
+BryophytePresence <- SpeciesPresence[SpeciesPresence$Species %in% unique(BrySpecies$scrubbed_species_binomial), ]
 
-#Tally richness by cell
-tally <- tally(group_by(BryophytePresence, CellID))
-colnames(tally)[2] <- "Richness"
-
-#Bryophyte richness by cell
-Bryophyte_Richness <- numeric(15038)
-Bryophyte_Richness[tally$CellID] <- tally$Richness
+#Tally richness by cell and create richness vector
+CellRichness <- tally(group_by(BryophytePresence, CellID))
+colnames(BryRichness)[2] <- "Richness"
+RichnessVec <- numeric(15038)
+RichnessVec[BryRichness$CellID] <- BryRichness$Richness
 
 #Subset bryophytes into three groups
-Mosses <- subset(bryphy, Group=="Mosses")
-Liverworts <- subset(bryphy, Group=="Liverworts")
-Hornworts <- subset(bryphy, Group=="Hornworts")
+Mosses <- subset(ByGroup, Group=="Mosses")
+Liverworts <- subset(ByGroup, Group=="Liverworts")
+Hornworts <- subset(ByGroup, Group=="Hornworts")
 
 #Rename columns
-allbryophytes$Family <- allbryophytes$scrubbed_family
-allbryophytes$Genus <- allbryophytes$scrubbed_genus
-allbryophytes$Species <- allbryophytes$scrubbed_species_binomial
-
-##Data manipulation
-newbryophyte <- allbryophytes[,c(10,11,12)]
+BrySpecies$Family <- BrySpecies$scrubbed_family
+BrySpecies$Genus <- BrySpecies$scrubbed_genus
+BrySpecies$Species <- BrySpecies$scrubbed_species_binomial
+BrySpecies <- BrySpecies[,c(10,11,12)]
 
 #Add group to bryophyte data by family
-newbryophyte <- merge(newbryophyte, bryphy, by = "Family", all.x = TRUE)
+BrySpecies <- merge(BrySpecies, ByGroup, by = "Family", all.x = TRUE)
 
-#Add group to occurrence data by species
-BryophytePresence <- merge(BryophytePresence, newbryophyte, by = "Species", all.x= TRUE)
+#Add group to presence data by species and remove duplicate entries and write as .csv
+BryophytePresence <- merge(BryophytePresence, BrySpecies, by = "Species", all.x= TRUE)
+BryophytePresence <- distinct(BryophytePresence)
 
-#Subset occurrence data by group
+write.csv(BryophytePresence, file = "BryophytePresence.csv")
+
+#Subset presence data by group
 MossPresence <- subset(BryophytePresence, BryophytePresence$Group=="Mosses")
 HornwortPresence <- subset(BryophytePresence, BryophytePresence$Group=="Hornworts")
 LiverwortPresence <- subset(BryophytePresence, BryophytePresence$Group=="Liverworts")
 HLPresence <- subset(BryophytePresence, BryophytePresence$Group=="Hornworts"|BryophytePresence$Group=="Liverworts")
-

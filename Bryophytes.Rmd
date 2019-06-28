@@ -26,10 +26,10 @@ require(CommEcol)
 require(rlist)
 ```
 
-#Load and process data
-```{r, eval=TRUE, echo=FALSE}
-source("Scripts/DataLoading.R")
-source("Scripts/DataProcessing.R")
+#Load data
+```{r}
+BryophytePresence <- read.csv("Data/BryophytePresence.csv")
+BlankRas <-raster("Data/blank_100km_raster.tif")
 ```
 
 
@@ -71,7 +71,7 @@ head(betamat)
 cellID <- tally$CellID
 
 cellvector <- c(1:15038)
-neighbor <- function(cellvector) {(adjacent(BIENblank, cellvector, directions=8, pairs=FALSE, target=cellID, sorted=TRUE, include=FALSE, id=FALSE))}
+neighbor <- function(cellvector) {(adjacent(BlankRas, cellvector, directions=8, pairs=FALSE, target=cellID, sorted=TRUE, include=FALSE, id=FALSE))}
 neighbors <- lapply(cellvector, neighbor)
 names(neighbors) <- cellvector
 
@@ -168,7 +168,7 @@ cellmatrix<-cbind(cellmatrix, x)
 cellmatrix<-cellmatrix[,-1]
 
 betavector<-as.vector(cellmatrix)
-BetaRaster <- setValues(BIENblank, betavector)
+BetaRaster <- setValues(BlankRas, betavector)
 spplot(BetaRaster,  maxpixels=15038, col.regions=cols)
 gplot(BetaRaster,  maxpixels=15038)
 
@@ -190,7 +190,7 @@ require(rasterVis)
 ```{r}
 #betavector <- as.vector(t(beta))
 #betavector <- as.vector(t(beta))
-#BetaRaster <- setValues(BIENblank, betavector)
+#BetaRaster <- setValues(BlankRas, betavector)
 ```
 
 #Trying out betadisper
@@ -208,9 +208,9 @@ require(rasterVis)
 #Convert blank raster to shapefile
 ```{r, eval=FALSE}
 crs_ref <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"  
-BIENblank_tmp <- projectRaster(BIENblank, crs = crs_ref)
+BlankRas_tmp <- projectRaster(BlankRas, crs = crs_ref)
 
-BIENpoints <- rasterToPoints(BIENblank_tmp, spatial  = TRUE)
+BIENpoints <- rasterToPoints(BlankRas_tmp, spatial  = TRUE)
 proj4string(BIENpoints)
 
 BIENpoints <- spTransform(BIENpoints, CRS(crs_ref))
@@ -218,7 +218,7 @@ BIENpoints <- spTransform(BIENpoints, CRS(crs_ref))
 BIENpoints@data <- data.frame(BIENpoints@data, long=coordinates(BIENpoints) [,1], lat=coordinates(BIENpoints) [,2])
 head(BIENpoints@data, n=20)
 
-BIENpolygons <- rasterToPolygons(BIENblank_tmp, fun = NULL, na.rm = TRUE, n=8, digits = 12)
+BIENpolygons <- rasterToPolygons(BlankRas_tmp, fun = NULL, na.rm = TRUE, n=8, digits = 12)
 BIENpolygons
 ```
 

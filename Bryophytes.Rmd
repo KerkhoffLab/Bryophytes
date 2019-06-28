@@ -26,49 +26,12 @@ require(CommEcol)
 require(rlist)
 ```
 
-#Load data
-```{r}
-BryophytePresence <- read.csv("Data/BryophytePresence.csv")
-BlankRas <-raster("Data/blank_100km_raster.tif")
-```
-
-
-#Create occurrence by cell matrix by reshaping dataframe, then convert to presence-absence matrix
-```{r}
-require(reshape2)
-
-SpeciesCellID <- BryophytePresence[,c(1,4)]
-melted <- melt(SpeciesCellID, id=c("Species", "CellID"), na.rm = TRUE)
-
-SpeciesCellMatrix <- acast(melted, CellID~Species, margins=FALSE)
-SpeciesCellMatrix[SpeciesCellMatrix > 0] <- 1
-
-```
-
-#The original beta matrix for ALL CELL PAIRS!!!
-```{r}
-#betadiver(help = TRUE)
-full.beta <- betadiver(SpeciesCellMatrix, method = "sor", order = FALSE, help = FALSE)
-```
-
-
-#Using betadiver to compute B-diversity using Jaccard dissimilarity
-```{r}
-betamat <- betadiver(SpeciesCellMatrix, method = "sor", order = FALSE, help = FALSE)
-head(betamat)
-```
-
-
-#Using vegdist to compute B-diversity using presence-absence data
-```{r}
-#JaccardMatrix <- vegdist(SpeciesCellMatrix, method="jaccard", binary=TRUE, upper=FALSE)
-
-```
-
 
 #Identify OCCUPPIED cells that are adjacent to each occuppied cell
 ```{r}
-cellID <- tally$CellID
+BlankRas <-raster("Data/blank_100km_raster.tif")
+CellRichness <- readRDS("Data/CellRichness.rds")
+cellID <- CellRichness$CellID
 
 cellvector <- c(1:15038)
 neighbor <- function(cellvector) {(adjacent(BlankRas, cellvector, directions=8, pairs=FALSE, target=cellID, sorted=TRUE, include=FALSE, id=FALSE))}
@@ -156,8 +119,7 @@ x[x==0]<-NA
 plot(cellvector, x)
 
 #MAP
-#require(RColorBrewer)
-#cols<-brewer.pal(5, "YlGn")
+
 require(wesanderson)
 cols <- rev(wes_palette("Zissou1", 500, type = "continuous"))
 require(rasterVis)
@@ -175,23 +137,13 @@ gplot(BetaRaster,  maxpixels=15038)
 library(ggplot2)
 
 theme_set(theme_void())
-gplot(BetaRaster) + geom_raster(aes(fill = value))+ scale_fill_gradientn(colours=cols) +
-          coord_equal()
+gplot(BetaRaster) + geom_raster(aes(fill = value))+ scale_fill_gradientn(colours=cols, na.value="white") +
+          coord_equal() 
 
 #plot(BetaRaster, col=rev(cols), axes = F)
 ```
 
-#RasterVis test
-```{r}
-require(rasterVis)
-```
 
-#Try out beta raster
-```{r}
-#betavector <- as.vector(t(beta))
-#betavector <- as.vector(t(beta))
-#BetaRaster <- setValues(BlankRas, betavector)
-```
 
 #Trying out betadisper
 ```{r}
@@ -199,13 +151,7 @@ require(rasterVis)
        #sqrt.dist = FALSE, add = FALSE)
 ```
 
-
-#Compute Jaccard dissimilarity for all pairs of sites
-```{r}
-#JaccardMatrix <- vegdist(SpeciesCellMatrix, method="jaccard", binary=TRUE, upper=TRUE)
-```
-
-#Convert blank raster to shapefile
+#Trying out betagrid
 ```{r, eval=FALSE}
 crs_ref <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"  
 BlankRas_tmp <- projectRaster(BlankRas, crs = crs_ref)
@@ -220,18 +166,10 @@ head(BIENpoints@data, n=20)
 
 BIENpolygons <- rasterToPolygons(BlankRas_tmp, fun = NULL, na.rm = TRUE, n=8, digits = 12)
 BIENpolygons
-```
-
-
-#Trying out betagrid
-```{r}
 #print(betagrid)
 #betagrid(gridshp=BIENpolygons, comp = SpeciesCellMatrix, xfeature = 2, yfeature = 3, radius = 0.25,index = "jaccard")
-```
 
-
-#Trying out betagrid2
-```{r}
+#betagrid2
 #PresAbTable <- read.table(SpeciesCellMatrix, row.names=1, head=T)
 #print(betagrid2)
 #betagrid2(SpeciesCellMatrix, radius = 100)

@@ -14,12 +14,22 @@ require(rgdal)
 require(mapdata)
 require(mapproj)
 
+BlankRas <-raster("Data/blank_100km_raster.tif")
+RichnessVec <- readRDS("Data/RichnessVec.rds")
 
 #Plot bryophyte richness
-RichnessVector<-Bryophyte_Richness
-RichnessVector[which(RichnessVector==0)]=NA
-RichnessRaster <- setValues(BIENblank, RichnessVector)
-plot(RichnessRaster, axes = F)
+RichnessVec[which(RichnessVec==0)]=NA
+RichnessRaster <- setValues(BlankRas, RichnessVec)
+#plot(RichnessRaster, axes = F)
+
+require(wesanderson)
+require(ggplot2)
+
+cols <- rev(wes_palette("Zissou1", 500, type = "continuous"))
+theme_set(theme_void())
+gplot(RichnessRaster, maxpixels=15038) + geom_raster(aes(fill = value))+ scale_fill_gradientn(colours=cols, na.value="transparent") +
+  coord_equal() 
+
 
 #Tally
 require(dplyr)
@@ -31,11 +41,11 @@ Moss_Richness <- numeric(15038)
 Moss_Richness[MossTally$CellID] <- MossTally$Richness
  
 #Plot moss richness
-MossRichnessRaster <- setValues(BIENblank, Moss_Richness)
+MossRichnessRaster <- setValues(BlankRas, Moss_Richness)
 plot(MossRichnessRaster)
 MossRichnessVector<-Moss_Richness
 MossRichnessVector[which(MossRichnessVector==0)]=NA
-MossRichnessRasterNA <- setValues(BIENblank, MossRichnessVector)
+MossRichnessRasterNA <- setValues(BlankRas, MossRichnessVector)
 plot(MossRichnessRasterNA, axes = F)
  
 
@@ -52,11 +62,11 @@ Liverwort_Richness <- numeric(15038)
 Liverwort_Richness[LiverwortTally$CellID] <- LiverwortTally$Richness
 
 #Plot liverwort richness
-LiverwortRichnessRaster <- setValues(BIENblank, Liverwort_Richness)
+LiverwortRichnessRaster <- setValues(BlankRas, Liverwort_Richness)
 plot(LiverwortRichnessRaster)
 LiverwortRichnessVector<-Liverwort_Richness
 LiverwortRichnessVector[which(LiverwortRichnessVector==0)]=NA
-LiverwortRichnessRasterNA <- setValues(BIENblank, LiverwortRichnessVector)
+LiverwortRichnessRasterNA <- setValues(BlankRas, LiverwortRichnessVector)
 plot(LiverwortRichnessRasterNA, axes = F)
  
 
@@ -72,17 +82,17 @@ HL_Richness <- numeric(15038)
 HL_Richness[HLTally$CellID] <- HLTally$Richness
 
 #Plot HL richness
-HLRichnessRaster <- setValues(BIENblank, HL_Richness)
+HLRichnessRaster <- setValues(BlankRas, HL_Richness)
 plot(HLRichnessRaster)
 HLRichnessVector<-HL_Richness
 HLRichnessVector[which(HLRichnessVector==0)]=NA
-HLRichnessRasterNA <- setValues(BIENblank, HLRichnessVector)
+HLRichnessRasterNA <- setValues(BlankRas, HLRichnessVector)
 plot(HLRichnessRasterNA, axes = F)
  
 
 
 #Map by group
-source('~/Documents/Bryophytes/Functions/group.map.R')
+source('Functions/group.map.R')
 group.map("Mosses")
 group.map("Hornworts")
 group.map("Liverworts")
@@ -106,6 +116,6 @@ BryophyteRange <- numeric(15038)
 BryophyteRange[Filter2$CellID] <- Filter2$Avg
 RangeVector<-BryophyteRange
 RangeVector[which(RangeVector==0)]=NA
-RangeRaster <- setValues(BIENblank, RangeVector)
+RangeRaster <- setValues(BlankRas, RangeVector)
 plot(RangeRaster)
  

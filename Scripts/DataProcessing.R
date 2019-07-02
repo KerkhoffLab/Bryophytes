@@ -19,13 +19,6 @@ BrySpecies <- BIEN_taxonomy_higher_plant_group("bryophytes", print.query = FALSE
 SpeciesPresence$Species <- gsub("_", " ", SpeciesPresence$Species)
 BryophytePresence <- SpeciesPresence[SpeciesPresence$Species %in% unique(BrySpecies$scrubbed_species_binomial), ]
 
-#Tally richness by cell and create richness vector and save
-CellRichness <- tally(group_by(BryophytePresence, CellID))
-colnames(BryRichness)[2] <- "Richness"
-RichnessVec <- numeric(15038)
-RichnessVec[BryRichness$CellID] <- BryRichness$Richness
-
-saveRDS(CellRichness, file = "Data/CellRichness.rds")
 
 #Subset bryophytes into three groups
 Mosses <- subset(ByGroup, Group=="Mosses")
@@ -44,6 +37,16 @@ BrySpecies <- merge(BrySpecies, ByGroup, by = "Family", all.x = TRUE)
 #Add group to presence data by species and remove duplicate entries and save
 BryophytePresence <- merge(BryophytePresence, BrySpecies, by = "Species", all.x= TRUE)
 BryophytePresence <- distinct(BryophytePresence)
+
+#Tally richness by cell and create richness vector and save
+CellRichness <- tally(group_by(BryophytePresence, CellID))
+colnames(CellRichness)[2] <- "Richness"
+RichnessVec <- numeric(15038)
+RichnessVec[CellRichness$CellID] <- CellRichness$Richness
+
+saveRDS(CellRichness, file = "Data/CellRichness.rds")
+saveRDS(RichnessVec, file = "Data/RichnessVec.rds")
+
 
 saveRDS(BryophytePresence, file = "Data/BryophytePresence.rds")
 BlankRas <-raster("Data/blank_100km_raster.tif")

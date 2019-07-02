@@ -18,8 +18,8 @@ saveRDS(betamat, file="Data/BetaMat.rds")
 #Separate out occuppied cells with 8 occuppied neighbors
 
 bryneighborvect <- unlist(lapply(bryneighbors, length))
-cell8 <- cellID[which(bryneighborvect==8)]
-cell7 <- cellID[which(bryneighborvect==7)]
+cell8 <- CellID[which(bryneighborvect==8)]
+cell7 <- CellID[which(bryneighborvect==7)]
 BetaMat8<-as.matrix(BetaMat)
 BetaMat8[!cell8, !cell8, drop=TRUE]
 BetaMat7<-as.matrix(BetaMat)
@@ -45,8 +45,8 @@ names(BetaMat8)[1:3788] <- cell8
 row.names(BetaMat7) <- cell7
 names(BetaMat7)[1:318] <- cell7
 full.BetaMat <- as.matrix(BetaMat)
-row.names(full.BetaMat) <- cellID
-names(full.BetaMat)[1:4761] <- cellID
+row.names(full.BetaMat) <- CellID
+names(full.BetaMat)[1:4761] <- CellID
 #neighborlist <- as.list(cell8)
 
 

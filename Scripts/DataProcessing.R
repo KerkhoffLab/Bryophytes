@@ -48,10 +48,3 @@ BryophytePresence <- distinct(BryophytePresence)
 saveRDS(BryophytePresence, file = "Data/BryophytePresence.rds")
 BlankRas <-raster("Data/blank_100km_raster.tif")
 CellRichness <- readRDS("Data/CellRichness.rds")
-
-cellID <- CellRichness$CellID
-cellvector <- c(1:15038)
-neighbor <- function(cellvector) {(adjacent(BlankRas, cellvector, directions=8, pairs=FALSE, target=cellID, sorted=TRUE, include=FALSE, id=FALSE))}
-neighbors <- lapply(cellvector, neighbor)
-names(neighbors) <- cellvector
-bryneighbors <- neighbors[cellID]

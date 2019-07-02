@@ -1,7 +1,6 @@
 #Load data
 BryophytePresence <- readRDS("Data/BryophytePresence.rds")
 
-
 #Subset hornwort and liverwort data
 HornwortPresence <- subset(BryophytePresence, BryophytePresence$Group=="Hornworts")
 LiverwortPresence <- subset(BryophytePresence, BryophytePresence$Group=="Liverworts")
@@ -13,25 +12,26 @@ HLRichness <- tally(group_by(HLPresence, CellID))
 SpeciesCellID <- HLPresence[,c(1,4)]
 melted <- melt(SpeciesCellID, id=c("Species", "CellID"), na.rm = TRUE)
 
-cellID <- HLRichness$CellID
+CellID <- HLRichness$CellID
 cellvector <- c(1:15038)
-neighbor <- function(cellvector) {(adjacent(BlankRas, cellvector, directions=8, pairs=FALSE, target=cellID, sorted=TRUE, include=FALSE, id=FALSE))}
+neighbor <- function(cellvector) {(adjacent(BlankRas, cellvector, directions=8, pairs=FALSE, target=CellID, sorted=TRUE, include=FALSE, id=FALSE))}
 neighbors <- lapply(cellvector, neighbor)
 names(neighbors) <- cellvector
-bryneighbors <- neighbors[cellID]
+bryneighbors <- neighbors[CellID]
 
-HLCellMatrix <- acast(melted, CellID~Species, margins=FALSE)
+HLCellMatrix <- acast(SpeciesCellID, CellID~Species, margins=FALSE, fill=0)
 HLCellMatrix[HLCellMatrix > 0] <- 1
 
 #Using betadiver to compute B-diversity using Sorensen dissimilarity
 #betadiver(help = TRUE) gives you indices
 HLBetaMat <- betadiver(HLCellMatrix, method = "sor", order = FALSE, help = FALSE)
+saveRDS(HLBetaMat, file="Data/HLBetaMat.rds")
 
 #Separate out occuppied cells with 8 occuppied neighbors
 
 bryneighborvect <- unlist(lapply(bryneighbors, length))
-cell8 <- cellID[which(bryneighborvect==8)]
-cell7 <- cellID[which(bryneighborvect==7)]
+cell8 <- CellID[which(bryneighborvect==8)]
+cell7 <- CellID[which(bryneighborvect==7)]
 HLBetaMat8<-as.matrix(HLBetaMat)
 HLBetaMat8[!cell8, !cell8, drop=TRUE]
 HLBetaMat7<-as.matrix(HLBetaMat)
@@ -44,6 +44,7 @@ HLBetaMat7 <-HLBetaMat7[inx7,inx7]
 
 #Trying to extract the vector of neighbors for each cell with 8 neighbors
 
+readRDS(HLBetaMat, file = "Data/HLBetaMat.rds")
 
 bry8neighbors <-neighbors[cell8]
 bry7neighbors <- neighbors[cell7]
@@ -56,8 +57,9 @@ names(HLBetaMat8)[1:3776] <- cell8
 row.names(HLBetaMat7) <- cell7
 names(HLBetaMat7)[1:310] <- cell7
 full.HLBetaMat <- as.matrix(HLBetaMat)
-row.names(full.HLBetaMat) <- cellID
-names(full.HLBetaMat)[1:4737] <- cellID
+row.names(full.HLBetaMat) <- CellID
+names(full.HLBetaMat)[1:4737] <- CellID
+#neighborlist <- as.list(cell8)
 
 
 
@@ -67,11 +69,12 @@ cell8_ch <- as.character(cell8)
 cell7_ch <- as.character(cell7)
 ultimatebeta8 <- lapply(cell8_ch, function(x)mean(full.HLBetaMat[x, as.character(bry8neighbors[,x])]))
 names(ultimatebeta8) <- cell8_ch
-ultimatebeta7 <- lapply(cell7_ch, function(x)mean(full.BetaMat[x, as.character(bry7neighbors[,x])]))
+ultimatebeta7 <- lapply(cell7_ch, function(x)mean(full.HLBetaMat[x, as.character(bry7neighbors[,x])]))
 names(ultimatebeta7) <- cell7_ch
 plot(cell8_ch, ultimatebeta8)
 plot(cell7_ch, ultimatebeta7)
 points(cell7_ch, ultimatebeta7)
+#check on cell 767. it has crazy LOW value
 
 
 
@@ -96,9 +99,10 @@ cellmatrix<-cbind(cellmatrix, x)
 cellmatrix<-cellmatrix[,-1]
 betavector<-as.vector(cellmatrix)
 BetaRaster <- setValues(BlankRas, betavector)
-#spplot(BetaRaster,  maxpixels=15038, col.regions=cols)
+spplot(BetaRaster,  maxpixels=15038, col.regions=cols)
 gplot(BetaRaster,  maxpixels=15038)
 library(ggplot2)
 theme_set(theme_void())
 gplot(BetaRaster) + geom_raster(aes(fill = value))+ scale_fill_gradientn(colours=cols, na.value="white") +
   coord_equal() 
+#plot(BetaRaster, col=rev(cols), axes = F)

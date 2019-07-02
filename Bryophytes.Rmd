@@ -27,67 +27,77 @@ require(rlist)
 ```
 
 
-#Identify OCCUPPIED cells that are adjacent to each occuppied cell
+#Load blank raster and cell richness data + extract cell IDs and create vector for all cells
 ```{r}
 BlankRas <-raster("Data/blank_100km_raster.tif")
 CellRichness <- readRDS("Data/CellRichness.rds")
-
-cellID <- CellRichness$CellID
+CellID <- CellRichness$CellID
 cellvector <- c(1:15038)
-neighbor <- function(cellvector) {(adjacent(BlankRas, cellvector, directions=8, pairs=FALSE, target=cellID, sorted=TRUE, include=FALSE, id=FALSE))}
+```
+
+#Identify occupied cells that are adjacent to each occuppied cell + convert to vector
+```{r}
+neighbor <- function(cellvector) {(adjacent(BlankRas, cellvector, directions=8, pairs=FALSE, target=CellID, sorted=TRUE, include=FALSE, id=FALSE))}
 neighbors <- lapply(cellvector, neighbor)
 names(neighbors) <- cellvector
-bryneighbors <- neighbors[cellID]
+neighbors <- neighbors[CellID]
+neighbors <- unlist(lapply(neighbors, length))
 ```
 
-
-#Separate out occuppied cells with 8 occuppied neighbors
+#Separate out occuppied cells with 8 and 7 occuppied neighbors
 ```{r}
-bryneighborvect <- unlist(lapply(bryneighbors, length))
-cell8 <- cellID[which(bryneighborvect==8)]
-cell7 <- cellID[which(bryneighborvect==7)]
-BetaMat8<-as.matrix(BetaMat)
-BetaMat8[!cell8, !cell8, drop=TRUE]
-BetaMat7<-as.matrix(BetaMat)
-BetaMat7[!cell7, !cell7, drop=TRUE]
-inx8 <- match(as.character(cell8), rownames(BetaMat8))
-inx7 <- match(as.character(cell7), rownames(BetaMat7))
-BetaMat8 <- BetaMat8[inx8,inx8]
-BetaMat7 <- BetaMat7[inx7,inx7]
+Cell8 <- CellID[which(neighbors==8)]
+Cell7 <- CellID[which(neighbors==7)]
 ```
 
-#Trying to extract the vector of neighbors for each cell with 8 neighbors
+#Make beta diversity matrix for cells with 8 neighbors and cells with 7 neighbors
 ```{r}
 readRDS(BetaMat, file = "Data/BetaMat.rds")
 
-bry8neighbors <-neighbors[cell8]
-bry7neighbors <- neighbors[cell7]
-bry8neighbors <- data.frame(bry8neighbors)
-names(bry8neighbors)[1:3788] <- cell8
-bry7neighbors <- data.frame(bry7neighbors)
-names(bry7neighbors)[1:318] <- cell7
-row.names(BetaMat8) <- cell8
-names(BetaMat8)[1:3788] <- cell8
-row.names(BetaMat7) <- cell7
-names(BetaMat7)[1:318] <- cell7
+BetaMat8<-as.matrix(BetaMat)
+BetaMat8[!Cell8, !Cell8, drop=TRUE]
+inx8 <- match(as.character(Cell8), rownames(BetaMat8))
+BetaMat8 <- BetaMat8[inx8,inx8]
+
+BetaMat7<-as.matrix(BetaMat)
+BetaMat7[!Cell7, !Cell7, drop=TRUE]
+inx7 <- match(as.character(Cell7), rownames(BetaMat7))
+BetaMat7 <- BetaMat7[inx7,inx7]
+```
+
+#Extract the vector of neighbors for each cell with 8 or 7 neighbors
+```{r}
+neighbors8 <-neighbors[Cell8]
+neighbors7 <- neighbors[Cell7]
+
+neighbors8 <- data.frame(neighbors8)
+names(neighbors8)[1:3788] <- Cell8
+neighbors7 <- data.frame(neighbors7)
+names(neighbors7)[1:318] <- Cell7
+
+row.names(BetaMat8) <- Cell8
+names(BetaMat8)[1:3788] <- Cell8
+row.names(BetaMat7) <- Cell7
+names(BetaMat7)[1:318] <- Cell7
+
 full.BetaMat <- as.matrix(BetaMat)
-row.names(full.BetaMat) <- cellID
-names(full.BetaMat)[1:4761] <- cellID
-#neighborlist <- as.list(cell8)
+row.names(full.BetaMat) <- CellID
+names(full.BetaMat)[1:4761] <- CellID
 ```
 
 
 #Beta diversity for each cell and its 8neighbors
 ```{r}
-cell8_ch <- as.character(cell8)
-cell7_ch <- as.character(cell7)
-ultimatebeta8 <- lapply(cell8_ch, function(x)mean(full.BetaMat[x, as.character(bry8neighbors[,x])]))
-names(ultimatebeta8) <- cell8_ch
-ultimatebeta7 <- lapply(cell7_ch, function(x)mean(full.BetaMat[x, as.character(bry7neighbors[,x])]))
-names(ultimatebeta7) <- cell7_ch
-plot(cell8_ch, ultimatebeta8)
-plot(cell7_ch, ultimatebeta7)
-points(cell7_ch, ultimatebeta7)
+Cell8_ch <- as.character(Cell8)
+Cell7_ch <- as.character(Cell7)
+
+ultimatebeta8 <- lapply(Cell8_ch, function(x)mean(full.BetaMat[x, as.character(neighbors8[,x])]))
+names(ultimatebeta8) <- Cell8_ch
+ultimatebeta7 <- lapply(Cell7_ch, function(x)mean(full.BetaMat[x, as.character(neighbors7[,x])]))
+names(ultimatebeta7) <- Cell7_ch
+plot(Cell8_ch, ultimatebeta8)
+plot(Cell7_ch, ultimatebeta7)
+points(Cell7_ch, ultimatebeta7)
 #check on cell 767. it has crazy LOW value
 ```
 
@@ -99,8 +109,8 @@ betavector8<-unlist(ultimatebeta8)
 cellmatrix <- as.matrix(cellvector)
 x <- rep(0,15038)
 x
-x[cell8]<-betavector8
-x[cell7]<-betavector7
+x[Cell8]<-betavector8
+x[Cell7]<-betavector7
 x[x==0]<-NA
 plot(cellvector, x)
 #MAP
@@ -120,31 +130,4 @@ theme_set(theme_void())
 gplot(BetaRaster) + geom_raster(aes(fill = value))+ scale_fill_gradientn(colours=cols, na.value="white") +
           coord_equal() 
 #plot(BetaRaster, col=rev(cols), axes = F)
-```
-
-
-
-#Trying out betadisper
-```{r}
-#betadisper(beta, group, type = c("median","centroid"), bias.adjust = FALSE,
-       #sqrt.dist = FALSE, add = FALSE)
-```
-
-#Trying out betagrid
-```{r, eval=FALSE}
-crs_ref <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"  
-BlankRas_tmp <- projectRaster(BlankRas, crs = crs_ref)
-BIENpoints <- rasterToPoints(BlankRas_tmp, spatial  = TRUE)
-proj4string(BIENpoints)
-BIENpoints <- spTransform(BIENpoints, CRS(crs_ref))
-BIENpoints@data <- data.frame(BIENpoints@data, long=coordinates(BIENpoints) [,1], lat=coordinates(BIENpoints) [,2])
-head(BIENpoints@data, n=20)
-BIENpolygons <- rasterToPolygons(BlankRas_tmp, fun = NULL, na.rm = TRUE, n=8, digits = 12)
-BIENpolygons
-#print(betagrid)
-#betagrid(gridshp=BIENpolygons, comp = SpeciesCellMatrix, xfeature = 2, yfeature = 3, radius = 0.25,index = "jaccard")
-#betagrid2
-#PresAbTable <- read.table(SpeciesCellMatrix, row.names=1, head=T)
-#print(betagrid2)
-#betagrid2(SpeciesCellMatrix, radius = 100)
 ```

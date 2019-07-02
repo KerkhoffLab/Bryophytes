@@ -11,12 +11,12 @@ MossRichness <- tally(group_by(MossPresence, CellID))
 SpeciesCellID <- MossPresence[,c(1,4)]
 melted <- melt(SpeciesCellID, id=c("Species", "CellID"), na.rm = TRUE)
 
-cellID <- MossRichness$CellID
+CellID <- MossRichness$CellID
 cellvector <- c(1:15038)
-neighbor <- function(cellvector) {(adjacent(BlankRas, cellvector, directions=8, pairs=FALSE, target=cellID, sorted=TRUE, include=FALSE, id=FALSE))}
+neighbor <- function(cellvector) {(adjacent(BlankRas, cellvector, directions=8, pairs=FALSE, target=CellID, sorted=TRUE, include=FALSE, id=FALSE))}
 neighbors <- lapply(cellvector, neighbor)
 names(neighbors) <- cellvector
-bryneighbors <- neighbors[cellID]
+bryneighbors <- neighbors[CellID]
 
 MossCellMatrix <- acast(melted, CellID~Species, margins=FALSE)
 MossCellMatrix[MossCellMatrix > 0] <- 1
@@ -29,8 +29,8 @@ saveRDS(MossBetaMat, file="Data/MossBetaMat.rds")
 #Separate out occuppied cells with 8 occuppied neighbors
 
 bryneighborvect <- unlist(lapply(bryneighbors, length))
-cell8 <- cellID[which(bryneighborvect==8)]
-cell7 <- cellID[which(bryneighborvect==7)]
+cell8 <- CellID[which(bryneighborvect==8)]
+cell7 <- CellID[which(bryneighborvect==7)]
 MossBetaMat8<-as.matrix(MossBetaMat)
 MossBetaMat8[!cell8, !cell8, drop=TRUE]
 MossBetaMat7<-as.matrix(MossBetaMat)
@@ -56,8 +56,8 @@ names(MossBetaMat8)[1:3782] <- cell8
 row.names(MossBetaMat7) <- cell7
 names(MossBetaMat7)[1:321] <- cell7
 full.MossBetaMat <- as.matrix(MossBetaMat)
-row.names(full.MossBetaMat) <- cellID
-names(full.MossBetaMat)[1:4757] <- cellID
+row.names(full.MossBetaMat) <- CellID
+names(full.MossBetaMat)[1:4757] <- CellID
 #neighborlist <- as.list(cell8)
 
 

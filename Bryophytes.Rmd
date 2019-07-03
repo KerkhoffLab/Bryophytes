@@ -110,38 +110,73 @@ plot(BetaVec, ylab = "Mean Pairwise β-Diversity", xlab = "Cell ID")
 ```
 
 
-#Map beta diversity
+#Load mapping packages and create colorscheme
 ```{r}
 require(wesanderson)
 require(ggplot2)
+require(rasterVis)
 
 cols <- rev(wes_palette("Zissou1", 500, type = "continuous"))
+```
 
-BetaVec[BetaVec<0.5]<-NA
+
+#Map beta diversity
+```{r}
+BetaVec[BetaVec<0]<-NA
 BetaRaster <- setValues(BlankRas, BetaVec)
 
 theme_set(theme_void())
-BetaMap <- gplot(BetaRaster, maxpixels=15038) + geom_raster(aes(fill = value))+ scale_fill_gradientn(name="β-diversity", colours=cols, na.value="transparent") +
-          coord_equal() 
+BetaMap <- gplot(BetaRaster, maxpixels=15038) + geom_raster(aes(fill = value)) + 
+    scale_fill_gradientn(name="β-diversity", colours=cols, na.value="transparent") +
+    coord_equal() 
 BetaMap
+```
 
-BlankRas <-raster("Data/blank_100km_raster.tif")
+
+#Map alpha diversity (aka richness)
+```{r}
 RichnessVec <- readRDS("Data/RichnessVec.rds")
-
-#Map bryophyte richness
 RichnessVec[which(RichnessVec==0)]=NA
 RichnessRaster <- setValues(BlankRas, RichnessVec)
 
-cols <- rev(wes_palette("Zissou1", 500, type = "continuous"))
 theme_set(theme_void())
-RichnessMap <- gplot(RichnessRaster, maxpixels=15038) + geom_raster(aes(fill = value))+ scale_fill_gradientn(name="α-diversity", colours=cols, na.value="transparent") +
-  coord_equal() 
+RichnessMap <- gplot(RichnessRaster, maxpixels=15038) + geom_raster(aes(fill = value)) +   
+    scale_fill_gradientn(name="α-diversity", colours=cols, na.value="transparent") +
+    coord_equal() 
 RichnessMap
 ```
 
 
-#Map alpha and beta diversity side-by-side
+#Map alpha and beta diversity side-by-side and save as png
 ```{r}
 require(gridExtra)
-grid.arrange(BetaMap, RichnessMap, ncol=2)
+
+png("bothmaps.png", width = 1000, height = 1000, pointsize = 20)
+grid.arrange(RichnessMap, BetaMap, ncol=2)
+dev.off()
 ```
+
+
+#Plot Jaccard index against Sorensen (both are SIMILARITY)
+```{r}
+SorBetaVec <- readRDS("SorBetaVec.rds")
+SorBetaVec[SorBetaVec<0.5]<-NA
+BetaVec[BetaVec<0.5]<-NA
+
+
+plot(BetaVec, ylab = "β-diversity", xlab = "Cell ID", col="darkgreen")
+points(SorBetaVec, col="skyblue2")
+```
+
+
+#Histogram of beta values
+```{r}
+BetaDF <- as.data.frame(BetaVec)
+BetaPolygons <- rasterToPolygons(BetaRaster)
+
+SorBetaRaster <- setValues(BlankRas, SorBetaVec)
+
+histogram(BetaRaster, col=(rev(cols)))
+histogram(SorBetaRaster, col=((cols)))
+```
+

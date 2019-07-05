@@ -120,14 +120,17 @@ cols <- rev(wes_palette("Zissou1", 500, type = "continuous"))
 ```
 
 
-#Map beta diversity
+#Map beta diversity, adjust minimum value to remove outliers
 ```{r}
-BetaVec[BetaVec<0]<-NA
+#go to this link for info on breaks, limits, etc.
+#figure out a way to show values <0.5 as black on map
+#https://stackoverflow.com/questions/24265652/label-minimum-and-maximum-of-scale-fill-gradient-legend-with-text-ggplot2
+
 BetaRaster <- setValues(BlankRas, BetaVec)
 
 theme_set(theme_void())
 BetaMap <- gplot(BetaRaster, maxpixels=15038) + geom_raster(aes(fill = value)) + 
-    scale_fill_gradientn(name="β-diversity", colours=cols, na.value="transparent") +
+    scale_fill_gradientn(name="β-diversity", colours=cols, na.value="transparent", limits = c(0.5,1)) + 
     coord_equal() 
 BetaMap
 ```
@@ -159,9 +162,9 @@ dev.off()
 
 #Plot Jaccard index against Sorensen (both are SIMILARITY)
 ```{r}
-SorBetaVec <- readRDS("SorBetaVec.rds")
-SorBetaVec[SorBetaVec<0.5]<-NA
-BetaVec[BetaVec<0.5]<-NA
+SorBetaVec <- readRDS("Data/SorBetaVec.rds")
+SorBetaVec[SorBetaVec<0]<-NA
+BetaVec[BetaVec<0]<-NA
 
 
 plot(BetaVec, ylab = "β-diversity", xlab = "Cell ID", col="darkgreen")

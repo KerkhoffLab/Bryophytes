@@ -1,24 +1,21 @@
 #Bryophyte data processing
-#Make sure to run DataLoading.R first
 
 #Load packages
 require(BIEN)
-require(ape)
-require(maps) 
 require(dplyr)
-require(maptools)
-require(raster)
-require(dismo)
 require(sp)
-require(rgdal)
-require(mapdata)
-require(mapproj)
+
+#Load data and source functions
+SpeciesPresence <- read.csv("Data/SpeciesPresence_by_100km_Cell.csv")
+ByGroup <- read.csv("Data/BryophytePhylogeny.csv")
+
+source("Functions/BIEN_occurrence_higher_plant_group.R")
+source("Functions/BIEN_taxonomy_higher_plant_group.R")
 
 #Table of all bryophyte occurrences
 BrySpecies <- BIEN_taxonomy_higher_plant_group("bryophytes", print.query = FALSE)
 SpeciesPresence$Species <- gsub("_", " ", SpeciesPresence$Species)
 BryophytePresence <- SpeciesPresence[SpeciesPresence$Species %in% unique(BrySpecies$scrubbed_species_binomial), ]
-
 
 #Subset bryophytes into three groups
 Mosses <- subset(ByGroup, Group=="Mosses")
@@ -44,10 +41,7 @@ colnames(CellRichness)[2] <- "Richness"
 RichnessVec <- numeric(15038)
 RichnessVec[CellRichness$CellID] <- CellRichness$Richness
 
+#Save richness and presence data
 saveRDS(CellRichness, file = "Data/CellRichness.rds")
 saveRDS(RichnessVec, file = "Data/RichnessVec.rds")
-
-
 saveRDS(BryophytePresence, file = "Data/BryophytePresence.rds")
-BlankRas <-raster("Data/blank_100km_raster.tif")
-CellRichness <- readRDS("Data/CellRichness.rds")

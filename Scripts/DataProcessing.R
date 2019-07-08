@@ -27,6 +27,7 @@ BrySpecies$Family <- BrySpecies$scrubbed_family
 BrySpecies$Genus <- BrySpecies$scrubbed_genus
 BrySpecies$Species <- BrySpecies$scrubbed_species_binomial
 BrySpecies <- BrySpecies[,c(10,11,12)]
+BrySpecies <- distinct(BrySpecies)
 
 #Add group to bryophyte data by family
 BrySpecies <- merge(BrySpecies, ByGroup, by = "Family", all.x = TRUE)

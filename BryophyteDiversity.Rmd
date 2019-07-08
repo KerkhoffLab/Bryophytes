@@ -4,7 +4,7 @@ author: Carter Powell, Jackie O'Malley, and Julia Eckberg
 output: html_notebook
 ---
 
-```{r}
+```{r, echo=FALSE}
 require(knitr)
 require(BIEN)
 require(ape)
@@ -26,20 +26,24 @@ require(rgeos)
 require(rlist)
 ```
 
+As an extension of the work done by Carter Powell '20, who mapped alpha diversity of bryophytes in the Americas using species distribution data from the BIEN database, we have calculated and mapped beta diversity of bryophytes in the Western Hemisphere. 
 
-#Load blank raster and cell richness data + extract cell IDs and create vector for all cells
-#Change file for BetaMat and CellRichness depending on if you want to map bryophytes, mosses, liverworts, etc. 
+Our analysis begins with bryophyte presence data from BIEN, which was constructed through species distribution modeling based on occurrence records for 4,802 species. We convert this data to a species-by-cell presence-absence matrix in order to calculate beta diversity using the 'betadiver' function from the *vegan* package. The resulting "BetaMat.rds" file is a Jacccard similarity matrix showing the beta diversity for each pair of cells. Additionally, we load a blank raster file containing 100km by 100km cells, a numeric vector equal to the number of cells in the raster, cell richness (alpha diversity) data, and a vector of the Cell IDs for each occuppied cell. 
 
 ```{r}
 BlankRas <-raster("Data/blank_100km_raster.tif")
-BetaMat <- readRDS("Data/BetaMat.rds")
 CellRichness <- readRDS("Data/CellRichness.rds")
 CellID <- CellRichness$CellID
 CellVec <- c(1:15038)
+
+BetaMat <- readRDS("Data/BetaMat.rds")
+BetaMat<-as.matrix(BetaMat)
+row.names(BetaMat) <- CellID
+names(BetaMat) <- CellID
 ```
 
+In order to identify and isolate the occuppied cells with 7 or 8 occcuppied neighbor cells, we use the 'adjacent' function from the *raster* package, and apply it to the vector of cell IDs. The output is a list including each occuppied cell and the cells that neighbor it. We then convert this list to a vector from which we extract the cells with 7 or 8 occuppied neighbors, creating two new vectors.
 
-#Identify occupied cells that are adjacent to each occuppied cell + convert to vector
 ```{r}
 neighbor <- function(CellVec) {(adjacent(BlankRas, CellVec, directions=8, pairs=FALSE, target=CellID, sorted=TRUE, include=FALSE, id=FALSE))}
 Neighbors <- lapply(CellVec, neighbor)
@@ -47,11 +51,7 @@ names(Neighbors) <- CellVec
 
 bryneighbors <- Neighbors[CellID]
 bryneighborvect <- unlist(lapply(bryneighbors, length))
-```
 
-
-#Separate out occuppied cells with 8 and 7 occuppied neighbors
-```{r}
 Cell8 <- CellID[which(bryneighborvect==8)]
 Neighbors8 <-Neighbors[Cell8]
 Neighbors8 <- data.frame(Neighbors8)
@@ -64,15 +64,7 @@ names(Neighbors7) <- Cell7
 ```
 
 
-#Make beta diversity matrix for all cells
-```{r}
-BetaMat<-as.matrix(BetaMat)
-row.names(BetaMat) <- CellID
-names(BetaMat) <- CellID
-```
-
-
-#Make beta diversity matrix for cells with 8 neighbors and cells with 7 neighbors
+Next, we create two new beta diversity matrices for the cells with 7 neighbors and those with 8 neighbors, respectively. 
 ```{r}
 BetaMat8<- BetaMat[!Cell8, !Cell8, drop=TRUE]
 inx8 <- match(as.character(Cell8), rownames(BetaMat8))
@@ -84,7 +76,8 @@ BetaMat7 <- BetaMat7[inx7,inx7]
 ```
 
 
-#For each cell, pairwise beta diversity is calculated for that focal cell and each of its 8 (or 7) neighbors, and the mean of those values is found
+For each cell, pairwise beta diversity is extracted for that focal cell and each of its 8 or 7 neighbors, and the mean of those values is calculated (McFadden *et al.* 2019). 
+
 ```{r}
 Cell8CH <- as.character(Cell8)
 Beta8 <- lapply(Cell8CH, function(x)mean(BetaMat[x, as.character(Neighbors8[,x])]))

@@ -1,34 +1,26 @@
 ---
 title: "Analysis of Bryophyte Richness and Diversity in the Americas"
-author: Carter Powell, Jackie O'Malley, and Julia Eckberg
-output: html_notebook
+author: "Jackie O'Malley '21, Julia Eckberg '21, Carter Powell '20, and Dr. Andrew J. Kerkhoff"
+date: "Department of Biology, Kenyon College, Gambier, OH 43022"
+output:
+  html_document:
+    df_print: paged
 ---
 
-```{r, echo=FALSE}
+```{r, message=FALSE}
 require(knitr)
-require(BIEN)
-require(ape)
-require(maps)
-require(dplyr)
-require(maptools)
-require(raster)
-require(dismo)
 require(sp)
-require(rgdal)
-require(mapdata)
-require(mapproj)
 require(vegan)
-require(letsR)
-require(entropart)
-require(betapart)
-require(CommEcol)
-require(rgeos)
-require(rlist)
+require(raster)
+require(wesanderson)
+require(ggplot2)
+require(gridExtra)
 ```
 
-As an extension of the work done by Carter Powell '20, who mapped alpha diversity of bryophytes in the Americas using species distribution data from the BIEN database, we have calculated and mapped beta diversity of bryophytes in the Western Hemisphere. 
+As an extension of the work done by Carter Powell '20, who mapped alpha diversity of bryophytes in the Americas using species distribution data from BIEN, we have calculated and mapped beta diversity of bryophytes in the Western Hemisphere.
 
-Our analysis begins with bryophyte presence data from BIEN, which was constructed through species distribution modeling based on occurrence records for 4,802 species. We convert this data to a species-by-cell presence-absence matrix in order to calculate beta diversity using the 'betadiver' function from the *vegan* package. The resulting "BetaMat.rds" file is a Jacccard similarity matrix showing the beta diversity for each pair of cells. Additionally, we load a blank raster file containing 100km by 100km cells, a numeric vector equal to the number of cells in the raster, cell richness (alpha diversity) data, and a vector of the Cell IDs for each occuppied cell. 
+
+Our analysis begins with bryophyte presence data from BIEN, which was constructed through species distribution modeling based on occurrence records for 4,802 species. We convert this data to a species-by-cell presence-absence matrix in order to calculate beta diversity using the 'betadiver' function from the *vegan* package. The resulting "BetaMat.rds" file is a Jacccard similarity matrix showing the beta diversity for each pair of cells. Additionally, we load a blank raster file containing 100km by 100km cells, a numeric vector equal to the number of cells in the raster, cell richness (alpha diversity) data, and a vector of the cell IDs for each occuppied cell. 
 
 ```{r}
 BlankRas <-raster("Data/blank_100km_raster.tif")
@@ -42,7 +34,7 @@ row.names(BetaMat) <- CellID
 names(BetaMat) <- CellID
 ```
 
-In order to identify and isolate the occuppied cells with 7 or 8 occcuppied neighbor cells, we use the 'adjacent' function from the *raster* package, and apply it to the vector of cell IDs. The output is a list including each occuppied cell and the cells that neighbor it. We then convert this list to a vector from which we extract the cells with 7 or 8 occuppied neighbors, creating two new vectors.
+In order to identify and isolate the occuppied cells with 7 or 8 occcuppied neighbor cells, we use the 'adjacent' function from the *raster* package, and apply it to the vector of cell IDs. The output is a list which includes each occuppied cell and the cells that neighbor it. We then convert this list to a vector from which we extract the cells with 7 or 8 occuppied neighbors, creating two distinct vectors.
 
 ```{r}
 neighbor <- function(CellVec) {(adjacent(BlankRas, CellVec, directions=8, pairs=FALSE, target=CellID, sorted=TRUE, include=FALSE, id=FALSE))}
@@ -89,7 +81,7 @@ names(Beta7) <- Cell7CH
 ```
 
 
-#Plot mean pairwise beta diversity by Cell ID
+We then plotted the mean pairwise β-diversity by cell ID for cells with both 7 and 8 neighbors to examine the range of values and investigate outliers.
 ```{r}
 Beta7Vec<-unlist(Beta7)
 Beta8Vec<-unlist(Beta8)
@@ -104,22 +96,14 @@ plot(BetaVec, ylab = "Mean Pairwise β-Diversity", xlab = "Cell ID")
 ```
 
 
-#Load mapping packages and create colorscheme
-```{r}
-require(wesanderson)
-require(ggplot2)
-require(rasterVis)
-
+Next, we mapped these values onto the blank raster and found that the extreme outliers stretch the color gradient, making it difficult to see more intricate variation within the majority of the values. 
+```{r, warning=FALSE}
 cols <- rev(wes_palette("Zissou1", 500, type = "continuous"))
-```
 
-
-#Map beta diversity, adjust minimum value to remove outliers
-```{r}
 BetaRaster <- setValues(BlankRas, BetaVec)
-BetaPoints<-rasterToPoints(BetaRaster)
+BetaDF<-rasterToPoints(BetaRaster)
 
-BetaDF <- data.frame(BetaPoints)
+BetaDF <- data.frame(BetaDF)
 colnames(BetaDF) <- c("Longitude", "Latitude", "MAP")
 
 theme_set(theme_void())
@@ -131,7 +115,7 @@ RawBetaMap
 ```
 
 
-#Map low beta values
+To combat this issue, we subsetted β-diversity values under 0.5 in order to map them separately in dark grey. The resulting dataset contains 19 cells.
 ```{r}
 LowBetaVec <- rep(0, 15038)
 LowBetaVec[Cell8]<-Beta8Vec
@@ -143,16 +127,10 @@ LowBetaRaster <- setValues(BlankRas, LowBetaVec)
 LowBetaPoints<-rasterToPoints(LowBetaRaster)
 LowBetaDF <- data.frame(LowBetaPoints)
 colnames(LowBetaDF) <- c("Longitude", "Latitude", "MAP")
-
-theme_set(theme_void())
-LowBetaMap <- gplot(LowBetaRaster, maxpixels=15038) +  geom_tile(aes(fill = value)) + 
-    scale_fill_gradientn(colours="black", na.value="transparent", limits = c(0,1)) + theme(legend.position = "none") + 
-    coord_equal() 
-LowBetaMap
 ```
 
 
-#Map beta diversity with values under 0.5 shown in dark grey (19 values are under 0.5)
+The resulting map shows the mean of all pairwise β-diversity values for each occuppied cell and its adjoining neighbors, with warmer colors indicating higher turnover. Values under 0.5 are shown in dark grey.
 ```{r}
 source("Functions/gplot_data.R")
 gplotB<- gplot_data(BetaRaster)
@@ -169,49 +147,39 @@ BetaMap
 ```
 
 
-#Map alpha diversity (aka richness)
-```{r}
+Next, we incorporated Carter Powell's richness map into our study to compare α-diversity and β-diversity trends for bryophytes in the Americas. 
+```{r, warning=FALSE}
 RichnessVec <- readRDS("Data/RichnessVec.rds")
 RichnessVec[which(RichnessVec==0)]=NA
 RichnessRaster <- setValues(BlankRas, RichnessVec)
 
+RichnessDF <- rasterToPoints(RichnessRaster)
+RichnessDF <- data.frame(RichnessDF)
+
+colnames(RichnessDF) <- c("Longitude", "Latitude", "MAP")
+
 theme_set(theme_void())
-RichnessMap <- gplot(RichnessRaster, maxpixels=15038) + geom_tile(aes(fill = value)) +   
+RichnessMap <- ggplot() + geom_tile(data=RichnessDF, aes(x=Longitude, y=Latitude, fill=MAP)) +   
     scale_fill_gradientn(name="α-diversity", colours=cols, na.value="transparent") +
     coord_equal() 
-RichnessMap
-```
-
-
-#Map alpha and beta diversity side-by-side and save as png
-```{r}
-require(gridExtra)
-
-png("bothmaps.png", width = 1000, height = 1000, pointsize = 20)
 grid.arrange(RichnessMap, BetaMap, ncol=2)
-dev.off()
 ```
 
 
-#Plot Jaccard index against Sorensen (both are SIMILARITY)
+Finally, we did the same calculations using the Sorensen similarity index to see how it compared to the Jaccard similarity index. The "SorBetaVec.rds" file can be loaded into the code in place of "BetaVec" to create maps using the Sorensen index.
 ```{r}
 SorBetaVec <- readRDS("Data/SorBetaVec.rds")
 SorBetaVec[SorBetaVec<0]<-NA
 BetaVec[BetaVec<0]<-NA
 
-plot(BetaVec, ylab = "β-diversity", xlab = "Cell ID", col="darkgreen")
-points(SorBetaVec, col="skyblue2")
+plot(BetaVec, ylab = "β-diversity", xlab = "Cell ID", col="darkgoldenrod2")
+points(SorBetaVec, col="cadetblue4")
+legend("bottomright", legend=c("Jaccard", "Sorensen"),
+        fill=c("darkgoldenrod2","cadetblue4"), horiz=FALSE, cex=0.9)
+
 ```
 
 
-#Histogram of beta values
-```{r}
-BetaDF <- as.data.frame(BetaVec)
-BetaPolygons <- rasterToPolygons(BetaRaster)
+**References**
 
-SorBetaRaster <- setValues(BlankRas, SorBetaVec)
-
-histogram(BetaRaster, col=(rev(cols)))
-histogram(SorBetaRaster, col=((cols)))
-```
-
+McFadden, I. R., Sandel, B. , Tsirogiannis, C. , Morueta‐Holme, N. , Svenning, J. , Enquist, B. J. and Kraft, N. J. (2019), Temperature shapes opposing latitudinal gradients of plant taxonomic and phylogenetic β diversity. Ecol Lett, 22: 1126-1135. doi:10.1111/ele.13269

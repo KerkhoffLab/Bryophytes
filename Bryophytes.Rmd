@@ -206,8 +206,10 @@ SorBetaVec <- readRDS("Data/SorBetaVec.rds")
 SorBetaVec[SorBetaVec<0]<-NA
 BetaVec[BetaVec<0]<-NA
 
-plot(BetaVec, ylab = "β-diversity", xlab = "Cell ID", col="darkgreen")
-points(SorBetaVec, col="skyblue2")
+plot(BetaVec, ylab = "β-diversity", xlab = "Cell ID", col="darkgoldenrod2")
+points(SorBetaVec, col="cadetblue4")
+legend("bottomright", legend=c("Jaccard", "Sorensen"),
+        fill=c("darkgoldenrod2","cadetblue4"), horiz=FALSE, cex=0.9)
 ```
 
 

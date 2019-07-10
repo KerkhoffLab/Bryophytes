@@ -1,14 +1,17 @@
 ---
 title: "Analysis of Bryophyte Richness and Diversity in the Americas"
-author: "Jackie O'Malley '21, Julia Eckberg '21, Carter Powell '20, and Dr. Andrew J. Kerkhoff"
+author: Jackie O'Malley '21, Julia Eckberg '21, Carter Powell '20, and Dr. Andrew
+  J. Kerkhoff
 date: "Department of Biology, Kenyon College, Gambier, OH 43022"
 output:
   html_document:
     df_print: paged
+  pdf_document: default
 ---
 
 ```{r, message=FALSE}
 require(knitr)
+require(latexpdf)
 require(sp)
 require(vegan)
 require(raster)
@@ -81,7 +84,7 @@ names(Beta7) <- Cell7CH
 ```
 
 
-We then plotted the mean pairwise β-diversity by cell ID for cells with both 7 and 8 neighbors to examine the range of values and investigate outliers.
+We then plotted the mean pairwise $\beta$ diversity by cell ID for cells with both 7 and 8 neighbors to examine the range of values and investigate outliers.
 ```{r}
 Beta7Vec<-unlist(Beta7)
 Beta8Vec<-unlist(Beta8)
@@ -109,13 +112,13 @@ colnames(BetaDF) <- c("Longitude", "Latitude", "MAP")
 theme_set(theme_void())
 RawBetaMap <- ggplot() + geom_tile(data=BetaDF, aes(x=Longitude, y=Latitude, fill=MAP)) + 
     scale_fill_gradientn(name="β-diversity", colours=cols, na.value="transparent", limits = c(0,1)) + 
-    coord_equal()
+    coord_equal() 
 
 RawBetaMap
 ```
 
 
-To combat this issue, we subsetted β-diversity values under 0.5 in order to map them separately in dark grey. The resulting dataset contains 19 cells.
+To combat this issue, we subsetted $\beta$ diversity values under 0.5 in order to map them separately in dark grey. The resulting dataset contains 19 cells.
 ```{r}
 LowBetaVec <- rep(0, 15038)
 LowBetaVec[Cell8]<-Beta8Vec
@@ -130,7 +133,7 @@ colnames(LowBetaDF) <- c("Longitude", "Latitude", "MAP")
 ```
 
 
-The resulting map shows the mean of all pairwise β-diversity values for each occuppied cell and its adjoining neighbors, with warmer colors indicating higher turnover. Values under 0.5 are shown in dark grey.
+The resulting map shows the mean of all pairwise $\beta$ diversity values for each occuppied cell and its adjoining neighbors, with warmer colors indicating higher turnover. Values under 0.5 are shown in dark grey.
 ```{r}
 source("Functions/gplot_data.R")
 gplotB<- gplot_data(BetaRaster)
@@ -147,7 +150,27 @@ BetaMap
 ```
 
 
-Next, we incorporated Carter Powell's richness map into our study to compare α-diversity and β-diversity trends for bryophytes in the Americas. 
+#Add Outlines
+```{r}
+nw_mount <- shapefile("./Outputs/Mountains/Koeppen-Geiger_biomes.shp")
+nw_bound <- shapefile("./Outputs/Global_bound/Koeppen-Geiger_biomes.shp")
+require(sf)
+
+nw_mount_sf <- st_as_sf(nw_mount)
+nw_bound_sf <- st_as_sf(nw_bound)
+
+BetaMap +
+  geom_sf(data = nw_bound_sf,size = 0.5, fill = NA ) + 
+  geom_sf(data = nw_mount_sf,size = 0.5, fill = NA )
+
+
+BetaMap +
+  geom_sf(data = nw_bound_sf,size = 0.5, fill = NA) + 
+  geom_sf(data = nw_mount_sf,size = 0.5, alpha = 0.2)
+```
+
+
+Next, we incorporated Carter Powell's richness map into our study to compare $\alpha$ diversity and $\beta$ diversity trends for bryophytes in the Americas. 
 ```{r, warning=FALSE}
 RichnessVec <- readRDS("Data/RichnessVec.rds")
 RichnessVec[which(RichnessVec==0)]=NA
@@ -182,4 +205,4 @@ legend("bottomright", legend=c("Jaccard", "Sorensen"),
 
 **References**
 
-McFadden, I. R., Sandel, B. , Tsirogiannis, C. , Morueta‐Holme, N. , Svenning, J. , Enquist, B. J. and Kraft, N. J. (2019), Temperature shapes opposing latitudinal gradients of plant taxonomic and phylogenetic β diversity. Ecol Lett, 22: 1126-1135. doi:10.1111/ele.13269
+McFadden, I. R., Sandel, B. , Tsirogiannis, C. , Morueta‐Holme, N. , Svenning, J. , Enquist, B. J. and Kraft, N. J. (2019), Temperature shapes opposing latitudinal gradients of plant taxonomic and phylogenetic $\beta$ diversity. Ecol Lett, 22: 1126-1135. doi:10.1111/ele.13269

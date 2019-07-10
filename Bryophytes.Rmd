@@ -211,16 +211,3 @@ points(SorBetaVec, col="cadetblue4")
 legend("bottomright", legend=c("Jaccard", "Sorensen"),
         fill=c("darkgoldenrod2","cadetblue4"), horiz=FALSE, cex=0.9)
 ```
-
-
-#Histogram of beta values
-```{r}
-BetaDF <- as.data.frame(BetaVec)
-BetaPolygons <- rasterToPolygons(BetaRaster)
-
-SorBetaRaster <- setValues(BlankRas, SorBetaVec)
-
-histogram(BetaRaster, col=(rev(cols)))
-histogram(SorBetaRaster, col=((cols)))
-```
-

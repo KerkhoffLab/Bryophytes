@@ -6,24 +6,15 @@ output: html_notebook
 
 ```{r}
 require(knitr)
-require(BIEN)
-require(ape)
-require(maps)
-require(dplyr)
-require(maptools)
-require(raster)
-require(dismo)
+require(latexpdf)
 require(sp)
-require(rgdal)
-require(mapdata)
-require(mapproj)
 require(vegan)
-require(letsR)
-require(entropart)
-require(betapart)
-require(CommEcol)
-require(rgeos)
-require(rlist)
+require(raster)
+require(rasterVis)
+require(wesanderson)
+require(ggplot2)
+require(gridExtra)
+require(sf)
 ```
 
 
@@ -113,11 +104,17 @@ plot(BetaVec, ylab = "Mean Pairwise β-Diversity", xlab = "Cell ID")
 
 #Load mapping packages and create colorscheme
 ```{r}
-require(wesanderson)
-require(ggplot2)
-require(rasterVis)
-
 cols <- rev(wes_palette("Zissou1", 500, type = "continuous"))
+```
+
+
+#Add continental and mountainous outlines
+```{r, message=FALSE}
+nw_mount <- shapefile("./Outputs/Mountains/Koeppen-Geiger_biomes.shp")
+nw_bound <- shapefile("./Outputs/Global_bound/Koeppen-Geiger_biomes.shp")
+
+nw_mount_sf <- st_as_sf(nw_mount)
+nw_bound_sf <- st_as_sf(nw_bound)
 ```
 
 
@@ -127,10 +124,10 @@ BetaRaster <- setValues(BlankRas, BetaVec)
 BetaPoints<-rasterToPoints(BetaRaster)
 
 BetaDF <- data.frame(BetaPoints)
-colnames(BetaDF) <- c("Longitude", "Latitude", "MAP")
+colnames(BetaDF) <- c("Longitude", "Latitude", "Beta")
 
 theme_set(theme_void())
-RawBetaMap <- ggplot() + geom_tile(data=BetaDF, aes(x=Longitude, y=Latitude, fill=MAP)) + 
+RawBetaMap <- ggplot() + geom_tile(data=BetaDF, aes(x=Longitude, y=Latitude, fill=Beta)) + 
     scale_fill_gradientn(name="β-diversity", colours=cols, na.value="transparent", limits = c(0,1)) + 
     coord_equal()
 
@@ -149,7 +146,7 @@ LowBetaVec[LowBetaVec>0.5]<-NA
 LowBetaRaster <- setValues(BlankRas, LowBetaVec)
 LowBetaPoints<-rasterToPoints(LowBetaRaster)
 LowBetaDF <- data.frame(LowBetaPoints)
-colnames(LowBetaDF) <- c("Longitude", "Latitude", "MAP")
+colnames(LowBetaDF) <- c("Longitude", "Latitude", "Beta")
 
 theme_set(theme_void())
 LowBetaMap <- gplot(LowBetaRaster, maxpixels=15038) +  geom_tile(aes(fill = value)) + 
@@ -165,35 +162,40 @@ source("Functions/gplot_data.R")
 gplotB<- gplot_data(BetaRaster)
 gplotLB<- gplot_data(LowBetaRaster)
 
+
 BetaMap <- ggplot() +
   geom_tile(data = dplyr::filter(gplotLB, !is.na(value)), 
             aes(x = x, y = y), fill = "gray25") +
   geom_tile(data = gplotB, 
             aes(x = x, y = y, fill = value)) +
   scale_fill_gradientn(name="β-diversity", colours=cols, na.value="transparent", limits = c(0.5,1)) +
-  coord_quickmap()
+  coord_quickmap() + geom_sf(data = nw_bound_sf, size = 0.1, fill=NA) + 
+  geom_sf(data = nw_mount_sf, size = 0.2, alpha=0.1)
 BetaMap
 ```
 
 
-#Map alpha diversity (aka richness)
-```{r}
+#Map richness (alpha diversity)
+```{r, warning=FALSE}
 RichnessVec <- readRDS("Data/RichnessVec.rds")
 RichnessVec[which(RichnessVec==0)]=NA
 RichnessRaster <- setValues(BlankRas, RichnessVec)
 
-theme_set(theme_void())
-RichnessMap <- gplot(RichnessRaster, maxpixels=15038) + geom_tile(aes(fill = value)) +   
-    scale_fill_gradientn(name="α-diversity", colours=cols, na.value="transparent") +
-    coord_equal() 
-RichnessMap
-```
+RichnessDF <- rasterToPoints(RichnessRaster)
+RichnessDF <- data.frame(RichnessDF)
 
+colnames(RichnessDF) <- c("Longitude", "Latitude", "MAP")
+
+theme_set(theme_void())
+RichnessMap <- ggplot() + geom_tile(data=RichnessDF, aes(x=Longitude, y=Latitude, fill=MAP)) +   
+    scale_fill_gradientn(name="α-diversity", colours=cols, na.value="transparent") +
+    coord_equal() +
+ geom_sf(data = nw_bound_sf, size = 0.1, fill=NA) + 
+  geom_sf(data = nw_mount_sf, size = 0.2, alpha=0.1)
+```
 
 #Map alpha and beta diversity side-by-side and save as png
 ```{r}
-require(gridExtra)
-
 png("bothmaps.png", width = 1000, height = 1000, pointsize = 20)
 grid.arrange(RichnessMap, BetaMap, ncol=2)
 dev.off()

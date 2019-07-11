@@ -24,8 +24,8 @@ mount <- subset(mount_shp, featurecla=="Range/mtn")
 # 1.2 Global boundaries
 data(wrld_simpl)
 noGRL <- wrld_simpl[which(wrld_simpl@data$NAME!='Greenland'), ] 
-noisl <- noGRL[which(noGRL@data$AREA>50)]
-wbuf <- gBuffer(noisl,width=0.00001)
+noIslands <- noGRL[which(noGRL@data$AREA>500), ]
+wbuf <- gBuffer(noIslands,width=0.00001)
 
 # 2. Cropping to the New world --------------------------------------------
 plot(wbuf)

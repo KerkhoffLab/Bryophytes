@@ -13,5 +13,7 @@ SpeciesCellMatrix[SpeciesCellMatrix > 0] <- 1
 #betadiver(help = TRUE) gives you indices
 require(vegan)
 betamat <- betadiver(SpeciesCellMatrix, method = "j", order = FALSE, help = FALSE)
-saveRDS(betamat, file="Data/BetaMat.rds")
 
+#Save species-cell matrix and beta diversity matrix
+saveRDS(SpeciesCellMatrix, file="Data/SpeciesCellMatrix.rds")
+saveRDS(betamat, file="Data/BetaMat.rds")

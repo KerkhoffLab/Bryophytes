@@ -3,8 +3,8 @@
 #Change file depending on if you want to map bryophytes, mosses, liverworts, etc. 
 
 BlankRas <-raster("Data/blank_100km_raster.tif")
-BetaMat <- readRDS("Data/HLBetaMat.rds")
-CellRichness <- readRDS("Data/HLRichness.rds")
+BetaMat <- readRDS("Data/BetaMat.rds")
+CellRichness <- readRDS("Data/CellRichness.rds")
 CellID <- CellRichness$CellID
 CellVec <- c(1:15038)
 

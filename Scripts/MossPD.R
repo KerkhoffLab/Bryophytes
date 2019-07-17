@@ -14,6 +14,7 @@ require(wesanderson)
 require(sf)
 require(dplyr)
 require(gridExtra)
+require(PhyloMeasures)
 
 #Load blank raster and colors
 BlankRas <-raster("Data/blank_100km_raster.tif")
@@ -198,3 +199,20 @@ RichnessMap
 #######################################
 
 grid.arrange(RichnessMap, PDMap4, PDMap5, PDMap6, ncol=2)
+
+
+###############################################################
+### PhyloMeasures ###
+#######################################
+
+pdquery <- pd.query(MossTree4, SpeciesCellMatrix4, standardize = TRUE)
+
+#SES.PD
+ses <- ses.pd(SpeciesCellMatrix4, MossTree4, null.model = "taxa.labels", runs = 999, include.root=TRUE)
+
+###############################################################
+### PHYLOGENETIC BETA DIVERSITY ###
+#######################################
+
+PhyBetaJ <- phylo.beta.pair(SpeciesCellMatrix4, MossTree4, index.family="jaccard")
+PhyBetaS <- phylo.beta.pair(SpeciesCellMatrix4, MossTree4, index.family="sorensen")

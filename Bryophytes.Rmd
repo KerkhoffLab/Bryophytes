@@ -110,8 +110,8 @@ cols <- rev(wes_palette("Zissou1", 500, type = "continuous"))
 
 #Add continental and mountainous outlines
 ```{r, message=FALSE}
-nw_mount <- shapefile("./Outputs/Mountains/Koeppen-Geiger_biomes.shp")
-nw_bound <- shapefile("./Outputs/Global_bound/Koeppen-Geiger_biomes.shp")
+nw_mount <- shapefile("Data/Outputs/Mountains/Koeppen-Geiger_biomes.shp")
+nw_bound <- shapefile("Data/Outputs/Global_bound/Koeppen-Geiger_biomes.shp")
 
 nw_mount_sf <- st_as_sf(nw_mount)
 nw_bound_sf <- st_as_sf(nw_bound)

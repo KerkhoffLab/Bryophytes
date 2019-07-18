@@ -171,12 +171,11 @@ PDMap6 <- ggplot() + geom_tile(data=PDDF6, aes(x=Longitude, y=Latitude, fill=PD6
   geom_sf(data = nw_mount_sf, size = 0.2, alpha=0.1)
 PDMap6
 
-
 ###############################################################
 ### MAP RICHNESS ###
 ##########################
 
-#Create moss richness vector
+#Create moss richness vector that includes only moss that are only 
 MossRichness <- numeric(15038)
 MossRichness[MossPD4$CellID4] <- MossPD4$SR
 MossRichness[which(MossRichness==0)]=NA
@@ -207,8 +206,8 @@ grid.arrange(RichnessMap, PDMap4, PDMap5, PDMap6, ncol=2)
 
 pdquery <- pd.query(MossTree4, SpeciesCellMatrix4, standardize = TRUE)
 
-#SES.PD
-ses <- ses.pd(SpeciesCellMatrix4, MossTree4, null.model = "taxa.labels", runs = 999, include.root=TRUE)
+#SES.PD to compare with pd.query
+#ses <- ses.pd(SpeciesCellMatrix4, MossTree4, null.model = "taxa.labels", runs = 999, include.root=TRUE)
 
 ###############################################################
 ### PHYLOGENETIC BETA DIVERSITY ###

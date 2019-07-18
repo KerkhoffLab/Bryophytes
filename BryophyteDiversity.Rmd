@@ -137,8 +137,8 @@ colnames(LowBetaDF) <- c("Longitude", "Latitude", "Beta")
 
 We then used code from our post-doc Susy Echeverria-Londono to add outlines of the continents and mountainous regions to our maps.
 ```{r}
-nw_mount <- shapefile("Data/Outputs/Mountains/Koeppen-Geiger_biomes.shp")
-nw_bound <- shapefile("Data/Outputs/Global_bound/Koeppen-Geiger_biomes.shp")
+nw_mount <- shapefile("Data/MapOutlines/Mountains/Koeppen-Geiger_biomes.shp")
+nw_bound <- shapefile("Data/MapOutlines/Global_bound/Koeppen-Geiger_biomes.shp")
 
 nw_mount_sf <- st_as_sf(nw_mount)
 nw_bound_sf <- st_as_sf(nw_bound)

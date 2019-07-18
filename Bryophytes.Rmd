@@ -110,8 +110,8 @@ cols <- rev(wes_palette("Zissou1", 500, type = "continuous"))
 
 #Add continental and mountainous outlines
 ```{r, message=FALSE}
-nw_mount <- shapefile("Data/Outputs/Mountains/Koeppen-Geiger_biomes.shp")
-nw_bound <- shapefile("Data/Outputs/Global_bound/Koeppen-Geiger_biomes.shp")
+nw_mount <- shapefile("Data/MapOutlines/Mountains/Koeppen-Geiger_biomes.shp")
+nw_bound <- shapefile("Data/MapOutlines/Global_bound/Koeppen-Geiger_biomes.shp")
 
 nw_mount_sf <- st_as_sf(nw_mount)
 nw_bound_sf <- st_as_sf(nw_bound)
@@ -132,6 +132,33 @@ RawBetaMap <- ggplot() + geom_tile(data=BetaDF, aes(x=Longitude, y=Latitude, fil
     coord_equal()
 
 RawBetaMap
+```
+
+#Subset beta values above 0.5
+```{r}
+HighBetaVec <- rep(0, 15038)
+HighBetaVec[Cell8]<-Beta8Vec
+HighBetaVec[Cell7]<-Beta7Vec
+HighBetaVec[HighBetaVec==0]<-NA
+HighBetaVec[HighBetaVec<0.5]<-NA
+
+HighBetaRaster <- setValues(BlankRas, HighBetaVec)
+HighBetaPoints<-rasterToPoints(HighBetaRaster)
+
+HighBetaDF <- data.frame(HighBetaPoints)
+colnames(HighBetaDF) <- c("Longitude", "Latitude", "Beta")
+```
+
+
+#Beta diversity by latitude
+```{r}
+HighBetaDF$pc <- predict(prcomp(~Latitude+Beta, HighBetaDF))[,1]
+cols2 <- rev(wes_palette("Zissou1", 4, type = "continuous"))
+
+theme_set(theme_gray())
+BetaScatterplot <- ggplot(HighBetaDF, aes(Latitude, Beta, color=pc)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5) + scale_color_gradientn(colours=cols2) + theme_minimal()
+
+BetaScatterplot
 ```
 
 
@@ -184,15 +211,32 @@ RichnessRaster <- setValues(BlankRas, RichnessVec)
 RichnessDF <- rasterToPoints(RichnessRaster)
 RichnessDF <- data.frame(RichnessDF)
 
-colnames(RichnessDF) <- c("Longitude", "Latitude", "MAP")
+colnames(RichnessDF) <- c("Longitude", "Latitude", "Alpha")
 
 theme_set(theme_void())
-RichnessMap <- ggplot() + geom_tile(data=RichnessDF, aes(x=Longitude, y=Latitude, fill=MAP)) +   
+RichnessMap <- ggplot() + geom_tile(data=RichnessDF, aes(x=Longitude, y=Latitude, fill=Alpha)) +   
     scale_fill_gradientn(name="α-diversity", colours=cols, na.value="transparent") +
     coord_equal() +
  geom_sf(data = nw_bound_sf, size = 0.1, fill=NA) + 
   geom_sf(data = nw_mount_sf, size = 0.2, alpha=0.1)
 ```
+
+
+#Alpha diversity by latitude
+```{r}
+RichnessDF$pc <- predict(prcomp(~Latitude+Alpha, RichnessDF))[,1]
+cols2 <- rev(wes_palette("Zissou1", 4, type = "continuous"))
+
+theme_set(theme_gray())
+AlphaScatterplot <- ggplot(RichnessDF, aes(Latitude, Alpha, color=pc)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5) + scale_color_gradientn(colours=cols2) + theme_minimal()
+
+AlphaScatterplot
+
+png("AlphaBetaScatter.png", width = 1000, height = 1000, pointsize = 20)
+grid.arrange(AlphaScatterplot, BetaScatterplot, ncol=1)
+dev.off()
+```
+
 
 #Map alpha and beta diversity side-by-side and save as png
 ```{r}

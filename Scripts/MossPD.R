@@ -21,8 +21,8 @@ BlankRas <-raster("Data/blank_100km_raster.tif")
 cols <- rev(wes_palette("Zissou1", 500, type = "continuous"))
 
 #Load mapping files
-nw_mount <- shapefile("./Outputs/Mountains/Koeppen-Geiger_biomes.shp")
-nw_bound <- shapefile("./Outputs/Global_bound/Koeppen-Geiger_biomes.shp")
+nw_mount <- shapefile("Data/MapOutlines/Mountains/Koeppen-Geiger_biomes.shp")
+nw_bound <- shapefile("Data/MapOutlines/Global_bound/Koeppen-Geiger_biomes.shp")
 nw_mount_sf <- st_as_sf(nw_mount)
 nw_bound_sf <- st_as_sf(nw_bound)
 

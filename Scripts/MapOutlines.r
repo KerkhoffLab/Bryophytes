@@ -7,18 +7,18 @@ require(rworldmap)
 
 # 0. Downloading data  ----------------------------------------------------
 ## from http://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-physical-labels/
-dir.create("./Data/")
+dir.create("./Data/MapOutlines/")
 
 download.file("https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/ne_10m_geography_regions_polys.zip",
-              destfile = "./Data/ne_10m_geography_regions_polys.zip")
+              destfile = "./Data/MapOutlines/ne_10m_geography_regions_polys.zip")
 
-setwd("./Data/")
+setwd("./Data/MapOutlines/")
 unzip("ne_10m_geography_regions_polys.zip")
 setwd("../")
 
 #  1. Reading data --------------------------------------------------------
 # 1.1. Mountain ranges
-mount_shp <- shapefile("./Data/ne_10m_geography_regions_polys.shp")
+mount_shp <- shapefile("./Data/MapOutlines/ne_10m_geography_regions_polys.shp")
 mount <- subset(mount_shp, featurecla=="Range/mtn")
 
 # 1.2 Global boundaries
@@ -46,19 +46,20 @@ plot(wbuf_NW_proj)
 plot(mount_NW_proj, add = T)
 
 # 5. Writing shapefiles ---------------------------------------------------
-dir.create("./Outputs/")
-dir.create("./Outputs/Global_bound/")
-dir.create("./Outputs/Mountains/")
+setwd("./Data/MapOutlines/")
+dir.create("./Global_bound/")
+dir.create("./Mountains/")
 
 wbuf_NW_proj <- as(wbuf_NW_proj, "SpatialPolygonsDataFrame")
 writeOGR(obj=wbuf_NW_proj, 
-         dsn="./Outputs/Global_bound/", 
+         dsn="./Global_bound/", 
          layer="Koeppen-Geiger_biomes", 
          driver="ESRI Shapefile", 
          overwrite = TRUE)
 
 writeOGR(obj=mount_NW_proj, 
-         dsn="./Outputs/Mountains/", 
+         dsn="./Mountains/", 
          layer="Koeppen-Geiger_biomes", 
          driver="ESRI Shapefile", 
          overwrite = TRUE)
+

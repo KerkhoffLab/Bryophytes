@@ -15,6 +15,7 @@ require(wesanderson)
 require(ggplot2)
 require(gridExtra)
 require(sf)
+require(rgdal)
 ```
 
 
@@ -122,7 +123,6 @@ nw_bound_sf <- st_as_sf(nw_bound)
 ```{r}
 BetaRaster <- setValues(BlankRas, BetaVec)
 BetaPoints<-rasterToPoints(BetaRaster)
-
 BetaDF <- data.frame(BetaPoints)
 colnames(BetaDF) <- c("Longitude", "Latitude", "Beta")
 
@@ -130,33 +130,38 @@ theme_set(theme_void())
 RawBetaMap <- ggplot() + geom_tile(data=BetaDF, aes(x=Longitude, y=Latitude, fill=Beta)) + 
     scale_fill_gradientn(name="β-diversity", colours=cols, na.value="transparent", limits = c(0,1)) + 
     coord_equal()
-
 RawBetaMap
 ```
 
-#Subset beta values above 0.5
+#Subset beta values above 0.5 and convert to long-lat
 ```{r}
-HighBetaVec <- rep(0, 15038)
-HighBetaVec[Cell8]<-Beta8Vec
-HighBetaVec[Cell7]<-Beta7Vec
-HighBetaVec[HighBetaVec==0]<-NA
-HighBetaVec[HighBetaVec<0.5]<-NA
+JacBetaVec <- rep(0, 15038)
+JacBetaVec[Cell8]<-Beta8Vec
+JacBetaVec[Cell7]<-Beta7Vec
+JacBetaVec[JacBetaVec==0]<-NA
+JacBetaVec[JacBetaVec<0.5]<-NA
 
-HighBetaRaster <- setValues(BlankRas, HighBetaVec)
-HighBetaPoints<-rasterToPoints(HighBetaRaster)
+JacBetaRaster <- setValues(BlankRas, JacBetaVec)
+JacBetaPoints<-rasterToPoints(JacBetaRaster)
 
-HighBetaDF <- data.frame(HighBetaPoints)
-colnames(HighBetaDF) <- c("Longitude", "Latitude", "Beta")
+JacBetaDF <- data.frame(JacBetaPoints)
+colnames(JacBetaDF) <- c("Longitude", "Latitude", "Beta")
+
+coordinates(JacBetaDF) <- ~Longitude+Latitude 
+proj4string(JacBetaDF) <- CRS("+proj=utm +zone=10") 
+BetaLongLat <- spTransform(JacBetaDF, CRS("+proj=longlat")) 
+BetaLongLat <- data.frame(BetaLongLat)
+colnames(BetaLongLat) <- c("Beta", "Longitude", "Latitude")
 ```
 
 
-#Beta diversity by latitude
+#Beta diversity by latitude scatterplots
 ```{r}
-HighBetaDF$pc <- predict(prcomp(~Latitude+Beta, HighBetaDF))[,1]
-cols2 <- rev(wes_palette("Zissou1", 4, type = "continuous"))
+BetaLongLat$pc <- predict(prcomp(~Latitude+Beta, BetaLongLat))[,1]
+cols2 <- rev(wes_palette("Zissou1", 1, type = "continuous"))
 
-theme_set(theme_gray())
-BetaScatterplot <- ggplot(HighBetaDF, aes(Latitude, Beta, color=pc)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5) + scale_color_gradientn(colours=cols2) + theme_minimal()
+BetaLongLat
+BetaScatterplot <- ggplot(BetaLongLat, aes(Latitude, Beta, color=pc)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5) + scale_color_gradientn(colours=cols2) + ylab("β diversity") + theme_minimal()
 
 BetaScatterplot
 ```
@@ -210,7 +215,6 @@ RichnessRaster <- setValues(BlankRas, RichnessVec)
 
 RichnessDF <- rasterToPoints(RichnessRaster)
 RichnessDF <- data.frame(RichnessDF)
-
 colnames(RichnessDF) <- c("Longitude", "Latitude", "Alpha")
 
 theme_set(theme_void())
@@ -219,16 +223,27 @@ RichnessMap <- ggplot() + geom_tile(data=RichnessDF, aes(x=Longitude, y=Latitude
     coord_equal() +
  geom_sf(data = nw_bound_sf, size = 0.1, fill=NA) + 
   geom_sf(data = nw_mount_sf, size = 0.2, alpha=0.1)
+RichnessMap
+```
+
+
+#Richness convert to long-lat
+```{r}
+coordinates(RichnessDF) <- ~Longitude+Latitude 
+proj4string(RichnessDF) <- CRS("+proj=utm +zone=10") 
+AlphaLongLat <- spTransform(RichnessDF, CRS("+proj=longlat")) 
+AlphaLongLat <- data.frame(AlphaLongLat)
+colnames(AlphaLongLat) <- c("Alpha", "Longitude", "Latitude")
 ```
 
 
 #Alpha diversity by latitude
 ```{r}
-RichnessDF$pc <- predict(prcomp(~Latitude+Alpha, RichnessDF))[,1]
-cols2 <- rev(wes_palette("Zissou1", 4, type = "continuous"))
+AlphaLongLat$pc <- predict(prcomp(~Latitude+Alpha, AlphaLongLat))[,1]
+cols2 <- rev(wes_palette("Zissou1", 1, type = "continuous"))
 
 theme_set(theme_gray())
-AlphaScatterplot <- ggplot(RichnessDF, aes(Latitude, Alpha, color=pc)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5) + scale_color_gradientn(colours=cols2) + theme_minimal()
+AlphaScatterplot <- ggplot(AlphaLongLat, aes(Latitude, Alpha, color=pc)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5) + scale_color_gradientn(colours=cols2) + ylab("α diversity") + xlab(" ") + theme_minimal() 
 
 AlphaScatterplot
 

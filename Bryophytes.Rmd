@@ -103,7 +103,7 @@ plot(BetaVec, ylab = "Mean Pairwise β-Diversity", xlab = "Cell ID")
 ```
 
 
-#Load mapping packages and create colorscheme
+#Create colorscheme
 ```{r}
 cols <- rev(wes_palette("Zissou1", 500, type = "continuous"))
 ```
@@ -133,6 +133,7 @@ RawBetaMap <- ggplot() + geom_tile(data=BetaDF, aes(x=Longitude, y=Latitude, fil
 RawBetaMap
 ```
 
+
 #Subset beta values above 0.5 and convert to long-lat
 ```{r}
 JacBetaVec <- rep(0, 15038)
@@ -161,7 +162,7 @@ BetaLongLat$pc <- predict(prcomp(~Latitude+Beta, BetaLongLat))[,1]
 cols2 <- rev(wes_palette("Zissou1", 1, type = "continuous"))
 
 BetaLongLat
-BetaScatterplot <- ggplot(BetaLongLat, aes(Latitude, Beta, color=pc)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5) + scale_color_gradientn(colours=cols2) + ylab("β diversity") + theme_minimal()
+BetaScatterplot <- ggplot(BetaLongLat, aes(Latitude, Beta, color=pc)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = cols2) + ylab("β diversity") + theme_minimal()
 
 BetaScatterplot
 ```
@@ -207,6 +208,35 @@ BetaMap
 ```
 
 
+#Scatterplot of beta diversity values of cells whose centers are within mountainous regions 
+```{r, warning = FALSE}
+BetaMount <- extract(BetaRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
+colnames(BetaMount) <- c("ID", "CellIDs", "Beta")
+BetaMountVec <- BetaMount[, "CellIDs"]
+
+BetaMountScatterplot <- ggplot(BetaMount, aes(CellIDs, Beta)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + ylab("β diversity") + ylim(0.3, 1.0) + xlab("Mountain Cell IDs") + theme_minimal()
+BetaMountScatterplot
+```
+
+
+#Scatterplot of beta diversity values of cells in lowland areas 
+```{r, warning = FALSE}
+BetaBound <- extract(BetaRaster, nw_bound, df = TRUE, cellnumbers = TRUE)
+colnames(BetaBound) <- c("ID", "CellIDs", "Beta")
+
+BetaMatch <- BetaBound[BetaBound$CellIDs %in% BetaMountVec, ]
+BetaMatchVec <- BetaMatch[, "CellIDs"]
+BetaLowland <- BetaBound[!BetaBound$CellIDs %in% BetaMatchVec, ]
+
+BetaLowlandScatterplot <- ggplot(BetaLowland, aes(CellIDs, Beta)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + ylab("β diversity") + ylim(0.3, 1.0) + xlab("Lowland Cell IDs") + theme_minimal() 
+BetaLowlandScatterplot
+
+png("BetaMountainLowlandScatter.png", width = 1000, height = 1000, pointsize = 20)
+grid.arrange(BetaMountScatterplot, BetaLowlandScatterplot, ncol=1)
+dev.off()
+```
+
+
 #Map richness (alpha diversity)
 ```{r, warning=FALSE}
 RichnessVec <- readRDS("Data/RichnessVec.rds")
@@ -243,12 +273,44 @@ AlphaLongLat$pc <- predict(prcomp(~Latitude+Alpha, AlphaLongLat))[,1]
 cols2 <- rev(wes_palette("Zissou1", 1, type = "continuous"))
 
 theme_set(theme_gray())
-AlphaScatterplot <- ggplot(AlphaLongLat, aes(Latitude, Alpha, color=pc)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5) + scale_color_gradientn(colours=cols2) + ylab("α diversity") + xlab(" ") + theme_minimal() 
-
+AlphaScatterplot <- ggplot(AlphaLongLat, aes(Latitude, Alpha, color=pc)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = cols2) + ylab("α diversity") + xlab(" ") + theme_minimal() 
 AlphaScatterplot
 
 png("AlphaBetaScatter.png", width = 1000, height = 1000, pointsize = 20)
 grid.arrange(AlphaScatterplot, BetaScatterplot, ncol=1)
+dev.off()
+```
+
+
+#Scatterplot of alpha diversity values of cells whose centers are within mountainous regions 
+```{r, warning = FALSE}
+AlphaMount <- extract(RichnessRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
+colnames(AlphaMount) <- c("ID", "CellIDs", "Alpha")
+AlphaBoundVec <- AlphaMount[, "CellIDs"]
+
+AlphaMountScatterplot <- ggplot(AlphaMount, aes(CellIDs, Alpha)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "red3") + ylab("α diversity") + ylim (0, 800) + xlab("Mountain Cell IDs") + theme_minimal()
+AlphaMountScatterplot
+
+png("AlphaBetaMountScatter.png", width = 1000, height = 1000, pointsize = 20)
+grid.arrange(AlphaMountScatterplot, BetaMountScatterplot, ncol = 1)
+dev.off()
+```
+
+
+#Scatterplot of alpha diversity values of cells in lowland areas 
+```{r, warning = FALSE}
+AlphaBound <- extract(RichnessRaster, nw_bound, df = TRUE, cellnumbers = TRUE)
+colnames(AlphaBound) <- c("ID", "CellIDs", "Alpha")
+
+AlphaMatch <- AlphaBound[AlphaBound$CellIDs %in% AlphaBoundVec, ]
+AlphaMatchVec <- AlphaMatch[, "CellIDs"]
+AlphaLowland <- AlphaBound[!AlphaBound$CellIDs %in% AlphaMatchVec, ]
+
+AlphaLowlandScatterplot <- ggplot(AlphaLowland, aes(CellIDs, Alpha)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "red3") + ylab("α diversity") + ylim(0, 800) + xlab("Lowland Cell IDs") + theme_minimal() 
+AlphaLowlandScatterplot
+
+png("AlphaMountainLowlandScatter.png", width = 1000, height = 1000, pointsize = 20)
+grid.arrange(AlphaMountScatterplot, AlphaLowlandScatterplot, ncol=1)
 dev.off()
 ```
 
@@ -272,3 +334,4 @@ points(SorBetaVec, col="cadetblue4")
 legend("bottomright", legend=c("Jaccard", "Sorensen"),
         fill=c("darkgoldenrod2","cadetblue4"), horiz=FALSE, cex=0.9)
 ```
+

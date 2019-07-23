@@ -195,7 +195,6 @@ source("Functions/gplot_data.R")
 gplotB<- gplot_data(BetaRaster)
 gplotLB<- gplot_data(LowBetaRaster)
 
-
 BetaMap <- ggplot() +
   geom_tile(data = dplyr::filter(gplotLB, !is.na(value)), 
             aes(x = x, y = y), fill = "gray25") +
@@ -203,7 +202,7 @@ BetaMap <- ggplot() +
             aes(x = x, y = y, fill = value)) +
   scale_fill_gradientn(name="β-diversity", colours=cols, na.value="transparent", limits = c(0.5,1)) +
   coord_quickmap() + geom_sf(data = nw_bound_sf, size = 0.1, fill=NA) + 
-  geom_sf(data = nw_mount_sf, size = 0.2, alpha=0.1)
+  geom_sf(data = nw_mount_sf, size = 0.2, alpha=0.1) + theme_void()
 BetaMap
 ```
 
@@ -247,12 +246,11 @@ RichnessDF <- rasterToPoints(RichnessRaster)
 RichnessDF <- data.frame(RichnessDF)
 colnames(RichnessDF) <- c("Longitude", "Latitude", "Alpha")
 
-theme_set(theme_void())
 RichnessMap <- ggplot() + geom_tile(data=RichnessDF, aes(x=Longitude, y=Latitude, fill=Alpha)) +   
     scale_fill_gradientn(name="α-diversity", colours=cols, na.value="transparent") +
     coord_equal() +
  geom_sf(data = nw_bound_sf, size = 0.1, fill=NA) + 
-  geom_sf(data = nw_mount_sf, size = 0.2, alpha=0.1)
+  geom_sf(data = nw_mount_sf, size = 0.2, alpha=0.1) + theme_void()
 RichnessMap
 ```
 
@@ -266,6 +264,12 @@ AlphaLongLat <- data.frame(AlphaLongLat)
 colnames(AlphaLongLat) <- c("Alpha", "Longitude", "Latitude")
 ```
 
+#Map alpha and beta diversity side-by-side and save as png
+```{r}
+png("bothmaps.png", width = 1000, height = 1000, pointsize = 20)
+grid.arrange(RichnessMap, BetaMap, ncol=2)
+dev.off()
+```
 
 #Alpha diversity by latitude
 ```{r}
@@ -315,12 +319,7 @@ dev.off()
 ```
 
 
-#Map alpha and beta diversity side-by-side and save as png
-```{r}
-png("bothmaps.png", width = 1000, height = 1000, pointsize = 20)
-grid.arrange(RichnessMap, BetaMap, ncol=2)
-dev.off()
-```
+
 
 
 #Plot Jaccard index against Sorensen (both are SIMILARITY)

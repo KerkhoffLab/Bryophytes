@@ -162,7 +162,7 @@ BetaLongLat$pc <- predict(prcomp(~Latitude+Beta, BetaLongLat))[,1]
 cols2 <- rev(wes_palette("Zissou1", 1, type = "continuous"))
 
 BetaLongLat
-BetaScatterplot <- ggplot(BetaLongLat, aes(Latitude, Beta, color=pc)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = cols2) + ylab("β diversity") + theme_minimal()
+BetaScatterplot <- ggplot(BetaLongLat, aes(Latitude, Beta)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "orangered2") + ylab("β diversity") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
 
 BetaScatterplot
 ```
@@ -200,10 +200,15 @@ BetaMap <- ggplot() +
             aes(x = x, y = y), fill = "gray25") +
   geom_tile(data = gplotB, 
             aes(x = x, y = y, fill = value)) +
-  scale_fill_gradientn(name="β-diversity", colours=cols, na.value="transparent", limits = c(0.5,1)) +
-  coord_quickmap() + geom_sf(data = nw_bound_sf, size = 0.1, fill=NA) + 
-  geom_sf(data = nw_mount_sf, size = 0.2, alpha=0.1) + theme_void()
+  scale_fill_gradientn(name="β diversity", colours=cols, na.value="transparent", limits = c(0.5,1)) +
+  coord_quickmap() + geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
+  geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() +
+  theme(legend.text=element_text(size=20), legend.title=element_text(size=32))
 BetaMap
+
+png("beta.png", width = 1000, height = 1000, pointsize = 30)
+BetaMap
+dev.off()
 ```
 
 
@@ -247,11 +252,16 @@ RichnessDF <- data.frame(RichnessDF)
 colnames(RichnessDF) <- c("Longitude", "Latitude", "Alpha")
 
 RichnessMap <- ggplot() + geom_tile(data=RichnessDF, aes(x=Longitude, y=Latitude, fill=Alpha)) +   
-    scale_fill_gradientn(name="α-diversity", colours=cols, na.value="transparent") +
+    scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent") +
     coord_equal() +
- geom_sf(data = nw_bound_sf, size = 0.1, fill=NA) + 
-  geom_sf(data = nw_mount_sf, size = 0.2, alpha=0.1) + theme_void()
+ geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
+  geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() + 
+  theme(legend.text=element_text(size=20), legend.title=element_text(size=32))
 RichnessMap
+
+png("alpha.png", width = 1000, height = 1000, pointsize = 30)
+RichnessMap
+dev.off()
 ```
 
 
@@ -274,10 +284,10 @@ dev.off()
 #Alpha diversity by latitude
 ```{r}
 AlphaLongLat$pc <- predict(prcomp(~Latitude+Alpha, AlphaLongLat))[,1]
-cols2 <- rev(wes_palette("Zissou1", 1, type = "continuous"))
+cols2 <- (wes_palette("Zissou1", 1, type = "continuous"))
 
 theme_set(theme_gray())
-AlphaScatterplot <- ggplot(AlphaLongLat, aes(Latitude, Alpha, color=pc)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = cols2) + ylab("α diversity") + xlab(" ") + theme_minimal() 
+AlphaScatterplot <- ggplot(AlphaLongLat, aes(Latitude, Alpha)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "orangered2") + ylab("α diversity") + xlab(" ") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.text.y = element_text(size=20), axis.text.x = element_text(size=0))
 AlphaScatterplot
 
 png("AlphaBetaScatter.png", width = 1000, height = 1000, pointsize = 20)

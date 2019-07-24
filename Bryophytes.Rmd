@@ -206,7 +206,7 @@ BetaMap <- ggplot() +
   theme(legend.text=element_text(size=20), legend.title=element_text(size=32))
 BetaMap
 
-png("beta.png", width = 1000, height = 1000, pointsize = 30)
+png("Figures/beta.png", width = 1000, height = 1000, pointsize = 30)
 BetaMap
 dev.off()
 ```
@@ -218,7 +218,7 @@ BetaMount <- extract(BetaRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
 colnames(BetaMount) <- c("ID", "CellIDs", "Beta")
 BetaMountVec <- BetaMount[, "CellIDs"]
 
-BetaMountScatterplot <- ggplot(BetaMount, aes(CellIDs, Beta)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + ylab("β diversity") + ylim(0.3, 1.0) + xlab("Mountain Cell IDs") + theme_minimal()
+BetaMountScatterplot <- ggplot(BetaMount, aes(CellIDs, Beta)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + ylab("β diversity") + ylim(0.3, 1.0) + xlab("Mountain Cell IDs") + theme_minimal() +  theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
 BetaMountScatterplot
 ```
 
@@ -232,10 +232,10 @@ BetaMatch <- BetaBound[BetaBound$CellIDs %in% BetaMountVec, ]
 BetaMatchVec <- BetaMatch[, "CellIDs"]
 BetaLowland <- BetaBound[!BetaBound$CellIDs %in% BetaMatchVec, ]
 
-BetaLowlandScatterplot <- ggplot(BetaLowland, aes(CellIDs, Beta)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + ylab("β diversity") + ylim(0.3, 1.0) + xlab("Lowland Cell IDs") + theme_minimal() 
+BetaLowlandScatterplot <- ggplot(BetaLowland, aes(CellIDs, Beta)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + ylab("β diversity") + ylim(0.3, 1.0) + xlab("Lowland Cell IDs") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
 BetaLowlandScatterplot
 
-png("BetaMountainLowlandScatter.png", width = 1000, height = 1000, pointsize = 20)
+png("Figures/BetaMountainLowlandScatter.png", width = 1000, height = 1000, pointsize = 20)
 grid.arrange(BetaMountScatterplot, BetaLowlandScatterplot, ncol=1)
 dev.off()
 ```
@@ -259,7 +259,7 @@ RichnessMap <- ggplot() + geom_tile(data=RichnessDF, aes(x=Longitude, y=Latitude
   theme(legend.text=element_text(size=20), legend.title=element_text(size=32))
 RichnessMap
 
-png("alpha.png", width = 1000, height = 1000, pointsize = 30)
+png("Figures/alpha.png", width = 1000, height = 1000, pointsize = 30)
 RichnessMap
 dev.off()
 ```
@@ -276,21 +276,18 @@ colnames(AlphaLongLat) <- c("Alpha", "Longitude", "Latitude")
 
 #Map alpha and beta diversity side-by-side and save as png
 ```{r}
-png("bothmaps.png", width = 1000, height = 1000, pointsize = 20)
+png("Figures/bothmaps.png", width = 1000, height = 1000, pointsize = 20)
 grid.arrange(RichnessMap, BetaMap, ncol=2)
 dev.off()
 ```
 
 #Alpha diversity by latitude
 ```{r}
-AlphaLongLat$pc <- predict(prcomp(~Latitude+Alpha, AlphaLongLat))[,1]
-cols2 <- (wes_palette("Zissou1", 1, type = "continuous"))
-
 theme_set(theme_gray())
 AlphaScatterplot <- ggplot(AlphaLongLat, aes(Latitude, Alpha)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "orangered2") + ylab("α diversity") + xlab(" ") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.text.y = element_text(size=20), axis.text.x = element_text(size=0))
 AlphaScatterplot
 
-png("AlphaBetaScatter.png", width = 1000, height = 1000, pointsize = 20)
+png("Figures/AlphaBetaScatter.png", width = 1000, height = 1000, pointsize = 20)
 grid.arrange(AlphaScatterplot, BetaScatterplot, ncol=1)
 dev.off()
 ```
@@ -302,10 +299,10 @@ AlphaMount <- extract(RichnessRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
 colnames(AlphaMount) <- c("ID", "CellIDs", "Alpha")
 AlphaBoundVec <- AlphaMount[, "CellIDs"]
 
-AlphaMountScatterplot <- ggplot(AlphaMount, aes(CellIDs, Alpha)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "red3") + ylab("α diversity") + ylim (0, 800) + xlab("Mountain Cell IDs") + theme_minimal()
+AlphaMountScatterplot <- ggplot(AlphaMount, aes(CellIDs, Alpha)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "goldenrod2") + ylab("α diversity") + ylim (0, 800) + xlab("Mountain Cell IDs") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
 AlphaMountScatterplot
 
-png("AlphaBetaMountScatter.png", width = 1000, height = 1000, pointsize = 20)
+png("Figures/AlphaBetaMountScatter.png", width = 1000, height = 1000, pointsize = 20)
 grid.arrange(AlphaMountScatterplot, BetaMountScatterplot, ncol = 1)
 dev.off()
 ```
@@ -320,27 +317,12 @@ AlphaMatch <- AlphaBound[AlphaBound$CellIDs %in% AlphaBoundVec, ]
 AlphaMatchVec <- AlphaMatch[, "CellIDs"]
 AlphaLowland <- AlphaBound[!AlphaBound$CellIDs %in% AlphaMatchVec, ]
 
-AlphaLowlandScatterplot <- ggplot(AlphaLowland, aes(CellIDs, Alpha)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "red3") + ylab("α diversity") + ylim(0, 800) + xlab("Lowland Cell IDs") + theme_minimal() 
+AlphaLowlandScatterplot <- ggplot(AlphaLowland, aes(CellIDs, Alpha)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "goldenrod2") + ylab("α diversity") + ylim(0, 800) + xlab("Lowland Cell IDs") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
 AlphaLowlandScatterplot
 
-png("AlphaMountainLowlandScatter.png", width = 1000, height = 1000, pointsize = 20)
+png("Figures/AlphaMountainLowlandScatter.png", width = 1000, height = 1000, pointsize = 20)
 grid.arrange(AlphaMountScatterplot, AlphaLowlandScatterplot, ncol=1)
 dev.off()
 ```
 
-
-
-
-
-#Plot Jaccard index against Sorensen (both are SIMILARITY)
-```{r}
-SorBetaVec <- readRDS("Data/SorBetaVec.rds")
-SorBetaVec[SorBetaVec<0]<-NA
-BetaVec[BetaVec<0]<-NA
-
-plot(BetaVec, ylab = "β-diversity", xlab = "Cell ID", col="darkgoldenrod2")
-points(SorBetaVec, col="cadetblue4")
-legend("bottomright", legend=c("Jaccard", "Sorensen"),
-        fill=c("darkgoldenrod2","cadetblue4"), horiz=FALSE, cex=0.9)
-```
 

@@ -1,6 +1,6 @@
 ---
 title: "Analysis of Bryophyte Richness and Diversity in the Americas"
-author: Carter Powell, Jackie O'Malley, and Julia Eckberg
+author: Carter Powell, Jkie O'Malley, and Julia Eckberg
 output: html_notebook
 ---
 
@@ -31,7 +31,7 @@ CellVec <- c(1:15038)
 ```
 
 
-#Identify occupied cells that are adjacent to each occuppied cell + convert to vector
+#Identify occupied cells that are adJent to each occuppied cell + convert to vector
 ```{r}
 neighbor <- function(CellVec) {(adjacent(BlankRas, CellVec, directions=8, pairs=FALSE, target=CellID, sorted=TRUE, include=FALSE, id=FALSE))}
 Neighbors <- lapply(CellVec, neighbor)
@@ -98,8 +98,6 @@ BetaVec <- rep(0, 15038)
 BetaVec[Cell8]<-Beta8Vec
 BetaVec[Cell7]<-Beta7Vec
 BetaVec[BetaVec==0]<-NA
-
-plot(BetaVec, ylab = "Mean Pairwise β-Diversity", xlab = "Cell ID")
 ```
 
 
@@ -136,21 +134,23 @@ RawBetaMap
 
 #Subset beta values above 0.5 and convert to long-lat
 ```{r}
-JacBetaVec <- rep(0, 15038)
-JacBetaVec[Cell8]<-Beta8Vec
-JacBetaVec[Cell7]<-Beta7Vec
-JacBetaVec[JacBetaVec==0]<-NA
-JacBetaVec[JacBetaVec<0.5]<-NA
+LongLatBetaVec <- rep(0, 15038)
+LongLatBetaVec[Cell8]<-Beta8Vec
+LongLatBetaVec[Cell7]<-Beta7Vec
+LongLatBetaVec[LongLatBetaVec==0]<-NA
+LongLatBetaVec[LongLatBetaVec<0]<-NA
 
-JacBetaRaster <- setValues(BlankRas, JacBetaVec)
-JacBetaPoints<-rasterToPoints(JacBetaRaster)
+LongLatBetaRaster <- setValues(BlankRas, LongLatBetaVec)
+LongLatBetaPoints<-rasterToPoints(LongLatBetaRaster)
+LongLatBetaDF <- data.frame(LongLatBetaPoints)
+colnames(LongLatBetaDF) <- c("Longitude", "Latitude", "Beta")
 
-JacBetaDF <- data.frame(JacBetaPoints)
-colnames(JacBetaDF) <- c("Longitude", "Latitude", "Beta")
+coordinates(LongLatBetaDF) <- ~Longitude+Latitude 
+proj4string(LongLatBetaDF) <- CRS("+proj=utm +zone=10") 
+BetaLongLat <- spTransform(LongLatBetaDF, CRS("+proj=longlat")) 
+LongLatBetaDF <- data.frame(BetaLongLat)
+LongLatBetaDF[c("Longitude", "Latitude", "Beta")]
 
-coordinates(JacBetaDF) <- ~Longitude+Latitude 
-proj4string(JacBetaDF) <- CRS("+proj=utm +zone=10") 
-BetaLongLat <- spTransform(JacBetaDF, CRS("+proj=longlat")) 
 BetaLongLat <- data.frame(BetaLongLat)
 colnames(BetaLongLat) <- c("Beta", "Longitude", "Latitude")
 ```
@@ -169,7 +169,7 @@ BetaScatterplot
 
 
 #Map low beta values
-```{r}
+```{r,warning=FALSE}
 LowBetaVec <- rep(0, 15038)
 LowBetaVec[Cell8]<-Beta8Vec
 LowBetaVec[Cell7]<-Beta7Vec
@@ -185,7 +185,6 @@ theme_set(theme_void())
 LowBetaMap <- gplot(LowBetaRaster, maxpixels=15038) +  geom_tile(aes(fill = value)) + 
     scale_fill_gradientn(colours="black", na.value="transparent", limits = c(0,1)) + theme(legend.position = "none") + 
     coord_equal() 
-LowBetaMap
 ```
 
 
@@ -212,40 +211,12 @@ dev.off()
 ```
 
 
-#Scatterplot of beta diversity values of cells whose centers are within mountainous regions 
-```{r, warning = FALSE}
-BetaMount <- extract(BetaRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
-colnames(BetaMount) <- c("ID", "CellIDs", "Beta")
-BetaMountVec <- BetaMount[, "CellIDs"]
-
-BetaMountScatterplot <- ggplot(BetaMount, aes(CellIDs, Beta)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + ylab("β diversity") + ylim(0.3, 1.0) + xlab("Mountain Cell IDs") + theme_minimal() +  theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
-BetaMountScatterplot
-```
-
-
-#Scatterplot of beta diversity values of cells in lowland areas 
-```{r, warning = FALSE}
-BetaBound <- extract(BetaRaster, nw_bound, df = TRUE, cellnumbers = TRUE)
-colnames(BetaBound) <- c("ID", "CellIDs", "Beta")
-
-BetaMatch <- BetaBound[BetaBound$CellIDs %in% BetaMountVec, ]
-BetaMatchVec <- BetaMatch[, "CellIDs"]
-BetaLowland <- BetaBound[!BetaBound$CellIDs %in% BetaMatchVec, ]
-
-BetaLowlandScatterplot <- ggplot(BetaLowland, aes(CellIDs, Beta)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + ylab("β diversity") + ylim(0.3, 1.0) + xlab("Lowland Cell IDs") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
-BetaLowlandScatterplot
-
-png("Figures/BetaMountainLowlandScatter.png", width = 1000, height = 1000, pointsize = 20)
-grid.arrange(BetaMountScatterplot, BetaLowlandScatterplot, ncol=1)
-dev.off()
-```
-
-
 #Map richness (alpha diversity)
 ```{r, warning=FALSE}
 RichnessVec <- readRDS("Data/RichnessVec.rds")
 RichnessVec[which(RichnessVec==0)]=NA
 RichnessRaster <- setValues(BlankRas, RichnessVec)
+saveRDS(RichnessRaster, "Data/RichnessRaster.rds")
 
 RichnessDF <- rasterToPoints(RichnessRaster)
 RichnessDF <- data.frame(RichnessDF)
@@ -274,12 +245,14 @@ AlphaLongLat <- data.frame(AlphaLongLat)
 colnames(AlphaLongLat) <- c("Alpha", "Longitude", "Latitude")
 ```
 
+
 #Map alpha and beta diversity side-by-side and save as png
 ```{r}
 png("Figures/bothmaps.png", width = 1000, height = 1000, pointsize = 20)
 grid.arrange(RichnessMap, BetaMap, ncol=2)
 dev.off()
 ```
+
 
 #Alpha diversity by latitude
 ```{r}
@@ -289,39 +262,6 @@ AlphaScatterplot
 
 png("Figures/AlphaBetaScatter.png", width = 1000, height = 1000, pointsize = 20)
 grid.arrange(AlphaScatterplot, BetaScatterplot, ncol=1)
-dev.off()
-```
-
-
-#Scatterplot of alpha diversity values of cells whose centers are within mountainous regions 
-```{r, warning = FALSE}
-AlphaMount <- extract(RichnessRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
-colnames(AlphaMount) <- c("ID", "CellIDs", "Alpha")
-AlphaBoundVec <- AlphaMount[, "CellIDs"]
-
-AlphaMountScatterplot <- ggplot(AlphaMount, aes(CellIDs, Alpha)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "goldenrod2") + ylab("α diversity") + ylim (0, 800) + xlab("Mountain Cell IDs") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
-AlphaMountScatterplot
-
-png("Figures/AlphaBetaMountScatter.png", width = 1000, height = 1000, pointsize = 20)
-grid.arrange(AlphaMountScatterplot, BetaMountScatterplot, ncol = 1)
-dev.off()
-```
-
-
-#Scatterplot of alpha diversity values of cells in lowland areas 
-```{r, warning = FALSE}
-AlphaBound <- extract(RichnessRaster, nw_bound, df = TRUE, cellnumbers = TRUE)
-colnames(AlphaBound) <- c("ID", "CellIDs", "Alpha")
-
-AlphaMatch <- AlphaBound[AlphaBound$CellIDs %in% AlphaBoundVec, ]
-AlphaMatchVec <- AlphaMatch[, "CellIDs"]
-AlphaLowland <- AlphaBound[!AlphaBound$CellIDs %in% AlphaMatchVec, ]
-
-AlphaLowlandScatterplot <- ggplot(AlphaLowland, aes(CellIDs, Alpha)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "goldenrod2") + ylab("α diversity") + ylim(0, 800) + xlab("Lowland Cell IDs") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
-AlphaLowlandScatterplot
-
-png("Figures/AlphaMountainLowlandScatter.png", width = 1000, height = 1000, pointsize = 20)
-grid.arrange(AlphaMountScatterplot, AlphaLowlandScatterplot, ncol=1)
 dev.off()
 ```
 

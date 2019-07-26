@@ -21,7 +21,6 @@ require(rgdal)
 
 #Load blank raster and cell richness data + extract cell IDs and create vector for all cells
 #Change file for BetaMat and CellRichness depending on if you want to map bryophytes, mosses, liverworts, etc. 
-
 ```{r}
 BlankRas <-raster("Data/blank_100km_raster.tif")
 BetaMat <- readRDS("Data/BetaMat.rds")

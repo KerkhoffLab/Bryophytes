@@ -1,21 +1,32 @@
 ---
 title: "Subsetting Mountains and Lowlands"
-author: "us"
+author: "Jackie O'Malley '21 and Julia Eckberg '21"
 date: "7/25/2019"
 output: html_document
 ---
 
-#Add continental and mountainous outlines
-```{r, message=FALSE}
+```{r, message = FALSE}
+require(sp)
+require(raster)
+require(ggplot2)
+require(gridExtra)
+require(rgdal)
+```
+
+
+#Add continental and mountainous region outlines
+```{r, message = FALSE}
 nw_mount <- shapefile("Data/MapOutlines/Mountains/Koeppen-Geiger_biomes.shp")
 nw_bound <- shapefile("Data/MapOutlines/Global_bound/Koeppen-Geiger_biomes.shp")
 
 LongLatBetaRaster <- readRDS("Data/LongLatBetaRaster.rds")
 RichnessRaster <- readRDS("Data/RichnessRaster.rds")
+BlankRas <-raster("Data/blank_100km_raster.tif")
+CellVec <- c(1:15038)
 ```
 
 
-#Creates dataframe including coordinates for each
+#Creates dataframe including coordinates for each cell
 ```{r}
 LongLatRaster <- setValues(BlankRas, CellVec)
 LongLatPoints<-rasterToPoints(LongLatRaster)
@@ -36,13 +47,14 @@ saveRDS(LongLatDF, "Data/LongLatDF.rds")
 ```{r, warning = FALSE}
 LongLatDF <- readRDS("Data/LongLatDF.rds")
 BetaMount <- extract(LongLatBetaRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
-BetaMount <- subset(BetaMount, select = -c(ID))
 
-colnames(BetaMount) <- c("CellID", "Beta")
+colnames(BetaMount) <- c("Type", "CellID", "Beta")
+BetaMount$Type <- "Mountain"
+
 BetaMountVec <- BetaMount$CellID
 BetaMount <- merge(BetaMount, LongLatDF)
 
-BetaMountScatterplot <- ggplot(BetaMount, aes(Latitude, Beta)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "goldenrod2") + ylab("Mountainous β diversity") + ylim(0.3, 1.0) + xlab("Latitude") + theme_minimal() +  theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
+BetaMountScatterplot <- ggplot() + geom_point(data = BetaMount, aes(Latitude, Beta), shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "goldenrod2") + ylab("Mountainous β diversity") + ylim(0.3, 1.0) + xlab("Latitude") + theme_minimal() +  theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
 BetaMountScatterplot
 ```
 
@@ -52,24 +64,46 @@ BetaMountScatterplot
 LongLatDF <- readRDS("Data/LongLatDF.rds")
 
 BetaBound <- extract(LongLatBetaRaster, nw_bound, df = TRUE, cellnumbers = TRUE)
-BetaBound <- subset(BetaBound, select = -c(ID))
-colnames(BetaBound) <- c("CellID", "Beta")
+colnames(BetaBound) <- c("Type", "CellID", "Beta")
 
 BetaMatch <- BetaBound[BetaBound$CellID %in% BetaMountVec, ]
 BetaMatchVec <- BetaMatch[, "CellID"]
 BetaLowland <- BetaBound[!BetaBound$CellID %in% BetaMatchVec, ]
 
+BetaLowland$Type <- "Lowland"
+
 BetaLowlandVec <- BetaLowland$CellID
 BetaLowland <- merge(BetaLowland, LongLatDF)
 
-BetaLowlandScatterplot <- ggplot(BetaLowland, aes(Latitude, Beta)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + ylab("β diversity") + ylim(0.3, 1.0) + xlab("Latitude") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
+BetaLowlandScatterplot <- ggplot() + geom_point(data = BetaLowland, aes(Latitude, Beta), shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + ylab("β diversity") + ylim(0.3, 1.0) + xlab("Latitude") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
 BetaLowlandScatterplot
 
-png("Figures/BetaMountainLowlandScatter.png", width = 1000, height = 1000, pointsize = 20)
+png("Figures/BetaMountainLowlandScatter.png", width = 1500, height = 1000, pointsize = 20)
 grid.arrange(BetaMountScatterplot, BetaLowlandScatterplot, ncol=1)
 dev.off()
 ```
 
+
+#Beta scatterplots combined
+```{r, warning = FALSE}
+FullBeta <- rbind(BetaMount, BetaLowland)
+
+BetaScatter <- ggplot(data = FullBeta, aes(Latitude, Beta, color=Type)) + geom_point(shape = 16, size = 7, show.legend = TRUE, alpha=0.5) + ylab("β diversity") + ylim(0.5, 1.0) + 
+ xlab("Latitude") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20), legend.text = element_text(size=20), legend.title = element_text(size=25)) + scale_color_manual(values = c("cyan4", "goldenrod2")) 
+
+BetaScatter
+png("Figures/BetaScatter.png", width = 1500, height = 1000, pointsize = 20)
+BetaScatter
+dev.off()
+
+BetaSmooth <- ggplot(data = FullBeta, aes(Latitude, Beta, color=Type)) + geom_smooth(shape = 16, size = 5, show.legend = TRUE, alpha = 0.9) + ylab("β diversity") + ylim(0.5, 1.0) + 
+ xlab("Latitude") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20), legend.text = element_text(size=20), legend.title = element_text(size=25)) + scale_color_manual(values = c("cyan4", "goldenrod2")) 
+BetaSmooth
+
+png("Figures/BetaSmooth.png", width = 1500, height = 1000, pointsize = 20)
+BetaSmooth
+dev.off()
+```
 
 
 #Scatterplot of alpha diversity values of cells whose centers are within mountainous regions 
@@ -77,8 +111,10 @@ dev.off()
 LongLatDF <- readRDS("Data/LongLatDF.rds")
 
 AlphaMount <- extract(RichnessRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
-AlphaMount <- subset(AlphaMount, select = -c(ID))
-colnames(AlphaMount) <- c("CellID", "Alpha")
+
+colnames(AlphaMount) <- c("Type", "CellID", "Alpha")
+AlphaMount$Type <- "Mountain"
+
 AlphaBoundVec <- AlphaMount[, "CellID"]
 AlphaMount <- merge(AlphaMount, LongLatDF)
 
@@ -96,12 +132,13 @@ dev.off()
 LongLatDF <- readRDS("Data/LongLatDF.rds")
 
 AlphaBound <- extract(RichnessRaster, nw_bound, df = TRUE, cellnumbers = TRUE)
-AlphaBound <- subset(AlphaBound, select = -c(ID))
-colnames(AlphaBound) <- c("CellID", "Alpha")
+colnames(AlphaBound) <- c("Type", "CellID", "Alpha")
 
 AlphaMatch <- AlphaBound[AlphaBound$CellID %in% AlphaBoundVec, ]
 AlphaMatchVec <- AlphaMatch[, "CellID"]
 AlphaLowland <- AlphaBound[!AlphaBound$CellID %in% AlphaMatchVec, ]
+
+AlphaLowland$Type <- "Lowland"
 
 AlphaLowlandVec <- AlphaLowland$CellID
 AlphaLowland <- merge(AlphaLowland, LongLatDF)
@@ -113,3 +150,26 @@ png("Figures/AlphaMountainLowlandScatter.png", width = 1000, height = 1000, poin
 grid.arrange(AlphaMountScatterplot, AlphaLowlandScatterplot, ncol=1)
 dev.off()
 ```
+
+
+#Alpha scatterplots combined
+```{r, warning = FALSE}
+FullAlpha <- rbind(AlphaMount, AlphaLowland)
+
+AlphaScatter <- ggplot(data = FullAlpha, aes(Latitude, Alpha, color=Type)) + geom_point(shape = 16, size = 7, show.legend = TRUE, alpha=0.5) + ylab("α diversity") + ylim(0, 800) + 
+ xlab("Latitude") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20), legend.text = element_text(size=20), legend.title = element_text(size=25)) + scale_color_manual(values = c("cyan4", "goldenrod2")) 
+AlphaScatter
+
+png("Figures/AlphaScatter.png", width = 1500, height = 1000, pointsize = 20)
+AlphaScatter
+dev.off()
+
+AlphaSmooth <- ggplot(data = FullAlpha, aes(Latitude, Alpha, color=Type)) + geom_smooth(size = 2, show.legend = TRUE) + ylab("α diversity") + ylim(0, 800) + 
+ xlab("Latitude") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20), legend.text = element_text(size=20), legend.title = element_text(size=25)) + scale_color_manual(values = c("cyan4", "goldenrod2")) 
+AlphaSmooth
+
+png("Figures/AlphaSmooth.png", width = 1500, height = 1000, pointsize = 20)
+AlphaSmooth
+dev.off()
+```
+

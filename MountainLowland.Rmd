@@ -93,10 +93,7 @@ BetaScatter <- ggplot(data = FullBeta, aes(Latitude, Beta, color=Type)) +
   ylab("β diversity") + ylim(0.5, 1.0) + xlab("Latitude") + 
   theme_minimal() + theme(axis.title.y = element_text(size=40), axis.title.x = element_text(size=40),  
                           axis.text = element_text(size=20), legend.text = element_text(size=32), 
-                          legend.position = "bottom", legend.title = element_blank(), 
-                            legend.background = element_rect(fill="white",
-                                  size=0.5, linetype="solid", 
-                                  colour ="black")) + 
+                          legend.position = "bottom", legend.title = element_blank()) + 
   scale_color_manual(values = c("cyan4", "goldenrod2")) + geom_smooth(size = 2, show.legend = FALSE)
 BetaScatter
 ```

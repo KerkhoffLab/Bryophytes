@@ -88,21 +88,17 @@ dev.off()
 ```{r, warning = FALSE}
 FullBeta <- rbind(BetaMount, BetaLowland)
 
-BetaScatter <- ggplot(data = FullBeta, aes(Latitude, Beta, color=Type)) + geom_point(shape = 16, size = 7, show.legend = TRUE, alpha=0.5) + ylab("β diversity") + ylim(0.5, 1.0) + 
- xlab("Latitude") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20), legend.text = element_text(size=20), legend.title = element_text(size=25)) + scale_color_manual(values = c("cyan4", "goldenrod2")) 
-
+BetaScatter <- ggplot(data = FullBeta, aes(Latitude, Beta, color=Type)) + 
+  geom_point(shape = 16, size = 3, alpha=0.8) + 
+  ylab("β diversity") + ylim(0.5, 1.0) + xlab("Latitude") + 
+  theme_minimal() + theme(axis.title.y = element_text(size=40), axis.title.x = element_text(size=40),  
+                          axis.text = element_text(size=20), legend.text = element_text(size=32), 
+                          legend.position = "bottom", legend.title = element_blank(), 
+                            legend.background = element_rect(fill="white",
+                                  size=0.5, linetype="solid", 
+                                  colour ="black")) + 
+  scale_color_manual(values = c("cyan4", "goldenrod2")) + geom_smooth(size = 2, show.legend = FALSE)
 BetaScatter
-png("Figures/BetaScatter.png", width = 1500, height = 1000, pointsize = 20)
-BetaScatter
-dev.off()
-
-BetaSmooth <- ggplot(data = FullBeta, aes(Latitude, Beta, color=Type)) + geom_smooth(shape = 16, size = 5, show.legend = TRUE, alpha = 0.9) + ylab("β diversity") + ylim(0.5, 1.0) + 
- xlab("Latitude") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20), legend.text = element_text(size=20), legend.title = element_text(size=25)) + scale_color_manual(values = c("cyan4", "goldenrod2")) 
-BetaSmooth
-
-png("Figures/BetaSmooth.png", width = 1500, height = 1000, pointsize = 20)
-BetaSmooth
-dev.off()
 ```
 
 
@@ -156,20 +152,18 @@ dev.off()
 ```{r, warning = FALSE}
 FullAlpha <- rbind(AlphaMount, AlphaLowland)
 
-AlphaScatter <- ggplot(data = FullAlpha, aes(Latitude, Alpha, color=Type)) + geom_point(shape = 16, size = 7, show.legend = TRUE, alpha=0.5) + ylab("α diversity") + ylim(0, 800) + 
- xlab("Latitude") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20), legend.text = element_text(size=20), legend.title = element_text(size=25)) + scale_color_manual(values = c("cyan4", "goldenrod2")) 
+AlphaScatter <- ggplot(data = FullAlpha, aes(Latitude, Alpha, color=Type)) + 
+  geom_point(shape = 16, size = 3, show.legend=FALSE, alpha=0.8) + 
+  ylab("α diversity") + ylim(0, 800) +
+  theme_minimal() + theme(axis.title.y = element_text(size=40), axis.title.x = element_blank(),  
+                          axis.text = element_text(size=20)) + 
+  scale_color_manual(values = c("cyan4", "goldenrod2")) + geom_smooth(size = 2, show.legend = FALSE)
 AlphaScatter
-
-png("Figures/AlphaScatter.png", width = 1500, height = 1000, pointsize = 20)
-AlphaScatter
-dev.off()
-
-AlphaSmooth <- ggplot(data = FullAlpha, aes(Latitude, Alpha, color=Type)) + geom_smooth(size = 2, show.legend = TRUE) + ylab("α diversity") + ylim(0, 800) + 
- xlab("Latitude") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20), legend.text = element_text(size=20), legend.title = element_text(size=25)) + scale_color_manual(values = c("cyan4", "goldenrod2")) 
-AlphaSmooth
-
-png("Figures/AlphaSmooth.png", width = 1500, height = 1000, pointsize = 20)
-AlphaSmooth
-dev.off()
 ```
 
+#SAVE ALPHA AND BETA SCATTERPLOTS :)
+```{r}
+png("Figures/SCATTER.png", width = 1250, height = 1000, pointsize = 20)
+grid.arrange(AlphaScatter, BetaScatter, ncol=1)
+dev.off()
+```

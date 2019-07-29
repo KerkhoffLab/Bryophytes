@@ -1,6 +1,6 @@
 ---
 title: "Analysis of Bryophyte Richness and Diversity in the Americas"
-author: Carter Powell, Jkie O'Malley, and Julia Eckberg
+author: Carter Powell, Jackie O'Malley, and Julia Eckberg
 output: html_notebook
 ---
 

@@ -11,6 +11,7 @@ require(raster)
 require(ggplot2)
 require(gridExtra)
 require(rgdal)
+require(forcats)
 ```
 
 
@@ -64,13 +65,20 @@ BetaMountScatterplot <- ggplot() + geom_point(data = BetaMount, aes(Latitude, Be
 BetaMountScatterplot
 ```
 
-#Bin mountains by 10 degrees
+#Bin mountains by hemisphere (beta)
+```{r}
+BetaMount$BinHem = cut(BetaMount$Latitude,c(-70,0,70), labels = c("Southern Mountains", "Northern Mountains"))
+table(BetaMount$BinHem)
+```
+
+
+#Bin mountains by 10 degrees (beta)
 ```{r}
 BetaMount$Bin10 = cut(BetaMount$Latitude,c(-70,-60,-50,-40,-30,-20,-10,0,10,20,30,40,50,60), labels = c("1M", "2M", "3M", "4M", "5M", "6M", "7M", "8M", "9M", "10M", "11M", "12M", "13M"))
 table(BetaMount$Bin10)
 ```
 
-#Bin mountains by 5 degrees
+#Bin mountains by 5 degrees  (beta)
 ```{r}
 BetaMount$Bin5 = cut(BetaMount$Latitude,c(-70,-65,-60,-55,-50,-45,-40,-35,-30,-25,-20,-15,-10,-5,0,5,10,15,20,25,30,35,40,45,50,55), labels = c("1M", "2M", "3M", "4M", "5M", "6M", "7M", "8M", "9M", "10M", "11M", "12M", "13M", "14M", "15M", "16M", "17M", "18M", "19M", "20M", "21M", "22M", "23M", "24M", "25M"))
 table(BetaMount$Bin5)
@@ -100,22 +108,45 @@ grid.arrange(BetaMountScatterplot, BetaLowlandScatterplot, ncol=1)
 dev.off()
 ```
 
-#Bin lowlands by 10 degrees
+#Bin lowlands by hemisphere (beta)
+```{r}
+BetaLowland$BinHem = cut(BetaLowland$Latitude,c(-70,0,70), labels = c("Southern Lowlands", "Northern Lowlands"))
+table(BetaLowland$BinHem)
+```
+
+#Bin lowlands by 10 degrees (beta)
 ```{r}
 BetaLowland$Bin10 = cut(BetaLowland$Latitude,c(-70,-60,-50,-40,-30,-20,-10,0,10,20,30,40,50,60), labels = c("1L", "2L", "3L", "4L", "5L", "6L", "7L", "8L", "9L", "10L", "11L", "12L", "13L"))
 table(BetaLowland$Bin10)
 ```
 
-#Bin lowlands by 5 degrees
+#Bin lowlands by 5 degrees (beta)
 ```{r}
 BetaLowland$Bin5 = cut(BetaLowland$Latitude,c(-65,-60,-55,-50,-45,-40,-35,-30,-25,-20,-15,-10,-5,0,5,10,15,20,25,30,35,40,45,50,55,60), labels = c("2L", "3L", "4L", "5L", "6L", "7L", "8L", "9L", "10L", "11L", "12L", "13L", "14L", "15L", "16L", "17L", "18L", "19L", "20L", "21L", "22L", "23L", "24L", "25L", "26L"))
 table(BetaLowland$Bin5)
 ```
 
-
-#BoxPlots
+#Beta hemispheres boxplot
 ```{r}
-require(forcats)
+FullBeta <- rbind(BetaMount, BetaLowland)
+reorderedhem <- fct_relevel(FullBeta$BinHem, "Northern Lowlands", "Northern Mountains", "Southern Lowlands", "Southern Mountains")
+
+BetaBoxPlotH <- ggplot(data = FullBeta, aes(reorderedhem, Beta, fill=Type)) + 
+  geom_boxplot() + 
+  ylab("β diversity") + ylim(0, 0.5) + xlab("Latitude") + 
+  theme_minimal() + theme(axis.title.y = element_text(size=48), axis.title.x = element_text(size=48),  
+                          axis.text.x = element_blank(), axis.text.y = element_text(size=40), legend.text = element_text(size=40), 
+                          legend.position = "bottom", legend.title = element_blank()) + labs(x = "Northern Hemisphere                                          Southern Hemisphere") +
+  scale_fill_manual(values = c("cyan4", "goldenrod2"))
+BetaBoxPlotH
+
+png("Figures/BetaBoxPlotH.png", width = 2000, height = 1000, pointsize = 20)
+BetaBoxPlotH
+dev.off()
+```
+
+#Beta boxplot
+```{r}
 FullBeta <- rbind(BetaMount, BetaLowland)
 
 reordered10 <- fct_relevel(FullBeta$Bin10, "1L", "1M","2L", "2M", "3L", "3M", "4L", "4M", "5L", "5M", "6L", "6M", "7L", "7M", "8L", "8M","9L", "9M", "10L", "10M", "11L", "11M", "12L", "12M", "13L", "13M")
@@ -172,8 +203,13 @@ grid.arrange(AlphaMountScatterplot, BetaMountScatterplot, ncol = 1)
 dev.off()
 ```
 
+#Bin mountains by hemisphere (alpha)
+```{r}
+AlphaMount$BinHem = cut(AlphaMount$Latitude,c(-70,0,70), labels = c("Southern Mountains", "Northern Mountains"))
+table(AlphaMount$BinHem)
+```
 
-#Bin mountains by 5 degrees
+#Bin mountains by 5 degrees (alpha)
 ```{r}
 AlphaMount$Bin5 = cut(AlphaMount$Latitude,c(-70,-65,-60,-55,-50,-45,-40,-35,-30,-25,-20,-15,-10,-5,0,5,10,15,20,25,30,35,40,45,50,55), labels = c("1M", "2M", "3M", "4M", "5M", "6M", "7M", "8M", "9M", "10M", "11M", "12M", "13M", "14M", "15M", "16M", "17M", "18M", "19M", "20M", "21M", "22M", "23M", "24M", "25M"))
 table(AlphaMount$Bin5)
@@ -205,15 +241,38 @@ grid.arrange(AlphaMountScatterplot, AlphaLowlandScatterplot, ncol=1)
 dev.off()
 ```
 
+#Bin lowlands by hemisphere (beta)
+```{r}
+AlphaLowland$BinHem = cut(AlphaLowland$Latitude,c(-70,0,70), labels = c("Southern Lowlands", "Northern Lowlands"))
+table(AlphaLowland$BinHem)
+```
 
-#Bin lowlands by 5 degrees
+#Bin lowlands by 5 degrees (alpha)
 ```{r}
 AlphaLowland$Bin5 = cut(AlphaLowland$Latitude,c(-65,-60,-55,-50,-45,-40,-35,-30,-25,-20,-15,-10,-5,0,5,10,15,20,25,30,35,40,45,50,55,60), labels = c("2L", "3L", "4L", "5L", "6L", "7L", "8L", "9L", "10L", "11L", "12L", "13L", "14L", "15L", "16L", "17L", "18L", "19L", "20L", "21L", "22L", "23L", "24L", "25L", "26L"))
 table(AlphaLowland$Bin5)
 ```
 
+#Alpha hemispheres boxplot
+```{r}
+FullAlpha <- rbind(AlphaMount, AlphaLowland)
+reorderedhem <- fct_relevel(FullAlpha$BinHem, "Northern Lowlands", "Northern Mountains", "Southern Lowlands", "Southern Mountains")
 
-#Alpha boxplot
+AlphaBoxPlotH <- ggplot(data = FullAlpha, aes(reorderedhem, Alpha, fill=Type)) + 
+  geom_boxplot() + 
+  ylab("α diversity") + ylim(0, 800) + xlab("Latitude") + 
+  theme_minimal() + theme(axis.title.y = element_text(size=48), axis.title.x = element_blank(),  
+                          axis.text.x = element_blank(), axis.text.y = element_text(size=40), legend.text = element_blank(), 
+                          legend.position = c(0), legend.title = element_blank()) + 
+  scale_fill_manual(values = c("cyan4", "goldenrod2"))
+AlphaBoxPlotH
+
+png("Figures/HemispheresBoxPlot.png", width = 2000, height = 2000, pointsize = 20)
+grid.arrange(AlphaBoxPlotH, BetaBoxPlotH)
+dev.off()
+```
+
+#Alpha boxplots
 ```{r}
 FullAlpha <- rbind(AlphaMount, AlphaLowland)
 

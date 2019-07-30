@@ -87,7 +87,7 @@ names(Beta7) <- Cell7CH
 ```
 
 
-#Plot mean pairwise beta diversity by Cell ID
+#Plot mean pairwise beta diversity by Cell ID and convert to dissimilarity using 1-x where x is Jaccard similarity
 ```{r}
 Beta7Vec<-unlist(Beta7)
 Beta8Vec<-unlist(Beta8)
@@ -96,13 +96,15 @@ BetaVec <- rep(0, 15038)
 
 BetaVec[Cell8]<-Beta8Vec
 BetaVec[Cell7]<-Beta7Vec
+
 BetaVec[BetaVec==0]<-NA
+BetaVec <- 1-BetaVec
 ```
 
 
 #Create colorscheme
 ```{r}
-cols <- rev(wes_palette("Zissou1", 500, type = "continuous"))
+cols <- (wes_palette("Zissou1", 500, type = "continuous"))
 ```
 
 
@@ -131,13 +133,13 @@ RawBetaMap
 ```
 
 
-#Subset beta values above 0.5 and convert to long-lat
+#Convert UTM to longitude and latitude
 ```{r}
 LongLatBetaVec <- rep(0, 15038)
 LongLatBetaVec[Cell8]<-Beta8Vec
 LongLatBetaVec[Cell7]<-Beta7Vec
 LongLatBetaVec[LongLatBetaVec==0]<-NA
-LongLatBetaVec[LongLatBetaVec<0]<-NA
+LongLatBetaVec <- 1-LongLatBetaVec
 
 LongLatBetaRaster <- setValues(BlankRas, LongLatBetaVec)
 LongLatBetaPoints<-rasterToPoints(LongLatBetaRaster)
@@ -152,6 +154,8 @@ LongLatBetaDF[c("Longitude", "Latitude", "Beta")]
 
 BetaLongLat <- data.frame(BetaLongLat)
 colnames(BetaLongLat) <- c("Beta", "Longitude", "Latitude")
+
+saveRDS(LongLatBetaRaster, file="Data/LongLatBetaRaster.rds")
 ```
 
 
@@ -161,44 +165,45 @@ BetaLongLat$pc <- predict(prcomp(~Latitude+Beta, BetaLongLat))[,1]
 cols2 <- rev(wes_palette("Zissou1", 1, type = "continuous"))
 
 BetaLongLat
-BetaScatterplot <- ggplot(BetaLongLat, aes(Latitude, Beta)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "orangered2") + ylab("β diversity") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
+BetaScatterplot <- ggplot(BetaLongLat, aes(Latitude, Beta)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "orangered2") + ylab("β diversity") + ylim(0,0.5)+ theme_minimal() + theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
 
 BetaScatterplot
 ```
 
 
-#Map low beta values
+#Map outlier beta values (>0.5)
 ```{r,warning=FALSE}
-LowBetaVec <- rep(0, 15038)
-LowBetaVec[Cell8]<-Beta8Vec
-LowBetaVec[Cell7]<-Beta7Vec
-LowBetaVec[LowBetaVec==0]<-NA
-LowBetaVec[LowBetaVec>0.5]<-NA
+OutlierBetaVec <- rep(0, 15038)
+OutlierBetaVec[Cell8]<-Beta8Vec
+OutlierBetaVec[Cell7]<-Beta7Vec
+OutlierBetaVec[OutlierBetaVec==0]<-NA
+OutlierBetaVec[OutlierBetaVec>0.5]<-NA
 
-LowBetaRaster <- setValues(BlankRas, LowBetaVec)
-LowBetaPoints<-rasterToPoints(LowBetaRaster)
-LowBetaDF <- data.frame(LowBetaPoints)
-colnames(LowBetaDF) <- c("Longitude", "Latitude", "Beta")
+OutlierBetaRaster <- setValues(BlankRas, OutlierBetaVec)
+OutlierBetaPoints<-rasterToPoints(OutlierBetaRaster)
+OutlierBetaDF <- data.frame(OutlierBetaPoints)
+colnames(OutlierBetaDF) <- c("Longitude", "Latitude", "Beta")
 
 theme_set(theme_void())
-LowBetaMap <- gplot(LowBetaRaster, maxpixels=15038) +  geom_tile(aes(fill = value)) + 
+OutlierBetaMap <- gplot(OutlierBetaRaster, maxpixels=15038) +  geom_tile(aes(fill = value)) + 
     scale_fill_gradientn(colours="black", na.value="transparent", limits = c(0,1)) + theme(legend.position = "none") + 
     coord_equal() 
+OutlierBetaMap
 ```
 
 
-#Map beta diversity with values under 0.5 shown in dark grey (19 values are under 0.5)
+#Map beta diversity with values over 0.5 shown in dark grey (19 values are over 0.5)
 ```{r}
 source("Functions/gplot_data.R")
 gplotB<- gplot_data(BetaRaster)
-gplotLB<- gplot_data(LowBetaRaster)
+gplotOutlier<- gplot_data(OutlierBetaRaster)
 
 BetaMap <- ggplot() +
-  geom_tile(data = dplyr::filter(gplotLB, !is.na(value)), 
+  geom_tile(data = dplyr::filter(gplotOutlier, !is.na(value)), 
             aes(x = x, y = y), fill = "gray25") +
   geom_tile(data = gplotB, 
             aes(x = x, y = y, fill = value)) +
-  scale_fill_gradientn(name="β diversity", colours=cols, na.value="transparent", limits = c(0.5,1)) +
+  scale_fill_gradientn(name="β diversity", colours=cols, na.value="transparent", limits = c(0,0.5)) +
   coord_quickmap() + geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
   geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() +
   theme(legend.text=element_text(size=20), legend.title=element_text(size=32))

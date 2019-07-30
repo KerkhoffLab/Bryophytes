@@ -40,7 +40,6 @@ LongLatDF <- data.frame(LongLat)
 LongLatDF[c("Longitude", "Latitude", "CellID")]
 LongLatDF <- subset(LongLatDF, select = -c(optional))
 saveRDS(LongLatDF, "Data/LongLatDF.rds")
-
 ```
 
 #Binning
@@ -61,7 +60,7 @@ BetaMount$Type <- "Mountain"
 BetaMountVec <- BetaMount$CellID
 BetaMount <- merge(BetaMount, LongLatDF)
 
-BetaMountScatterplot <- ggplot() + geom_point(data = BetaMount, aes(Latitude, Beta), shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "goldenrod2") + ylab("Mountainous β diversity") + ylim(0.3, 1.0) + xlab("Latitude") + theme_minimal() +  theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
+BetaMountScatterplot <- ggplot() + geom_point(data = BetaMount, aes(Latitude, Beta), shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "goldenrod2") + ylab("Mountainous β diversity") + ylim(0, 0.6) + xlab("Latitude") + theme_minimal() +  theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
 BetaMountScatterplot
 ```
 
@@ -93,7 +92,7 @@ BetaLowland$Type <- "Lowland"
 BetaLowlandVec <- BetaLowland$CellID
 BetaLowland <- merge(BetaLowland, LongLatDF)
 
-BetaLowlandScatterplot <- ggplot() + geom_point(data = BetaLowland, aes(Latitude, Beta), shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + ylab("Lowland β diversity") + ylim(0.3, 1.0) + xlab("Latitude") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
+BetaLowlandScatterplot <- ggplot() + geom_point(data = BetaLowland, aes(Latitude, Beta), shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + ylab("Lowland β diversity") + ylim(0, 0.6) + xlab("Latitude") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
 BetaLowlandScatterplot
 
 png("Figures/BetaMountainLowlandScatter.png", width = 1500, height = 1000, pointsize = 20)
@@ -123,9 +122,9 @@ reordered10 <- fct_relevel(FullBeta$Bin10, "1L", "1M","2L", "2M", "3L", "3M", "4
 
 reordered5 <- fct_relevel(FullBeta$Bin5, "1M","2L", "2M", "3L", "3M", "4L", "4M", "5L", "5M", "6L", "6M", "7L", "7M", "8L", "8M","9L", "9M", "10L", "10M", "11L", "11M", "12L", "12M", "13L", "13M", "14L", "14M","15L", "15M", "16L", "16M", "17L", "17M", "18L", "18M", "19L", "19M", "20L", "20M", "21L", "21M","22L", "22M", "23L", "23M", "24L", "24M", "25L", "25M", "26L")
 
-BetaBoxPlot <- ggplot(data = FullBeta, aes(reordered10, Beta, fill=Type)) + 
+BetaBoxPlot <- ggplot(data = FullBeta, aes(reordered5, Beta, fill=Type)) + 
   geom_boxplot() + 
-  ylab("β diversity") + ylim(0.5, 1.0) + xlab("Latitude") + 
+  ylab("β diversity") + ylim(0, 0.6) + xlab("Latitude") + 
   theme_minimal() + theme(axis.title.y = element_text(size=40), axis.title.x = element_text(size=40),  
                           axis.text.x = element_blank(), axis.text.y = element_text(size=20), legend.text = element_text(size=32), 
                           legend.position = "bottom", legend.title = element_blank()) + 
@@ -144,7 +143,7 @@ FullBeta <- rbind(BetaMount, BetaLowland)
 
 BetaScatter <- ggplot(data = FullBeta, aes(Latitude, Beta, color=Type)) + 
   geom_point(shape = 16, size = 3, alpha=0.8) + 
-  ylab("β diversity") + ylim(0.5, 1.0) + xlab("Latitude") + 
+  ylab("β diversity") + ylim(0, 0.5) + xlab("Latitude") + 
   theme_minimal() + theme(axis.title.y = element_text(size=40), axis.title.x = element_text(size=40),  
                           axis.text = element_text(size=20), legend.text = element_text(size=32), 
                           legend.position = "bottom", legend.title = element_blank()) + 

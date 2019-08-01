@@ -22,7 +22,7 @@ RichnessVec <- readRDS("Data/RichnessVec.rds")
 BryophytePresence <- readRDS("Data/BryophytePresence.rds")
 
 #Set theme and colors for gplots
-cols <- rev(wes_palette("Zissou1", 500, type = "continuous"))
+cols <- (wes_palette("Zissou1", 500, type = "continuous"))
 theme_set(theme_void())
 
 
@@ -89,6 +89,7 @@ group.map("Mosses")
 group.map("Hornworts")
 group.map("Liverworts")
 
+species.map("Sphagnum magellanicum")
 
 #BRYOPHYTE RANGE MAP
 Range <- tally(group_by(BryophytePresence, Species))

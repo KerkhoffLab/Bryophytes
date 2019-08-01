@@ -134,9 +134,9 @@ reorderedhem <- fct_relevel(FullBeta$BinHem, "Northern Lowlands", "Northern Moun
 BetaBoxPlotH <- ggplot(data = FullBeta, aes(reorderedhem, Beta, fill=Type)) + 
   geom_boxplot() + 
   ylab("β diversity") + ylim(0, 0.5) + xlab("Latitude") + 
-  theme_minimal() + theme(axis.title.y = element_text(size=48), axis.title.x = element_text(size=48),  
-                          axis.text.x = element_blank(), axis.text.y = element_text(size=40), legend.text = element_text(size=40), 
-                          legend.position = "bottom", legend.title = element_blank()) + labs(x = "Northern Hemisphere                                          Southern Hemisphere") +
+  theme_minimal() + theme(axis.title.y = element_text(size=80), axis.title.x = element_text(size=80),  
+                          axis.text.x = element_blank(), axis.text.y = element_text(size=60), legend.text = element_text(size=60), 
+                          legend.position = "bottom", legend.title = element_blank()) + labs(x = "Northern Hemisphere       Southern Hemisphere") +
   scale_fill_manual(values = c("cyan4", "goldenrod2"))
 BetaBoxPlotH
 
@@ -261,8 +261,8 @@ reorderedhem <- fct_relevel(FullAlpha$BinHem, "Northern Lowlands", "Northern Mou
 AlphaBoxPlotH <- ggplot(data = FullAlpha, aes(reorderedhem, Alpha, fill=Type)) + 
   geom_boxplot() + 
   ylab("α diversity") + ylim(0, 800) + xlab("Latitude") + 
-  theme_minimal() + theme(axis.title.y = element_text(size=48), axis.title.x = element_blank(),  
-                          axis.text.x = element_blank(), axis.text.y = element_text(size=40), legend.text = element_blank(), 
+  theme_minimal() + theme(axis.title.y = element_text(size=80), axis.title.x = element_blank(),  
+                          axis.text.x = element_blank(), axis.text.y = element_text(size=60), legend.text = element_blank(), 
                           legend.position = c(0), legend.title = element_blank()) + 
   scale_fill_manual(values = c("cyan4", "goldenrod2"))
 AlphaBoxPlotH

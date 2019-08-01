@@ -188,11 +188,11 @@ theme_set(theme_void())
 OutlierBetaMap <- gplot(OutlierBetaRaster, maxpixels=15038) +  geom_tile(aes(fill = value)) + 
     scale_fill_gradientn(colours="black", na.value="transparent", limits = c(0,1)) + theme(legend.position = "none") + 
     coord_equal() 
-OutlierBetaMap
 ```
 
 
 #Map beta diversity with values over 0.5 shown in dark grey (19 values are over 0.5)
+#theme_void for white background, theme_gray for latitude curves
 ```{r}
 source("Functions/gplot_data.R")
 gplotB<- gplot_data(BetaRaster)
@@ -205,8 +205,8 @@ BetaMap <- ggplot() +
             aes(x = x, y = y, fill = value)) +
   scale_fill_gradientn(name="β diversity", colours=cols, na.value="transparent", limits = c(0,0.5)) +
   coord_quickmap() + geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
-  geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() +
-  theme(legend.text=element_text(size=20), legend.title=element_text(size=32))
+  geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_gray() +
+  theme(legend.text=element_text(size=20), legend.title=element_text(size=0), axis.title = element_blank())
 BetaMap
 
 png("Figures/beta.png", width = 1000, height = 1000, pointsize = 30)

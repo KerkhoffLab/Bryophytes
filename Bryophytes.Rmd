@@ -4,7 +4,7 @@ author: Carter Powell, Jackie O'Malley, and Julia Eckberg
 output: html_notebook
 ---
 
-```{r}
+```{r, message = FALSE}
 require(knitr)
 require(latexpdf)
 require(sp)
@@ -30,7 +30,7 @@ CellVec <- c(1:15038)
 ```
 
 
-#Identify occupied cells that are adJent to each occuppied cell + convert to vector
+#Identify occupied cells that are adjacent to each occuppied cell + convert to vector
 ```{r}
 neighbor <- function(CellVec) {(adjacent(BlankRas, CellVec, directions=8, pairs=FALSE, target=CellID, sorted=TRUE, include=FALSE, id=FALSE))}
 Neighbors <- lapply(CellVec, neighbor)
@@ -151,6 +151,7 @@ proj4string(LongLatBetaDF) <- CRS("+proj=utm +zone=10")
 BetaLongLat <- spTransform(LongLatBetaDF, CRS("+proj=longlat")) 
 LongLatBetaDF <- data.frame(BetaLongLat)
 LongLatBetaDF[c("Longitude", "Latitude", "Beta")]
+saveRDS(LongLatBetaDF, file = "Data/LongLatBetaDF.rds")
 
 BetaLongLat <- data.frame(BetaLongLat)
 colnames(BetaLongLat) <- c("Beta", "Longitude", "Latitude")

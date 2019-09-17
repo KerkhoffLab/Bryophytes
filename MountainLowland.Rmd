@@ -60,6 +60,7 @@ BetaMount$Type <- "Mountain"
 
 BetaMountVec <- BetaMount$CellID
 BetaMount <- merge(BetaMount, LongLatDF)
+saveRDS(BetaMount, file = "Data/BetaMount.rds")
 
 BetaMountScatterplot <- ggplot() + geom_point(data = BetaMount, aes(Latitude, Beta), shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "goldenrod2") + ylab("Mountainous β diversity") + ylim(0, 0.6) + xlab("Latitude") + theme_minimal() +  theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
 BetaMountScatterplot

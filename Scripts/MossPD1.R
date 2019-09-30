@@ -76,6 +76,10 @@ PDMap <- ggplot() + geom_tile(data=PDDF, aes(x=Longitude, y=Latitude, fill=PD)) 
   geom_sf(data = nw_mount_sf, size = 0.2, alpha=0.1)
 PDMap
 
+png("Figures/pd.png", width = 1000, height = 1000, pointsize = 30)
+PDMap
+dev.off()
+
 #Standardized effect size of PD
 MossSESPD <- ses.pd(SpeciesCellMatrix, MossTree, null.model = "taxa.labels", runs=999, include.root = TRUE)
 

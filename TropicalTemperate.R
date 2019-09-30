@@ -27,7 +27,7 @@ TemperateScatterplot <- ggplot() + geom_point(data = TemperateBeta, aes(Latitude
   theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
 TemperateScatterplot
 
-png(file = "Documents/Bryophytes/Figures/temperatescatterplot.png", width = 1000, height = 1000, pointsize = 30)
+png(file = Figures/"temperatescatterplot.png", width = 1000, height = 1000, pointsize = 30)
 TemperateScatterplot
 dev.off()
 
@@ -36,11 +36,11 @@ TropicalBeta$Longitude[TropicalBeta$Longitude <- "Tropical"]
 TemperateBeta$Longitude[TemperateBeta$Longitude <- "Temperate"]
 
 CombinedDF <- rbind(TropicalBeta, TemperateBeta)
-CombinedBoxplot <- ggplot(CombinedDF, aes(x = Longitude, y = Beta)) + geom_boxplot() + ylab("All Areas β diversity") + ylim(0, 0.5) + xlab(" ") + 
+CombinedBoxplot <- ggplot(CombinedDF, aes(x = Longitude, y = Beta)) + geom_boxplot() + theme_minimal() + ylab("All Areas β diversity") + ylim(0, 0.5) + xlab(" ") + 
   theme(axis.title.y = element_text(size=32), axis.text.y = element_text(size=20), axis.text.x = element_text(size=32))
 CombinedBoxplot
 
-png("Documents/Bryophytes/Figures/tropicaltemperatebox.png", width = 1000, height = 1000, pointsize = 20)
+png("Figures/tropicaltemperatebox.png", width = 1000, height = 1000, pointsize = 20)
 CombinedBoxplot
 dev.off()
 
@@ -76,15 +76,65 @@ TropicalMountBeta$Longitude[TropicalMountBeta$Longitude <- "Tropical"]
 TemperateMountBeta$Longitude[TemperateMountBeta$Longitude <- "Temperate"]
 
 CombinedMountDF <- rbind(TropicalMountBeta, TemperateMountBeta)
-CombinedMountBoxplot <- ggplot(CombinedMountDF, aes(x = Longitude, y = Beta)) + geom_boxplot() + ylab("Mountainous β diversity") + ylim(0, 0.5) + xlab(" ") + 
+CombinedMountBoxplot <- ggplot(CombinedMountDF, aes(x = Longitude, y = Beta)) + geom_boxplot() + theme_minimal() + ylab("Mountainous β diversity") + ylim(0, 0.5) + xlab(" ") + 
   theme(axis.title.y = element_text(size=32), axis.text.y = element_text(size=20), axis.text.x = element_text(size=32))
 CombinedMountBoxplot
 
-png(file = "Documents/Bryophytes/Figures/combinedmountboxplot.png", width = 1000, height = 1000, pointsize = 30)
+png(file = "Figures/combinedmountboxplot.png", width = 1000, height = 1000, pointsize = 30)
 CombinedMountBoxplot
 dev.off()
 
 #Map box plot of tropical v temperate in all areas next to box plot of tropical v temperate of just the tropical zones 
-png("Documents/Bryophytes/Figures/combinedtropicaltemperatemaps.png", width = 1000, height = 1000, pointsize = 20)
+png("Figures/combinedtropicaltemperatemaps.png", width = 1000, height = 1000, pointsize = 20)
 grid.arrange(CombinedBoxplot, CombinedMountBoxplot, ncol=2)
+dev.off()
+
+
+
+
+
+#Make it so we're comparing mountainous and lowland tropical/temperate values, rather than comparing all areas to the mountainous beta values 
+#Load in BetaLowland, which has the beta diversity, latitude, and cellIDs of lowland cells 
+BetaLowland <- readRDS("Data/BetaLowland.rds")
+#Now separate tropical values in lowland areas and plot those values, save as a png 
+TropicalLowlandBeta <- BetaLowland[(BetaLowland$Latitude >= -23.5 & BetaLowland$Latitude <= 23.5),]
+
+TropicalLowlandScatterplot <- ggplot() + geom_point(data = TropicalLowlandBeta, aes(Latitude, Beta), shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + 
+  ylab("Tropical Lowland β diversity") + ylim(0, 0.6) + xlab("Latitude") + theme_minimal() + 
+  theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
+TropicalLowlandScatterplot
+
+png(file = "Figures/tropicallowlandscatterplot.png", width = 1000, height = 1000, pointsize = 30)
+TropicalLowlandScatterplot
+dev.off()
+
+#And do the same for temperate values in lowland areas, make a scatterplot
+TropicalLowlandLatitudes <- TropicalLowlandBeta$Latitude 
+
+TropicalLowlandMatch <- BetaLowland[BetaLowland$Latitude %in% TropicalLowlandLatitudes, ]
+TropicalLowlandMatchVec <- TropicalLowlandMatch[, "Latitude"]
+TemperateLowlandBeta <- BetaLowland[!BetaLowland$Latitude %in% TropicalLowlandMatchVec, ]
+
+TemperateLowlandScatterplot <- ggplot() + geom_point(data = TemperateLowlandBeta, aes(Latitude, Beta), shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + 
+  ylab("Temperate Lowland β diversity") + ylim(0, 0.6) + xlab("Latitude") + theme_minimal() + 
+  theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
+TemperateLowlandScatterplot
+
+#Boxplots comparing temperate and tropical lowland values, save as a png
+TropicalLowlandBeta$Longitude[TropicalLowlandBeta$Longitude <- "Tropical"]
+TemperateLowlandBeta$Longitude[TemperateLowlandBeta$Longitude <- "Temperate"]
+
+CombinedLowlandDF <- rbind(TropicalLowlandBeta, TemperateLowlandBeta)
+CombinedLowlandBoxplot <- ggplot(CombinedLowlandDF, aes(x = Longitude, y = Beta)) + geom_boxplot() + theme_minimal() + ylab("Lowland β diversity") + ylim(0, 0.5) + xlab(" ") + 
+  theme(axis.title.y = element_text(size=32), axis.text.y = element_text(size=20), axis.text.x = element_text(size=32)) + 
+  scale_fill_manual(values = c("cyan4", "goldenrod2"))
+CombinedLowlandBoxplot
+
+png(file = "Figures/combinedlowlandboxplot.png", width = 1000, height = 1000, pointsize = 30)
+CombinedLowlandBoxplot
+dev.off()
+
+#Boxplots showing temperate/tropical values comparing mountainous to lowland values 
+png("Figures/combinedlowlandmountmaps.png", width = 1000, height = 1000, pointsize = 20)
+grid.arrange(CombinedLowlandBoxplot, CombinedMountBoxplot, ncol=2)
 dev.off()

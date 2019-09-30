@@ -175,12 +175,12 @@ PDMap6
 ### MAP RICHNESS ###
 ##########################
 
-#Create moss richness vector that includes only moss that are only 
+#Create moss richness vector that includes only moss included in Laenen tree 4
 MossRichness <- numeric(15038)
 MossRichness[MossPD4$CellID4] <- MossPD4$SR
 MossRichness[which(MossRichness==0)]=NA
 
-#Plot moss richness
+#Plot moss richness of Laenen tree 4 
 MossRichnessRaster <- setValues(BlankRas, MossRichness)
 
 MossRichnessDF <- rasterToPoints(MossRichnessRaster)

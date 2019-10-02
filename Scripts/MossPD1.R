@@ -59,7 +59,7 @@ PDVec[PDVec==0] <- NA
 
 #Load blank raster and colors
 BlankRas <-raster("Data/blank_100km_raster.tif")
-cols <- rev(wes_palette("Zissou1", 500, type = "continuous"))
+cols <- wes_palette("Zissou1", 500, type = "continuous")
 
 #Create PD raster and dataframe
 PDRaster <- setValues(BlankRas, PDVec)
@@ -71,7 +71,7 @@ colnames(PDDF) <- c("Longitude", "Latitude", "PD")
 #Map PD
 theme_set(theme_void())
 PDMap <- ggplot() + geom_tile(data=PDDF, aes(x=Longitude, y=Latitude, fill=PD)) +   
-  scale_fill_gradientn(name="PD", colours=cols, na.value="transparent") +
+  scale_fill_gradientn(name="PD", colours = cols, na.value="transparent") +
   coord_equal() + geom_sf(data = nw_bound_sf, size = 0.1, fill=NA) + 
   geom_sf(data = nw_mount_sf, size = 0.2, alpha=0.1)
 PDMap

@@ -69,3 +69,44 @@ RangeMap
 png("Figures/RangeMap.png", width = 1000, height = 1000, pointsize = 30)
 RangeMap
 dev.off()
+
+#Separate mountainous range values and make a scatterplot 
+RangeMount <- extract(RangeRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
+
+colnames(RangeMount) <- c("Type", "CellID", "Avg")
+RangeMount$Type <- "Mountain"
+
+RangeMountVec <- RangeMount$CellID
+RangeMount <- merge(RangeMount, LongLatDF)
+saveRDS(RangeMount, file = "Data/BetaMount.rds")
+
+RangeMountScatterplot <- ggplot() + geom_point(data = RangeMount, aes(Latitude, Avg), shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "goldenrod2") + 
+  ylab("Montane Range Size") + xlab("Latitude") + theme_minimal() +  
+  theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
+RangeMountScatterplot
+
+png("Figures/RangeMountScatterplot.png", width = 1500, height = 1000, pointsize = 20)
+RangeMountScatterplot
+dev.off()
+
+#Separate lowland range values and make a scatterplot 
+Bound <- extract(RangeRaster, nw_bound, df = TRUE, cellnumbers = TRUE)
+colnames(Bound) <- c("Type", "CellID", "Avg")
+
+BoundMatch <- Bound[Bound$CellID %in% RangeMountVec, ]
+BoundMatchVec <- BoundMatch[, "CellID"]
+RangeLowland <- Bound[!Bound$CellID %in% BoundMatchVec, ]
+
+RangeLowland$Type <- "Lowland"
+
+RangeLowlandVec <- RangeLowland$CellID
+RangeLowland <- merge(RangeLowland, LongLatDF)
+
+RangeLowlandScatterplot <- ggplot(RangeLowland, aes(Latitude, Avg)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + 
+  ylab("Lowland Range Size") + xlab("Latitude") + theme_minimal() + 
+  theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
+RangeLowlandScatterplot
+
+png("Figures/RangeMountainLowlandScatter.png", width = 1000, height = 1000, pointsize = 20)
+grid.arrange(RangeMountScatterplot, RangeLowlandScatterplot, ncol=1)
+dev.off()

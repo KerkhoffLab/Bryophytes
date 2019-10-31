@@ -18,6 +18,8 @@ require(dplyr)
 BlankRas <-raster("Data/blank_100km_raster.tif")
 BryophytePresence <- readRDS("Data/BryophytePresence.rds")
 cols <- (wes_palette("Zissou1", 500, type = "continuous"))
+RangeBeta <- readRDS("Data/RangeBeta.rds")
+RangeAlpha <- readRDS("Data/RangeAlpha.rds")
 
 nw_mount <- shapefile("Data/MapOutlines/Mountains/Koeppen-Geiger_biomes.shp")
 nw_bound <- shapefile("Data/MapOutlines/Global_bound/Koeppen-Geiger_biomes.shp")
@@ -44,15 +46,15 @@ dev.off()
 
 #Range map of bryophytes using cellID, but still showing median of the average range size of bryophytes in a single cell 
 #Count the number of cells in which a species is found 
-Range <- tally(group_by(BryophytePresence, Species))
-Range <- merge(Range, BryophytePresence, by = "Species")
+CellRange <- tally(group_by(BryophytePresence, Species))
+CellRange <- merge(CellRange, BryophytePresence, by = "Species")
 
-Range <- subset(Range, select = c("n", "CellID")) %>%
+CellRange <- subset(CellRange, select = c("n", "CellID")) %>%
   group_by(CellID) %>%
   summarize(Avg = median(n))
 
 BryophyteRange <- numeric(15038)
-BryophyteRange[Range$CellID] <- Range$Avg 
+BryophyteRange[CellRange$CellID] <- CellRange$Avg 
 BryophyteRange[which(BryophyteRange==0)]=NA
 
 RangeRaster <- setValues(BlankRas, BryophyteRange)
@@ -109,4 +111,26 @@ RangeLowlandScatterplot
 
 png("Figures/RangeMountainLowlandScatter.png", width = 1000, height = 1000, pointsize = 20)
 grid.arrange(RangeMountScatterplot, RangeLowlandScatterplot, ncol=1)
+dev.off()
+
+#Plotting range sizes versus beta diversity values 
+RangeBeta <- merge(FullBeta, CellRange, by = "CellID")
+saveRDS(RangeBeta, file = "Data/RangeBeta.rds")
+
+RangeBetaScatterplot <- ggplot(RangeBeta, aes(Avg, Beta)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + 
+  ylab("β diversity") + ylim(0, 0.5) + xlab("Median Range Size") + theme_minimal() + 
+  theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
+RangeBetaScatterplot
+
+#Plotting range sizes versus alpha diversity values 
+RangeAlpha <- merge(FullAlpha, CellRange, by = "CellID")
+saveRDS(RangeAlpha, file = "Data/RangeAlpha.rds")
+
+RangeAlphaScatterplot <- ggplot(RangeAlpha, aes(Avg, Alpha)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "orangered2") + 
+  ylab("α diversity") + xlab("Median Range Size") + theme_minimal() + 
+  theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
+RangeAlphaScatterplot
+
+png("Figures/RangeAlphaBetaScatter.png", width = 1000, height = 1000, pointsize = 20)
+grid.arrange(RangeBetaScatterplot, RangeAlphaScatterplot, ncol=1)
 dev.off()

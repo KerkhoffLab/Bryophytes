@@ -117,11 +117,12 @@ dev.off()
 FullRange <- rbind(RangeLowland, RangeMount)
 
 FullRangeScatter <- ggplot(data = FullRange, aes(Latitude, Avg, color=Type)) + 
-  geom_point(shape = 16, size = 3, show.legend=FALSE, alpha=0.8) + 
-  ylab("Median Range Size") + xlab("Latitude") +
+  geom_point(shape = 16, size = 3, alpha=0.8) + 
+  ylab("Median Range Size") + xlab("Latitude") + 
   theme_minimal() + theme(axis.title.y = element_text(size=40), axis.title.x = element_text(size=40),  
-                          axis.text = element_text(size=20)) + 
-  scale_color_manual(values = c("cyan4", "goldenrod2")) + geom_smooth(size = 2, show.legend = TRUE)
+                          axis.text = element_text(size=20), legend.text = element_text(size=32), 
+                          legend.position = "bottom", legend.title = element_blank()) + 
+  scale_color_manual(values = c("cyan4", "goldenrod2")) + geom_smooth(size = 2, show.legend = FALSE)
 FullRangeScatter
 
 png("Figures/FullRangeScatter.png", width = 1000, height = 1000, pointsize = 20)

@@ -113,6 +113,21 @@ png("Figures/RangeMountainLowlandScatter.png", width = 1000, height = 1000, poin
 grid.arrange(RangeMountScatterplot, RangeLowlandScatterplot, ncol=1)
 dev.off()
 
+#Plotting lowland and montane range values across latitudes together (like we did with alpha and beta diverstiy in FullScatter.png)
+FullRange <- rbind(RangeLowland, RangeMount)
+
+FullRangeScatter <- ggplot(data = FullRange, aes(Latitude, Avg, color=Type)) + 
+  geom_point(shape = 16, size = 3, show.legend=FALSE, alpha=0.8) + 
+  ylab("Median Range Size") + xlab("Latitude") +
+  theme_minimal() + theme(axis.title.y = element_text(size=40), axis.title.x = element_text(size=40),  
+                          axis.text = element_text(size=20)) + 
+  scale_color_manual(values = c("cyan4", "goldenrod2")) + geom_smooth(size = 2, show.legend = FALSE)
+FullRangeScatter
+
+png("Figures/FullRangeScatter.png", width = 1000, height = 1000, pointsize = 20)
+FullRangeScatter
+dev.off()
+
 #Plotting range sizes versus beta diversity values 
 RangeBeta <- merge(FullBeta, CellRange, by = "CellID")
 saveRDS(RangeBeta, file = "Data/RangeBeta.rds")

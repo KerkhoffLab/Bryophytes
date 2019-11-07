@@ -121,7 +121,7 @@ FullRangeScatter <- ggplot(data = FullRange, aes(Latitude, Avg, color=Type)) +
   ylab("Median Range Size") + xlab("Latitude") +
   theme_minimal() + theme(axis.title.y = element_text(size=40), axis.title.x = element_text(size=40),  
                           axis.text = element_text(size=20)) + 
-  scale_color_manual(values = c("cyan4", "goldenrod2")) + geom_smooth(size = 2, show.legend = FALSE)
+  scale_color_manual(values = c("cyan4", "goldenrod2")) + geom_smooth(size = 2, show.legend = TRUE)
 FullRangeScatter
 
 png("Figures/FullRangeScatter.png", width = 1000, height = 1000, pointsize = 20)

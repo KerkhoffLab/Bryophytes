@@ -53,11 +53,15 @@ CellRange <- subset(CellRange, select = c("n", "CellID")) %>%
   group_by(CellID) %>%
   summarize(Avg = median(n))
 
+CellRangeVec <- CellRange$CellID
+
 BryophyteRange <- numeric(15038)
 BryophyteRange[CellRange$CellID] <- CellRange$Avg 
 BryophyteRange[which(BryophyteRange==0)]=NA
 
 RangeRaster <- setValues(BlankRas, BryophyteRange)
+saveRDS(RangeRaster, "Data/RangeRaster.rds")
+
 RangeDF <- rasterToPoints(RangeRaster)
 RangeDF <- data.frame(RangeDF)
 colnames(RangeDF) <- c("Longitude", "Latitude", "Avg")
@@ -133,7 +137,8 @@ dev.off()
 RangeBeta <- merge(FullBeta, CellRange, by = "CellID")
 saveRDS(RangeBeta, file = "Data/RangeBeta.rds")
 
-RangeBetaScatterplot <- ggplot(RangeBeta, aes(Avg, Beta)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + 
+RangeBetaScatterplot <- ggplot(RangeBeta, aes(Avg, Beta)) + 
+  geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + 
   ylab("β diversity") + ylim(0, 0.5) + xlab("Median Range Size") + theme_minimal() + 
   theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
 RangeBetaScatterplot
@@ -142,11 +147,13 @@ RangeBetaScatterplot
 RangeAlpha <- merge(FullAlpha, CellRange, by = "CellID")
 saveRDS(RangeAlpha, file = "Data/RangeAlpha.rds")
 
-RangeAlphaScatterplot <- ggplot(RangeAlpha, aes(Avg, Alpha)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "orangered2") + 
+RangeAlphaScatterplot <- ggplot(RangeAlpha, aes(Avg, Alpha)) + 
+  geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + 
   ylab("α diversity") + xlab("Median Range Size") + theme_minimal() + 
   theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
 RangeAlphaScatterplot
 
-png("Figures/RangeAlphaBetaScatter.png", width = 1000, height = 1000, pointsize = 20)
-grid.arrange(RangeBetaScatterplot, RangeAlphaScatterplot, ncol=1)
+png("Figures/RangeAlphaBetaScatter.png", width = 2000, height = 1000, pointsize = 20)
+grid.arrange(RangeBetaScatterplot, RangeAlphaScatterplot, ncol=2)
 dev.off()
+

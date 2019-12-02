@@ -26,13 +26,23 @@ nw_bound <- shapefile("Data/MapOutlines/Global_bound/Koeppen-Geiger_biomes.shp")
 nw_mount_sf <- st_as_sf(nw_mount)
 nw_bound_sf <- st_as_sf(nw_bound)
 
-#Count the number of cells in which a species is found, includes latitude and longitude values 
+#Count the number of cells in which a species is found, includes latitude and longitude values and calculates the median value
 Range <- tally(group_by(BryophytePresence, Species))
 Range <- merge(Range, BryophytePresence, by = "Species")
 
 Range <- subset(Range, select = c("n", "Latitude")) %>%
   group_by(Latitude) %>%
   summarize(Avg = median(n))
+
+#Does the same as above, but looks at range by species 
+Range <- tally(group_by(BryophytePresence, Species))
+Range <- merge(Range, BryophytePresence, by = "Species")
+
+SpeciesRange <- subset(Range, select = c("n", "Species")) %>%
+  group_by(Species) %>%
+  summarize(Avg = median(n))
+colnames(SpeciesRange) <- c("Species", "RangeAvg")
+saveRDS(SpeciesRange, file = "Data/SpeciesRange.rds")
 
 #Map of the median of the average range size of the bryophytes found in a single cell/ at a specific latitude, mapped using latitude values 
 RangeScatterplot <- ggplot(Range, aes(Latitude, Avg)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "orangered2") + 
@@ -52,6 +62,7 @@ CellRange <- merge(CellRange, BryophytePresence, by = "Species")
 CellRange <- subset(CellRange, select = c("n", "CellID")) %>%
   group_by(CellID) %>%
   summarize(Avg = median(n))
+saveRDS(CellRange, file = "Data/CellRange.rds")
 
 CellRangeVec <- CellRange$CellID
 

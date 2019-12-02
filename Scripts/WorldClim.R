@@ -1,5 +1,19 @@
 #Looking at climatic variables using WorldClim data - see if bryophytes that are in locations of higher drought stress have wider ranges
 
+#Packages
+require(knitr)
+require(latexpdf)
+require(sp)
+require(vegan)
+require(raster)
+require(rasterVis)
+require(wesanderson)
+require(ggplot2)
+require(gridExtra)
+require(sf)
+require(rgdal)
+require(dplyr)
+
 #Load in data 
 RangeRaster <- readRDS("Data/RangeRaster.rds")
 
@@ -20,8 +34,9 @@ plot(WorldClim$bio17) #bio17 = precipitation in the driest quarter
 #Precipitation in the Driest Quarter (1970 - 2000)
 # Plot Bio17 (precipitation in the driest quarter) divide by 10 because Worldclim stores integer T*10 (I didn't but Hailey did)
 QPrecipitationDF<- data.frame(bio=getValues(WorldClim$bio17), CellID = as.character(1:15038))
-colnames(QPrecipitationDF) <- c("Precipitation", "CellID")
-QPrecipitationDF <- QPrecipitationDF[QPrecipitationDF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
+colnames(QPrecipitationDF) <- c("QuarterlyPrecip", "CellID")
+#QPrecipitationDF <- QPrecipitationDF[QPrecipitationDF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
+
 
 Bio17DF <- cbind(QPrecipitationDF, CellRange, by= "CellID")
 colnames(Bio17DF) <- c("Precipitation", "CellID", "Cell", "Avg", "by")
@@ -47,6 +62,8 @@ Bio17Map
 
 
 #Precipitation in the driest month (bio14) 
+CellRange <- readRDS("Data/CellRange.rds")
+
 MPrecipitationDF<- data.frame(bio=getValues(WorldClim$bio14), CellID = as.character(1:15038))
 colnames(MPrecipitationDF) <- c("Precipitation", "CellID")
 MPrecipitationDF <- MPrecipitationDF[MPrecipitationDF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
@@ -63,4 +80,51 @@ Bio14Scatterplot
 
 png("Figures/Bio14Scatterplot.png", width = 1000, height = 1000, pointsize = 30)
 Bio14Scatterplot
+dev.off()
+
+#Make a dataframe with cellID, species, driest quarter precipitation values
+BryophytePresence <- readRDS("Data/BryophytePresence.rds")
+SpeciesCellDF <- BryophytePresence[,1:2]
+
+QPrecipSpeciesDF <- merge(SpeciesCellDF, QPrecipitationDF, by = "CellID")
+
+#With this new dataframe that has species, cellID, and quarterly precipitation, calculate the median precipitation of each species
+#Add in species range values 
+SpeciesRange <- readRDS("Data/SpeciesRange.rds")
+
+QPrecipAvg <- subset(QPrecipSpeciesDF, select = c("QuarterlyPrecip", "Species")) %>%
+  group_by(Species) %>%
+  summarize(Avg = median(QuarterlyPrecip))
+
+QPrecipAvg <- merge(QPrecipAvg, SpeciesRange, by = "Species")
+
+#Quarterly precipitation plot quarterly precipitation by range
+Bio17SpeciesRangeScatterplot <- ggplot(QPrecipAvg, aes(Avg, RangeAvg)) + 
+  geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + ylab("Bryophyte Species Median Range Size") + 
+  xlab("Median Precipitation in the Driest Quarter") + theme_minimal() + ylim(0,1700) + 
+  theme(axis.title.y = element_text(size=28), axis.title.x = element_text(size=28), axis.text.x = element_text(size=20), axis.text.y = element_text(size = 20))
+Bio17SpeciesRangeScatterplot
+
+png("Figures/Bio17SpeciesRangeScatterplot.png", width = 1000, height = 1000, pointsize = 30)
+Bio17SpeciesRangeScatterplot
+dev.off()
+
+#Now make a dataframe with cellID, species, and driest month precipitation values (this version also has range values, which are the Avg column)
+#and calculate median precipitation 
+MPrecipSpeciesDF <- merge(SpeciesCellDF, Bio14DF, by = "CellID")
+
+MPrecipAvg <- subset(MPrecipSpeciesDF, select = c("Precipitation", "Species")) %>%
+  group_by(Species) %>%
+  summarize(Avg = median(Precipitation))
+
+MPrecipAvg <- merge(MPrecipAvg, SpeciesRange, by = "Species")
+
+Bio14SpeciesRangeScatterplot <- ggplot(MPrecipAvg, aes(Avg, RangeAvg)) + 
+  geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + ylab("Bryophyte Species Median Range Size") + 
+  xlab("Median Precipitation in the Driest Month") + theme_minimal() + ylim(0,1600) +
+  theme(axis.title.y = element_text(size=28), axis.title.x = element_text(size=28), axis.text.x = element_text(size=20), axis.text.y = element_text(size = 20))
+Bio14SpeciesRangeScatterplot
+
+png("Figures/Bio14SpeciesRangeScatterplot.png", width = 1000, height = 1000, pointsize = 30)
+Bio14SpeciesRangeScatterplot
 dev.off()

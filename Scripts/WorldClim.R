@@ -35,8 +35,8 @@ plot(WorldClim$bio17) #bio17 = precipitation in the driest quarter
 # Plot Bio17 (precipitation in the driest quarter) divide by 10 because Worldclim stores integer T*10 (I didn't but Hailey did)
 QPrecipitationDF<- data.frame(bio=getValues(WorldClim$bio17), CellID = as.character(1:15038))
 colnames(QPrecipitationDF) <- c("QuarterlyPrecip", "CellID")
-#QPrecipitationDF <- QPrecipitationDF[QPrecipitationDF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
-
+QPrecipitationDF <- QPrecipitationDF[QPrecipitationDF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
+CellRange <- readRDS("Data/CellRange.rds")
 
 Bio17DF <- cbind(QPrecipitationDF, CellRange, by= "CellID")
 colnames(Bio17DF) <- c("Precipitation", "CellID", "Cell", "Avg", "by")
@@ -63,6 +63,7 @@ Bio17Map
 
 #Precipitation in the driest month (bio14) 
 CellRange <- readRDS("Data/CellRange.rds")
+CellRangeVec <- CellRange$CellID
 
 MPrecipitationDF<- data.frame(bio=getValues(WorldClim$bio14), CellID = as.character(1:15038))
 colnames(MPrecipitationDF) <- c("Precipitation", "CellID")
@@ -101,7 +102,7 @@ QPrecipAvg <- merge(QPrecipAvg, SpeciesRange, by = "Species")
 #Quarterly precipitation plot quarterly precipitation by range
 Bio17SpeciesRangeScatterplot <- ggplot(QPrecipAvg, aes(Avg, RangeAvg)) + 
   geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + ylab("Bryophyte Species Median Range Size") + 
-  xlab("Median Precipitation in the Driest Quarter") + theme_minimal() + ylim(0,1700) + 
+  xlab("Median Precipitation in the Driest Quarter") + theme_minimal() + ylim(0,1700) + geom_smooth(size = 2,color = "gray63") +
   theme(axis.title.y = element_text(size=28), axis.title.x = element_text(size=28), axis.text.x = element_text(size=20), axis.text.y = element_text(size = 20))
 Bio17SpeciesRangeScatterplot
 
@@ -121,7 +122,7 @@ MPrecipAvg <- merge(MPrecipAvg, SpeciesRange, by = "Species")
 
 Bio14SpeciesRangeScatterplot <- ggplot(MPrecipAvg, aes(Avg, RangeAvg)) + 
   geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + ylab("Bryophyte Species Median Range Size") + 
-  xlab("Median Precipitation in the Driest Month") + theme_minimal() + ylim(0,1600) +
+  xlab("Median Precipitation in the Driest Month") + theme_minimal() + ylim(0,1600) + geom_smooth(size = 2,color = "gray63") +
   theme(axis.title.y = element_text(size=28), axis.title.x = element_text(size=28), axis.text.x = element_text(size=20), axis.text.y = element_text(size = 20))
 Bio14SpeciesRangeScatterplot
 

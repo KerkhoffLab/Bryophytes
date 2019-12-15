@@ -16,13 +16,15 @@ require(dplyr)
 
 #Load in data 
 RangeRaster <- readRDS("Data/RangeRaster.rds")
+CellRange <- readRDS("Data/CellRange.rds")
+CellRangeVec <- CellRange$CellID
 
 #Initial WorldClim Data Code - getting ALL the data from WorldClim, puts it into a brick, crops to only include the Americas 
 #and creates raster of the proper resolution that matches the RangeRaster with bryophyte range data 
 worldclim <- getData('worldclim', var='bio', res=10) 
 WC_layers <- do.call(brick, lapply(list.files(path = "wc10/", pattern = "*.bil$", full.names = TRUE), raster)) 
 WorldClim <- do.call(crop, c(WC_layers,extent(-175,-22,-56,74)))
-Bryophytecrs <- crs(RangeRaster) #creates a raster with resolution of the C4 map (100 km^2 cells)
+Bryophytecrs <- crs(RangeRaster) #creates a raster with resolution of the bryophyte range map
 WorldClim <- projectRaster(WorldClim, crs = Bryophytecrs) 
 WorldClim <- resample(WorldClim, RangeRaster) #fits WorldClim data on the BIEN 100 km^2 map by averaging variables across each cell
 WorldClim17 <- subset(WorldClim, "bio17", drop = TRUE)
@@ -36,7 +38,6 @@ plot(WorldClim$bio17) #bio17 = precipitation in the driest quarter
 QPrecipitationDF<- data.frame(bio=getValues(WorldClim$bio17), CellID = as.character(1:15038))
 colnames(QPrecipitationDF) <- c("QuarterlyPrecip", "CellID")
 QPrecipitationDF <- QPrecipitationDF[QPrecipitationDF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
-CellRange <- readRDS("Data/CellRange.rds")
 
 Bio17DF <- cbind(QPrecipitationDF, CellRange, by= "CellID")
 colnames(Bio17DF) <- c("Precipitation", "CellID", "Cell", "Avg", "by")
@@ -52,19 +53,14 @@ png("Figures/Bio17Scatterplot.png", width = 1000, height = 1000, pointsize = 30)
 Bio17Scatterplot
 dev.off()
 
-Bio17Map <- ggplot() + geom_tile(data=Bio17DF, aes(fill=Precipitation)) +   
-  scale_fill_gradientn(name="Precipitation", colours=cols, na.value="transparent") +
-  coord_equal() +
-  geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
-  geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() + 
-  theme(legend.text=element_text(size=20), legend.title=element_text(size=32))
-Bio17Map
-
+#Bio17Map <- ggplot() + geom_tile(data=Bio17DF, aes(fill=Precipitation)) +   
+  #scale_fill_gradientn(name="Precipitation", colours=cols, na.value="transparent") +
+  #coord_equal() +
+  #geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
+  #geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() + 
+  #theme(legend.text=element_text(size=20), legend.title=element_text(size=32))
 
 #Precipitation in the driest month (bio14) 
-CellRange <- readRDS("Data/CellRange.rds")
-CellRangeVec <- CellRange$CellID
-
 MPrecipitationDF<- data.frame(bio=getValues(WorldClim$bio14), CellID = as.character(1:15038))
 colnames(MPrecipitationDF) <- c("Precipitation", "CellID")
 MPrecipitationDF <- MPrecipitationDF[MPrecipitationDF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
@@ -113,6 +109,7 @@ dev.off()
 #Now make a dataframe with cellID, species, and driest month precipitation values (this version also has range values, which are the Avg column)
 #and calculate median precipitation 
 MPrecipSpeciesDF <- merge(SpeciesCellDF, Bio14DF, by = "CellID")
+colnames(MPrecipSpeciesDF) <- c("CellID", "Species", "Precipitation", "RangeAvg")
 
 MPrecipAvg <- subset(MPrecipSpeciesDF, select = c("Precipitation", "Species")) %>%
   group_by(Species) %>%

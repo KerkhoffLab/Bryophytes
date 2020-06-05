@@ -151,6 +151,7 @@ source("Functions/gplot_data.R")
 gplotB<- gplot_data(BetaRaster)
 gplotLB<- gplot_data(LowBetaRaster)
 
+
 BetaMap <- ggplot() +
   geom_tile(data = dplyr::filter(gplotLB, !is.na(value)), 
             aes(x = x, y = y), fill = "gray25") +

@@ -82,3 +82,13 @@ CellRichness <- readRDS("Data/CellRichness.rds")
 CellID <- CellRichness$CellID
 CellVec <- c(1:15038)
 
+#Identify occupied cells that are adjacent to each occuppied cell + convert to vector
+neighbor <- function(CellVec) {(adjacent(BlankRas, CellVec, directions=8, pairs=FALSE, target=CellID, sorted=TRUE, include=FALSE, id=FALSE))}
+Neighbors <- lapply(CellVec, neighbor)
+names(Neighbors) <- CellVec
+
+bryneighbors <- Neighbors[CellID]
+bryneighborvect <- unlist(lapply(bryneighbors, length))
+
+#Stop for NullModelWithWorldClimData.R & SpreadingDye.R---------------------------------
+

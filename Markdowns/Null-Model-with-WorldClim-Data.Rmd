@@ -1,0 +1,208 @@
+---
+title: "Null Model with WorldClim Data"
+author: Hailey Napier
+output: html_notebook
+---
+
+```{r, message = FALSE}
+require(knitr)
+require(latexpdf)
+require(sp)
+require(vegan)
+require(raster)
+require(rasterVis)
+require(gridExtra)
+require(sf)
+require(rgdal)
+```
+
+##Null Model
+#Omit cells that have no neighbors
+```{r}
+have_neighbors <- CellID[which(bryneighborvect!=0)]
+LandCells <- data.frame(have_neighbors)
+LandCells$CellID <- LandCells$have_neighbors
+LandCells$have_neighbors <- NULL
+```
+
+#Make a list of ranges based on species
+```{r}
+ranges <- as.vector(SpeciesRange$RangeAvg)
+ranges <- sort(ranges)
+```
+
+#Spreading Dye Algorithm with Climate Data
+```{r}
+linearRanges <- c(1:4802) #vector of all the ranges 1-4802 to use as an identifier because some ranges have the same size
+
+NullBio12DF <- data.frame(linearRanges)
+names(NullBio12DF)[1] <- "RangeID"
+NullBio12DF$RangeSize <- ranges
+
+NullBio14DF <- data.frame(linearRanges)
+names(NullBio14DF)[1] <- "RangeID"
+NullBio14DF$RangeSize <- ranges
+
+NullBio15DF <- data.frame(linearRanges)
+names(NullBio15DF)[1] <- "RangeID"
+NullBio15DF$RangeSize <- ranges
+
+NullBio17DF <- data.frame(linearRanges)
+names(NullBio17DF)[1] <- "RangeID"
+NullBio17DF$RangeSize <- ranges
+
+for(i in 1:10){
+  #Add a new column to each bioclim dataframe
+  NullBio12DF$temp <- NA
+  names(NullBio12DF)[i + 2] <- i
+  NullBio14DF$temp <- NA
+  names(NullBio14DF)[i + 2] <- i
+  NullBio15DF$temp <- NA
+  names(NullBio15DF)[i + 2] <- i
+  NullBio17DF$temp <- NA
+  names(NullBio17DF)[i + 2] <- i
+  
+  linearRanges <- c(1:4802) #vector of all the ranges 1-4802 to use as an identifier because some ranges have the same size
+  
+  #set everything at zero
+  LandCells$Occupied <- 0
+  LandCells$Total_Overlap <- 0
+  focal_neighbors <- NULL
+  total_neighbors <- NULL
+  
+  for(j in 1:length(ranges)){
+    
+    #total_neighbors is a list of all of the neighbors of each of the cells in the range, so it resets with each new range
+    total_neighbors <- NULL
+    #occupancy reference for each cell in the range has to be set so all of the cells are empty when you start a new range
+    LandCells$Occupied <- 0
+    
+    Bio12_Null <- NULL
+    Bio14_Null <- NULL
+    Bio15_Null <- NULL
+    Bio17_Null <- NULL
+    
+    if(length(linearRanges) > 1){
+      
+      #choose a random range using the ID number
+      linearID_test_range = sample(linearRanges, 1)
+      #take the randomly selected range out of the list of ranges so it doesn't get redrawn
+      linearRanges <- linearRanges[linearRanges != linearID_test_range]
+    }else if(length(linearRanges) == 1){
+      #before it gets to zero the sample will start drawing random ranges to keep from getting to zero, so make sure it takes the last range and not a random one
+      linearID_test_range = linearRanges
+      linearRanges = NA
+    }
+    
+    #set the range size based on the ID
+    test_range = ranges[linearID_test_range]
+    
+    #choose a random cell from the list of cells that have neighbors
+    focal_cell <- sample(have_neighbors, 1)
+    
+    for(k in 1:test_range){
+      #mark the current cell as occupied
+      LandCells$Occupied[which(LandCells$CellID == focal_cell)] <- 1
+      #add one to the total number of times this cell was included in any range
+      LandCells$Total_Overlap[which(LandCells$CellID == focal_cell)] <- LandCells$Total_Overlap[which(LandCells$CellID == focal_cell)] + 1
+      #set the linear ID number for the focal cell to mark it in the matrix
+      linear_focal_cell <- match(focal_cell, have_neighbors)
+      #make a list of the focal cell's neighbors
+      focal_neighbors <- bryneighbors[CellID == focal_cell]
+      focal_neighbors <- focal_neighbors[[1]][]
+      #add the focal cell's neighbors to the list of all of the neighbors of every cell in the range
+      total_neighbors <- append(total_neighbors, focal_neighbors)
+      
+      #extract bioclimatic variables for each cell
+      focal_bio14 <- MPrecipitationDF$Precipitation[MPrecipitationDF$CellID == focal_cell]
+      Bio14_Null <- append(Bio14_Null, focal_bio14)
+      focal_bio17 <- QPrecipitationDF$QuarterlyPrecip[QPrecipitationDF$CellID == focal_cell]
+      Bio17_Null <- append(Bio17_Null, focal_bio17)
+      focal_bio15 <- SPrecipitationDF$SeasonalPrecip[SPrecipitationDF$CellID == focal_cell]
+      Bio15_Null <- append(Bio15_Null, focal_bio15)
+      focal_bio12 <- APrecipitationDF$AnnualPrecip[APrecipitationDF$CellID == focal_cell]
+      Bio12_Null <- append(Bio12_Null, focal_bio12)
+      
+      repeat{
+        #if the focal cell has more than one neighbor, choose a neighbor at random to be the next focal cell
+        if(length(focal_neighbors) > 1){
+          new_focal_cell <- sample(focal_neighbors, 1)
+          #if the cell has exactly one neighbor, choose that neighbor to be the next focal cell
+        }else if(length(focal_neighbors) == 1){
+          new_focal_cell <- focal_neighbors
+          #if the cell has no neighbors, but there is more than one neighbor of any cell in the range, choose one of the total range neighbors at random
+        }else if(length(total_neighbors) > 1){
+          new_focal_cell <- sample(total_neighbors, 1)
+          #if there is exactly one neighbor in the full range, choose that neighbor to be the next focal cell
+        }else if(length(total_neighbors) == 1){
+          new_focal_cell <- total_neighbors
+          #if the focal cell has no neighbors, and the total range has no neighbors, choose a random unoccupied cell to be the next focal cell
+        }else{
+          new_focal_cell <- sample(LandCells$CellID[LandCells$Occupied == 0], 1)
+        }
+        if(LandCells$Occupied[which(LandCells$CellID == new_focal_cell)] == 1){
+          #remove the occupied cells from both lists of neighbors
+          total_neighbors <- total_neighbors[total_neighbors != new_focal_cell]
+          focal_neighbors <- focal_neighbors[focal_neighbors != new_focal_cell]
+          #repeat choosing the new focal cell until the new focal cell is unoccupied
+        }else{
+          break
+        }
+      }
+      #if there are more than zero ranges left, the new unoccupied focal cell is the focal cell
+      if(length(linearRanges) >= 1){
+        focal_cell <- new_focal_cell
+      }else{
+        break
+      }
+    }
+    #Store bioclim data for each range in a dataframe
+    NullBio12DF[[i +2]][NullBio12DF$RangeID == linearID_test_range] <- median(Bio12_Null, na.rm = T)
+    NullBio14DF[[i +2]][NullBio14DF$RangeID == linearID_test_range] <- median(Bio14_Null, na.rm = T)
+    NullBio15DF[[i +2]][NullBio15DF$RangeID == linearID_test_range] <- median(Bio15_Null, na.rm = T)
+    NullBio17DF[[i +2]][NullBio17DF$RangeID == linearID_test_range] <- median(Bio17_Null, na.rm = T)
+  }
+}
+Sys.time()
+```
+
+##Analysis
+#Find means
+```{r}
+Practice <- NullBio14DF
+
+linearRanges <- c(1:4802)
+
+Practice$RangeID <- NULL
+Practice$RangeSize<- NULL
+Practice$Mean <- rowMeans(Practice, na.rm=TRUE)
+Practice$RangeID <- linearRanges
+Practice$RangeSize <- ranges
+
+```
+
+#Plot means
+```{r}
+PracticeScatterplot <- ggplot(Practice, aes(Mean, RangeSize)) + 
+  geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + ylab("Null Species Median Range Size") + 
+  xlab("Mean Null Precipitation in Driest Month") + theme_minimal() + ylim(0,1600) + geom_smooth(size = 2,color = "gray63") +
+  theme(axis.title.y = element_text(size=28), axis.title.x = element_text(size=28), axis.text.x = element_text(size=20), axis.text.y = element_text(size = 20)) +
+
+  PracticeScatterplot
+
+```
+
+#Plot null data over observed data
+```{r}
+RangeScatter2 <- ggplot(data = FullRange, aes(Latitude, Avg)) + 
+  geom_point(shape = 16, size = 3, alpha=0.6, color = "cyan4") + 
+  ylab("Median Range Size") + xlab("Latitude") + 
+  theme_minimal() + theme(axis.title.y = element_text(size=40), axis.title.x = element_text(size=40),  
+                          axis.text = element_text(size=20))
+RangeScatter2
+
+png("Figures/RangeScatter2.png", width = 1500, height = 1000, pointsize = 20)
+RangeScatter2
+dev.off()
+```
+

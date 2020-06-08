@@ -1,0 +1,175 @@
+---
+title: "Null Modelling Figures"
+author: Hailey Napier
+output: html_notebook
+---
+```{r}
+library(dplyr)
+```
+#All ranges
+```{r}
+RangeScatter2 <- ggplot(data = FullRange, aes(Latitude, Avg)) + 
+  geom_point(shape = 16, size = 7, alpha=0.6, color = "cyan4") + 
+  ylab("Median Range Size") + xlab("Latitude") + 
+  theme_minimal() + theme(axis.title.y = element_text(size=40), axis.title.x = element_text(size=40),  
+                          axis.text = element_text(size=20))
+RangeScatter2
+
+png("Figures/RangeScatter2.png", width = 1200, height = 1000, pointsize = 20)
+RangeScatter2
+dev.off()
+```
+
+#All null vs. observed
+Make a dataframe that I can plot from
+```{r}
+ALLBio14DF <- MPrecipAvg
+ALLBio14DF$Species <- ALLBio14DF$RangeAvg
+names(ALLBio14DF)[1] <- "RangeSize"
+ALLBio14DF$RangeAvg <- NULL
+ALLBio14DF$Type <- "Observed"
+
+
+temp <- as.data.frame(ranges)
+names(temp)[1] <- "RangeSize"
+temp$Avg <- NA
+temp$Type <- "Null"
+for(i in 1:10){
+  temp$Avg <- NA
+  temp$Avg <- unlist(NullBio14DF[i+2])
+  ALLBio14DF <- bind_rows(ALLBio14DF, temp)
+}
+```
+
+Scatterplot with both
+```{r}
+ALLBio14Scatter <- ggplot(data = ALLBio14DF %>%
+                            arrange(Type), 
+                          aes(Avg, RangeSize, color=Type, alpha = Type)) + 
+  scale_alpha_manual(guide = "none", values = c(0.7, 0.7)) +
+  geom_point(shape = 16, size = 5) +
+  ylab("Median Range Size") + xlab("Median Precipitation in Driest Month") + 
+  theme_minimal() + theme(axis.title.y = element_text(size=40), axis.title.x = element_text(size=40),  
+                          axis.text = element_text(size=20), legend.text = element_text(size=32), 
+                          legend.position = "bottom", legend.title = element_blank()) + 
+  scale_color_manual(values = c("gray63", "cyan4")) #+ geom_smooth(size = 2, show.legend = FALSE)
+ALLBio14Scatter
+
+png("Figures/ALLBio14Scatter.png", width = 1200, height = 1000, pointsize = 20)
+ALLBio14Scatter
+dev.off()
+
+```
+
+Smoothed plot (I don't know why I made this. I don't need it for anything)
+```{r}
+ALLBio14Smooth <- ggplot(data = ALLBio14DF %>%
+                            arrange(Type), 
+                          aes(Avg, RangeSize, color=Type, alpha = Type)) + 
+  scale_alpha_manual(guide = "none", values = c(0.7, 0.7)) +
+  #geom_point(shape = 16, size = 3) +
+  ylab("Median Range Size") + xlab("Median Precipitation in Driest Month") + 
+  theme_minimal() + theme(axis.title.y = element_text(size=40), axis.title.x = element_text(size=40),  
+                          axis.text = element_text(size=20), legend.text = element_text(size=32), 
+                          legend.position = "bottom", legend.title = element_blank()) + 
+  scale_color_manual(values = c("gray63", "cyan4")) + geom_smooth(size = 2, show.legend = T)
+ALLBio14Smooth
+
+png("Figures/ALLBio14Smooth.png", width = 1200, height = 1000, pointsize = 20)
+dev.off()
+
+```
+
+
+#Null means
+```{r}
+#data manipulation to find means, null SD, and z-scores
+Practice <- NullBio14DF
+
+linearRanges <- c(1:4802)
+
+Practice$RangeID <- NULL
+Practice$RangeSize<- NULL
+
+Practice <- transform(Practice, SD=apply(Practice,1, sd, na.rm = TRUE))
+
+Practice$Mean <- rowMeans(Practice, na.rm=TRUE)
+
+Practice$RangeID <- linearRanges
+Practice$RangeSize <- ranges
+
+Bio14ObsDF <- MPrecipAvg[order(MPrecipAvg$RangeAvg),]
+MPrecipAvg$Species <- NULL
+Bio14ObsDF$RangeID <- c(1:4802)
+names(Bio14ObsDF)[2] = "RangeSize"
+names(Bio14ObsDF)[1] = "Obs"
+
+Bio14ZScores <- data.frame(ranges)
+names(Bio14ZScores)[1] = "RangeSize"
+Bio14ZScores$RangeID <- c(1:4802)
+Bio14ZScores$SD <- Practice$SD
+Bio14ZScores$NullMean <- Practice$Mean
+Bio14ZScores <- left_join(Bio14ZScores, Bio14ObsDF, by = "RangeID") 
+Bio14ZScores$ZScore <- ((Bio14ZScores$Obs - Bio14ZScores$NullMean)/Bio14ZScores$SD)
+mean(Bio14ZScores$ZScore, na.rm=T)
+  
+temp$Avg <- NULL
+temp$Type <- NULL
+temp$Avg <- Practice$Mean
+temp$Type <- "Null Mean"
+ALLBio14DF <- bind_rows(ALLBio14DF, temp)
+
+NMeanObs14DF <- subset(ALLBio14DF, Type == c("Observed", "Null Mean"))
+
+
+```
+
+Plot means
+```{r}
+NullBio14MeanScatter <- ggplot(Practice, aes(Mean, RangeSize)) + 
+  geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "goldenrod2") + ylab("Null Species Median Range Size") + 
+  xlab("Mean Null Precipitation in Driest Month") + theme_minimal() + ylim(0,1600) + geom_smooth(size = 2,color = "gray70") +
+  theme(axis.title.y = element_text(size=28), axis.title.x = element_text(size=28), axis.text.x = element_text(size=20), axis.text.y = element_text(size = 20)) 
+
+NullBio14MeanScatter
+
+png("Figures/NullBio14MeanScatter.png", width = 1200, height = 1000, pointsize = 20)
+NullBio14MeanScatter
+dev.off()
+
+```
+
+Plot smoothed lines with means
+```{r}
+NMeanObs14Scatter <- ggplot(data = NMeanObs14DF %>%
+                            arrange(Type), 
+                          aes(Avg, RangeSize, color=Type, alpha = Type)) + 
+  scale_alpha_manual(guide = "none", values = c(0.7, 0.7)) +
+  #geom_point(shape = 16, size = 3) +
+  ylab("Median Range Size") + xlab("Median Precipitation in Driest Month") + 
+  theme_minimal() + theme(axis.title.y = element_text(size=40), axis.title.x = element_text(size=40),  
+                          axis.text = element_text(size=20), legend.text = element_text(size=32), 
+                          legend.position = "bottom", legend.title = element_blank()) + 
+  scale_color_manual(values = c("gray63", "cyan4")) + geom_smooth(size = 2, show.legend = T)
+NMeanObs14Scatter
+
+png("Figures/NMeanObs14Scatter.png", width = 1200, height = 1000, pointsize = 20)
+NMeanObs14Scatter
+dev.off()
+
+```
+
+Plot z-scores
+```{r}
+Bio14ZScoreScatter <- ggplot(Bio14ZScores, aes(RangeSize.x, ZScore)) + 
+  geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "goldenrod2") + ylab("ZScore") + 
+  xlab("Median Range Size") + theme_minimal() + xlim(0,1700) + geom_hline(yintercept=-2) + geom_hline(yintercept = 2)
+  theme(axis.title.y = element_text(size=28), axis.title.x = element_text(size=28), axis.text.x = element_text(size=20), axis.text.y = element_text(size = 20)) 
+
+Bio14ZScoreScatter
+
+#png("Figures/NullBio14MeanScatter.png", width = 1200, height = 1000, pointsize = 20)
+#NullBio14MeanScatter
+#dev.off()
+```
+

@@ -4,6 +4,9 @@
 require(BIEN)
 require(dplyr)
 require(sp)
+require(ape)
+require(vegan)
+require(reshape2)
 
 #Load data and source functions
 SpeciesPresence <- read.csv("Data/SpeciesPresence_by_100km_Cell.csv")
@@ -46,3 +49,36 @@ RichnessVec[CellRichness$CellID] <- CellRichness$Richness
 saveRDS(CellRichness, file = "Data/CellRichness.rds")
 saveRDS(RichnessVec, file = "Data/RichnessVec.rds")
 saveRDS(BryophytePresence, file = "Data/BryophytePresence.rds")
+
+
+####Summer 2020 Additions####
+##Moss Diversity.R##
+#Load data
+BryophytePresence <- readRDS("Data/BryophytePresence.rds")
+
+#Create occurrence by cell matrix by reshaping dataframe, then convert to presence-absence matrix
+SpeciesCellID <- BryophytePresence[,c(1,4)]
+melted <- melt(SpeciesCellID, id=c("Species", "CellID"), na.rm = TRUE)
+
+SpeciesCellMatrix <- acast(melted, CellID~Species, margins=FALSE)
+SpeciesCellMatrix[SpeciesCellMatrix > 0] <- 1
+
+#Using betadiver to compute B-diversity using Jaccard similarity
+#betadiver(help = TRUE) gives you indices
+betamat <- betadiver(SpeciesCellMatrix, method = "j", order = FALSE, help = FALSE)
+
+#Save species-cell matrix and beta diversity matrix
+saveRDS(SpeciesCellMatrix, file="Data/SpeciesCellMatrix.rds")
+saveRDS(betamat, file="Data/BetaMat.rds")
+
+#Stop for Bryophytes.rmd --------------------------------------------
+
+##Bryophytes.rmd##
+#Load blank raster and cell richness data + extract cell IDs and create vector for all cells
+#Change file for BetaMat and CellRichness depending on if you want to map bryophytes, mosses, liverworts, etc. 
+BlankRas <-raster("Data/blank_100km_raster.tif")
+BetaMat <- readRDS("Data/BetaMat.rds")
+CellRichness <- readRDS("Data/CellRichness.rds")
+CellID <- CellRichness$CellID
+CellVec <- c(1:15038)
+

@@ -91,7 +91,7 @@ SpeciesRange <- readRDS("Data/SpeciesRange.rds")
 
 QPrecipAvg <- subset(QPrecipSpeciesDF, select = c("QuarterlyPrecip", "Species")) %>%
   group_by(Species) %>%
-  summarize(Avg = median(QuarterlyPrecip))
+  summarize(Avg = median(QuarterlyPrecip, na.rm=T))
 
 QPrecipAvg <- merge(QPrecipAvg, SpeciesRange, by = "Species")
 
@@ -113,7 +113,7 @@ colnames(MPrecipSpeciesDF) <- c("CellID", "Species", "Precipitation", "RangeAvg"
 
 MPrecipAvg <- subset(MPrecipSpeciesDF, select = c("Precipitation", "Species")) %>%
   group_by(Species) %>%
-  summarize(Avg = median(Precipitation))
+  summarize(Avg = median(Precipitation, na.rm=T))
 
 MPrecipAvg <- merge(MPrecipAvg, SpeciesRange, by = "Species")
 

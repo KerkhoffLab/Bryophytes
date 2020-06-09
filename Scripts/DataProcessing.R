@@ -92,3 +92,26 @@ bryneighborvect <- unlist(lapply(bryneighbors, length))
 
 #Stop for NullModelWithWorldClimData.R & SpreadingDye.R---------------------------------
 
+LongLatBetaVec <- rep(0, 15038)
+LongLatBetaVec[LongLatBetaVec==0]<-NA
+LongLatBetaVec <- 1-LongLatBetaVec
+
+LongLatBetaRaster <- setValues(BlankRas, LongLatBetaVec)
+LongLatBetaPoints<-rasterToPoints(LongLatBetaRaster)
+LongLatBetaDF <- data.frame(LongLatBetaPoints)
+colnames(LongLatBetaDF) <- c("Longitude", "Latitude", "Beta")
+
+coordinates(LongLatBetaDF) <- ~Longitude+Latitude 
+proj4string(LongLatBetaDF) <- CRS("+proj=utm +zone=10") 
+BetaLongLat <- spTransform(LongLatBetaDF, CRS("+proj=longlat")) 
+LongLatBetaDF <- data.frame(BetaLongLat)
+LongLatBetaDF[c("Longitude", "Latitude", "Beta")]
+saveRDS(LongLatBetaDF, file = "Data/LongLatBetaDF.rds")
+
+BetaLongLat <- data.frame(BetaLongLat)
+colnames(BetaLongLat) <- c("Beta", "Longitude", "Latitude")
+
+saveRDS(LongLatBetaRaster, file="Data/LongLatBetaRaster.rds")
+
+#Stop for MontaneFamilies.R--------------------------------------
+

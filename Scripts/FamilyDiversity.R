@@ -6,6 +6,14 @@
 
 
 # 2.0 Plot species richness for each family (separate plot for each family)
-#make family name vector
-FamilyNames <- BryphytePresence$Family
-# 2.1 
+
+# 2.1 Make family name vector and variable for vector length
+FamilyNames <- unique(BryophytePresence$Family)
+NumberFamilies <- length(FamilyNames)
+
+# 2. Loop through family names and subset BryophtePresence for each family
+i <- 1
+for(i in NumberFamilies){
+  fam <- FamilyNames[i]
+  subset(BryophytePresence, Family == fam)
+}

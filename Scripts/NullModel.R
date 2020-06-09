@@ -1,5 +1,6 @@
 ##Null Model to test the relationship between precipitation and range sizes
-#Hailey Napier Spring 2020 
+#Hailey Napier 
+#Spring 2020 
 
 #Packages
 require(sp)
@@ -12,7 +13,7 @@ install.packages("dplyr")
 require(sf)
 require(dpylr)
 
-###RUN *SET UP DATA* FIRST###
+###RUN *DataProcessing.R* FIRST###
 
 #Omit cells that have no neighbors
 have_neighbors <- CellID[which(bryneighborvect!=0)]
@@ -34,7 +35,6 @@ ranges.vector <- rep(0, length(ranges))
 CellID.vector <- rep(0, length(have_neighbors))
 range_cells <- array(c(ranges.vector,CellID.vector),dim = c(length(ranges),length(have_neighbors)),dimnames = list(linearRanges,
                                                                                                                    have_neighbors))
-
 #set everything at zero
 LandCells$Occupied <- 0
 LandCells$Total_Overlap <- 0

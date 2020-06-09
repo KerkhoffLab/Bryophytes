@@ -1,5 +1,5 @@
-#Families in Montane Regions
-#Hailey Napier Summer 2020
+#Mountain Ranges
+#Hailey Napier June 2020
 #Adapted from MapOutlines.r
 
 # libs --------------------------------------------------------------------
@@ -172,5 +172,7 @@ RockyBeta <- merge(RockyBeta, LongLatDF)
 AndesAlphaBeta <- left_join(AndesBeta, CellRichness, by = "CellID")
 AppAlphaBeta <- left_join(AppalachianBeta, CellRichness, by = "CellID")
 RockyAlphaBeta <- left_join(RockyBeta, CellRichness, by = "CellID")
+
+
 
 

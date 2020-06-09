@@ -1,8 +1,8 @@
-#Family Diversity
+#Bryophyte Family Diversity
 #Hailey Napier
 #June 2020
 
-# 0. Load Packages
+# Load Packages
 require(maps) 
 require(dplyr)
 require(maptools)
@@ -22,7 +22,7 @@ require(sf)
 require(rgdal)
 
 
-# 0.5 Run DataProcessing.R to generate necessary data
+# 0.0 Run DataProcessing.R to generate necessary data---------------------------------------------------------
 BryophytePresence <- readRDS("Data/BryophytePresence.rds")
 
 nw_mount <- shapefile("Data/MapOutlines/Mountains/Koeppen-Geiger_biomes.shp")
@@ -32,11 +32,11 @@ nw_mount_sf <- st_as_sf(nw_mount)
 nw_bound_sf <- st_as_sf(nw_bound)
 
 
-# 1.0 Plot all family richness (how many families are in each cell)
+# 1.0 Plot all family richness (how many families are in each cell)-------------------------------------------
 
 
 
-# 2.0 Plot species richness for each family (separate plot for each family)
+# 2.0 Plot species richness for each family (separate plot for each family)-----------------------------------
 
 # 2.1 Make family name dataframe and vector for number of families
 Families <- data.frame(table(BryophytePresence$Family))
@@ -75,6 +75,7 @@ dir.create("./RichnessByFamilyMaps")
 
 
 # 2.5 Loop through families and map all species in each family (one map for each family)
+#doesn't work currently -- runs everything line-by-line but won't save maps when run in loop
 for(i in 1:NumberFamilies){
   TempFamRichnessRaster <- setValues(BlankRas, FamRichList[[i]])
   TempFamDF <- rasterToPoints(TempFamRichnessRaster)
@@ -98,7 +99,3 @@ for(i in 1:NumberFamilies){
   dev.off()
   print("D")
 }
-
-dev.list()
-
-i <- 1

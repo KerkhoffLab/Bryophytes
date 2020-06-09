@@ -1,4 +1,6 @@
 #Bryophyte data processing
+#Julia Eckberg and Jackie O'Malley, Summer 2019
+#Additions by Hailey Napier, June 2020
 
 #Load packages
 require(BIEN)

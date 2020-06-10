@@ -33,12 +33,8 @@ nw_bound_sf <- st_as_sf(nw_bound)
 
 
 # 1.0 Plot all family richness (how many families are in each cell)-------------------------------------------
-
-
-
-# 2.0 Plot species richness for each family (separate plot for each family)-----------------------------------
-
-# 2.1 Make family name dataframe and vector for number of families
+-
+# 1.1 Make family name dataframe and vector for number of families
 Families <- data.frame(table(BryophytePresence$Family))
 names(Families)[1] <- "Family"
 names(Families)[2] <- "Richness"
@@ -47,17 +43,55 @@ Families <- left_join(Families, ByGroup, by = "Family")
 FamilyNames <- Families$Family
 NumberFamilies <- length(FamilyNames)
 
+FamRichList[[2]]
 
-# 2.2 Loop through family names and subset BryophtePresence for each family, store them in a list
+# 1.2 Find family richness
+#this is probably not the fastest way to do this, but it works
+FamPresence <- data.frame(CellID)
+FamPresence$Richness <- NA
+
+for(i in 1:length(CellID)){
+  famcell <- subset(BryophytePresence, CellID == CellID[i])
+  r <- length(unique(famcell$Family))
+  FamPresence$Richness[CellID == CellID[i]] <- r
+}
+
+FamRichness <- numeric(15038)
+FamRichness[FamPresence$CellID] <- FamPresence$Richness
+FamRichness[which(FamRichness==0)]=NA
+
+
+# 1.3 Map family richness (one plot for all families)
+FamRichnessRaster <- setValues(BlankRas, FamRichness)
+FamDF <- rasterToPoints(FamRichnessRaster)
+FamDF <- data.frame(FamDF)
+colnames(FamDF) <- c("Longitude", "Latitude", "Alpha")
+
+FamRichnessMap <- ggplot() + geom_tile(data=FamDF, aes(x=Longitude, y=Latitude, fill=Alpha)) +   
+  scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent") +
+  coord_equal() +
+  geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
+  geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() + 
+  theme(legend.text=element_text(size=20), legend.title=element_text(size=32))
+FamRichnessMap
+
+png("Figures/FamRichnessMap.png", width= 1000, height = 1000, pointsize = 30)
+FamRichnessMap
+dev.off()
+
+
+
+# 2.0 Plot species richness for each family (separate plot for each family)-----------------------------------
+
+# 2.1 Loop through family names and subset BryophtePresence for each family, store them in a list
 FamList <- list()
 for(i in 1:NumberFamilies){
   fam <- FamilyNames[i]
   FamList[[i]] <- subset(BryophytePresence, Family == fam)
-  i <- i + 1
 }
 
 
-#2.3 Loop through families and tally richness for each family, store in a list
+#2.2 Loop through families and tally richness for each family, store in a list
 FamRichList <- list()
 FamPresList <- list()
 for(i in 1:NumberFamilies){
@@ -68,14 +102,16 @@ for(i in 1:NumberFamilies){
   FamRichList[[i]][which(FamRichList[[i]]==0)] = NA
 }
 
-
-# 2.4 Make a new folder for richness w/in each family
+# 2.3 Make a new folder for richness maps w/in each family
 setwd("./Figures")
 dir.create("./RichnessByFamilyMaps")
 
 
-# 2.5 Loop through families and map all species in each family (one map for each family)
+# 2.4 Loop through families and map all species in each family (one map for each family)
 #doesn't work currently -- runs everything line-by-line but won't save maps when run in loop
+
+#make sure to set working directory to default
+
 for(i in 1:NumberFamilies){
   TempFamRichnessRaster <- setValues(BlankRas, FamRichList[[i]])
   TempFamDF <- rasterToPoints(TempFamRichnessRaster)
@@ -88,14 +124,16 @@ for(i in 1:NumberFamilies){
     geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
     geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() + 
     theme(legend.text=element_text(size=20), legend.title=element_text(size=32))
-  print("map done")
+  #print("map done")
   
   filename <- paste("./Figures/RichnessByFamilyMaps/RichMap_", FamilyNames[i], ".png", sep = "")
-  print("A")
+  #print("A")
   png(filename, width= 1000, height = 1000, pointsize = 30)
-  print("B")
+  #print("B")
   Map
-  print("C")
+  #print("C")
   dev.off()
-  print("D")
+  #print("D")
 }
+
+i <- 6

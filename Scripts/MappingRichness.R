@@ -1,4 +1,5 @@
 #Mapping Mosses
+#Julia Eckberg and Jackie O'Malley, Summer 2019
 #Uses data from DataProcessing.R
 
 #Load packages

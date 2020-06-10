@@ -50,10 +50,12 @@ FamRichList[[2]]
 FamPresence <- data.frame(CellID)
 FamPresence$Richness <- NA
 
+#loop takes about 2 minutes to run
 for(i in 1:length(CellID)){
-  famcell <- subset(BryophytePresence, CellID == CellID[i])
+  cell <- CellID[i]
+  famcell <- subset(BryophytePresence, CellID == cell)
   r <- length(unique(famcell$Family))
-  FamPresence$Richness[CellID == CellID[i]] <- r
+  FamPresence$Richness[CellID == cell] <- r
 }
 
 FamRichness <- numeric(15038)

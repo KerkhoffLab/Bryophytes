@@ -126,16 +126,10 @@ for(i in 1:NumberFamilies){
     geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
     geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() + 
     theme(legend.text=element_text(size=20), legend.title=element_text(size=32))
-  #print("map done")
   
   filename <- paste("./Figures/RichnessByFamilyMaps/RichMap_", FamilyNames[i], ".png", sep = "")
-  #print("A")
   png(filename, width= 1000, height = 1000, pointsize = 30)
-  #print("B")
-  Map
-  #print("C")
+  print({Map})
   dev.off()
-  #print("D")
 }
 
-i <- 6

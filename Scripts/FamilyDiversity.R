@@ -43,7 +43,6 @@ Families <- left_join(Families, ByGroup, by = "Family")
 FamilyNames <- Families$Family
 NumberFamilies <- length(FamilyNames)
 
-FamRichList[[2]]
 
 # 1.2 Find family richness
 #this is probably not the fastest way to do this, but it works
@@ -110,7 +109,6 @@ dir.create("./RichnessByFamilyMaps")
 
 
 # 2.4 Loop through families and map all species in each family (one map for each family)
-#doesn't work currently -- runs everything line-by-line but won't save maps when run in loop
 
 #make sure to set working directory to default
 
@@ -132,4 +130,80 @@ for(i in 1:NumberFamilies){
   print({Map})
   dev.off()
 }
+
+
+# 3.0 Looking at the numbers--------------------------------------------------------------------------------
+FamNSpecies <- data.frame(tally(group_by(BrySpecies, Family)))
+names(FamNSpecies)[2] <- "NumberSpecies"
+meanSpecies <- mean(FamNSpecies$NumberSpecies)
+medianSpecies <- median(FamNSpecies$NumberSpecies)
+
+b <- ggplot(data = FamNSpecies, aes(reorder(Family, -NumberSpecies), NumberSpecies)) +
+  geom_bar(stat = "identity") +
+  scale_fill_brewer(palette="Blues") +
+  theme(axis.text.x=element_text(angle=90, hjust=1))
+png("./Figures/FamSpeciesBarChart.png", width= 1000, height = 1000, pointsize = 30)
+print({b})
+dev.off()
+
+h <- ggplot(data = FamNSpecies, aes(NumberSpecies)) +
+  geom_histogram(binwidth = 10) +
+  geom_vline(aes(xintercept = mean(NumberSpecies)), color = "blue", linetype = "dashed") + 
+  geom_vline(aes(xintercept = median(NumberSpecies)), color = "red", linetype = "dashed")
+png("./Figures/FamSpeciesHist.png", width= 1000, height = 1000, pointsize = 30)
+print({h})
+dev.off()
+
+
+# 3.1 Map families with more species than mean
+#All families on one map (richness represents number of families in each cell)
+FamMostSpecies <- subset(FamNSpecies, NumberSpecies > meanSpecies)
+FamMostSpeciesList <- FamMostSpecies$Family
+length(FamMostSpeciesList)
+FamMostSpeciesList
+
+MostSpecioseFamPres<- subset(BryophytePresence, Family == FamMostSpeciesList[1])
+FamByGroup <- subset(ByGroup, Family == FamMostSpeciesList[1])
+for(i in 2:length(FamMostSpeciesList)){
+  temp1 <- subset(BryophytePresence, Family == FamMostSpeciesList[i])
+  MostSpecioseFamPres <- bind(MostSpecioseFamPres, temp1)
+  temp2 <- subset(ByGroup, Family == FamMostSpeciesList[i])
+  FamByGroup <- bind(FamByGroup, temp2)
+}
+
+SpecioseFam <- data.frame(table(MostSpecioseFamPres$Family))
+names(SpecioseFam)[1] <- "Family"
+names(SpecioseFam)[2] <- "Richness"
+SpecioseFam <- left_join(SpecioseFam, FamByGroup, by = "Family")
+
+MostSpeciesPresence <- data.frame(CellID)
+MostSpeciesPresence$Richness <- NA
+
+for(i in 1:length(CellID)){
+  cell <- CellID[i]
+  famcell <- subset(MostSpecioseFamPres, CellID == cell)
+  r <- length(unique(famcell$Family))
+  MostSpeciesPresence$Richness[CellID == cell] <- r
+}
+
+MostSpeciesRichness <- numeric(15038)
+MostSpeciesRichness[MostSpeciesPresence$CellID] <- MostSpeciesPresence$Richness
+MostSpeciesRichness[which(MostSpeciesRichness==0)]=NA
+
+MostSpeciesRichnessRaster <- setValues(BlankRas, MostSpeciesRichness)
+MostSpeciesDF <- rasterToPoints(MostSpeciesRichnessRaster)
+MostSpeciesDF <- data.frame(MostSpeciesDF)
+colnames(MostSpeciesDF) <- c("Longitude", "Latitude", "Alpha")
+
+MostSpeciesFamRichnessMap <- ggplot() + geom_tile(data=MostSpeciesDF, aes(x=Longitude, y=Latitude, fill=Alpha)) +   
+  scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent") +
+  coord_equal() +
+  geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
+  geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() + 
+  theme(legend.text=element_text(size=20), legend.title=element_text(size=32))
+MostSpeciesFamRichnessMap
+
+png("Figures/MostSpeciesFamRichnessMap.png", width= 1000, height = 1000, pointsize = 30)
+MostSpeciesFamRichnessMap
+dev.off()
 

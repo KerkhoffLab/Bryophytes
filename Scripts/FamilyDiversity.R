@@ -33,7 +33,7 @@ nw_bound_sf <- st_as_sf(nw_bound)
 
 
 # 1.0 Plot all family richness (how many families are in each cell)-------------------------------------------
--
+
 # 1.1 Make family name dataframe and vector for number of families
 Families <- data.frame(table(BryophytePresence$Family))
 names(Families)[1] <- "Family"
@@ -162,7 +162,7 @@ FamMostSpeciesList <- FamMostSpecies$Family
 length(FamMostSpeciesList)
 FamMostSpeciesList
 
-MostSpecioseFamPres<- subset(BryophytePresence, Family == FamMostSpeciesList[1])
+MostSpecioseFamPres <- subset(BryophytePresence, Family == FamMostSpeciesList[1])
 FamByGroup <- subset(ByGroup, Family == FamMostSpeciesList[1])
 for(i in 2:length(FamMostSpeciesList)){
   temp1 <- subset(BryophytePresence, Family == FamMostSpeciesList[i])
@@ -207,3 +207,73 @@ png("Figures/MostSpeciesFamRichnessMap.png", width= 1000, height = 1000, pointsi
 MostSpeciesFamRichnessMap
 dev.off()
 
+
+
+# 4.0 Family diversity in montane regions--------------------------------------------------------------------
+
+#4.1 Run MountainRanges.R to get necessary data
+
+# 4.2 Subset richness data to include only montane regions of interest
+AndesCellID <- AndesAlphaBeta$CellID
+AppCellID <- AppalachianBeta$CellID
+
+AndesBryPres <- subset(BryophytePresence, CellID == AndesCellID[1])
+AppBryPres <- subset(BryophytePresence, CellID == AppCellID[1])
+for(i in 1:length(AndesCellID)){
+  temp <- subset(BryophytePresence, CellID == AndesCellID[i])
+  AndesBryPres <- bind(AndesBryPres, temp)
+  temp2 <- subset(BryophytePresence, CellID == AppCellID[i])
+  AppBryPres <- bind(AppBryPres, temp2)
+}
+
+# 4.3 Look at the families in each region
+AndesFamList <- unique(AndesBryPres$Family)
+AppFamList <- unique(AppBryPres$Family)
+
+length(AndesFamList)
+length(AppFamList)
+
+AndesSpecies <- unique(AndesBryPres$Species)
+length(AndesSpecies)
+AppSpecies <- unique(AppBryPres$Species)
+
+AndesSF <- BrySpecies %>%
+  filter(Species %in% AndesSpecies) %>%
+  select(Family, Species)
+AndesSF <- AndesSF[!duplicated(AndesSF$Species),]
+
+AppSF <- BrySpecies %>%
+  filter(Species %in% AppSpecies) %>%
+  select(Family, Species)
+AppSF <- AppSF[!duplicated(AppSF$Species),]
+
+AndesFamNSpecies <- data.frame(tally(group_by(AndesSF, Family)))
+AppFamNSpecies <- data.frame(tally(group_by(AppSF, Family)))
+
+shared_families_andes <- AndesFamNSpecies %>%
+  filter(Family %in% AppFamNSpecies$Family)
+names(shared_families_andes)[2] <- "Andes.Rich"
+shared_families_andes$Shared <- 1
+
+shared_families_app <- AppFamNSpecies %>%
+  filter(Family %in% AndesFamNSpecies$Family)
+names(shared_families_app)[2] <- "App.Rich"
+shared_families_app$Shared <- 1
+
+shared_families <- left_join(shared_families_andes, shared_families_app, by = "Family")
+sf <- shared_families$Family
+
+shared_families_all <- full_join(shared_families_andes, shared_families_app)
+
+notshared_families_andes <- AndesFamNSpecies %>%
+  filter(!Family %in% AppFamNSpecies$Family)
+notshared_families_andes$Shared <- 0
+names(notshared_families_andes)[2] <- "Andes.Rich"
+
+notshared_families_app <- AppFamNSpecies %>%
+  filter(!Family %in% AndesFamNSpecies$Family)
+names(notshared_families_app)[2] <- "App.Rich"
+notshared_families_app$Shared <- 0
+
+AndesAppFamilies <- full_join(shared_families_all, notshared_families_andes)
+AndesAppFamilies <- full_join(AndesAppFamilies, notshared_families_app)

@@ -1,3 +1,6 @@
+#Julia Eckberg and Jackie O'Malley
+#Summer 2019
+
 #Load data
 BryophytePresence <- readRDS("Data/BryophytePresence.rds")
 

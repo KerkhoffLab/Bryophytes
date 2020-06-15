@@ -21,6 +21,8 @@ require(gridExtra)
 require(sf)
 require(rgdal)
 
+require(reshape2)
+
 
 # 0.0 Run DataProcessing.R to generate necessary data---------------------------------------------------------
 BryophytePresence <- readRDS("Data/BryophytePresence.rds")
@@ -207,3 +209,80 @@ png("Figures/MostSpeciesFamRichnessMap.png", width= 1000, height = 1000, pointsi
 MostSpeciesFamRichnessMap
 dev.off()
 
+
+# 4.0 Beta diversity--------------------------------------------------------------------------------------------
+
+# 4.1 Make beta diversity matrix
+FamBryPres <- BryophytePresence
+FamBryPres$Species <- NULL
+nrow(FamBryPres)
+
+FamCellID <- FamBryPres[,c(4,3)]
+melted <- melt(SpeciesCellID, id=c("Family", "CellID"), na.rm = TRUE)
+
+cellvector <- c(1:15038)
+neighbor <- function(cellvector) {(adjacent(BlankRas, cellvector, directions=8, pairs=FALSE, target=CellID, sorted=TRUE, include=FALSE, id=FALSE))}
+neighbors <- lapply(cellvector, neighbor)
+names(neighbors) <- cellvector
+fam_neighbors <- neighbors[CellID]
+
+FamCellMatrix <- acast(FamCellID, CellID~Family, margins=FALSE, fill=0)
+FamCellMatrix[FamCellMatrix > 0] <- 1
+
+#Using betadiver to compute B-diversity using Sorensen dissimilarity
+#betadiver(help = TRUE) gives you indices
+FamBetaMat <- betadiver(FamCellMatrix, method = "sor", order = FALSE, help = FALSE)
+saveRDS(FamBetaMat, file="Data/FamBetaMat.rds")
+
+
+# 4.2 Make/load other necessary data
+#adapted from Bryophytes.rmd
+CellVec <- c(1:15038)
+FamBetaMat <- readRDS("Data/AppFamilyCellMatrix.rds")
+
+
+# 4.3 Identify occupied cells that are adjacent to each occuppied cell + convert to vector
+neighbor <- function(CellVec) {(adjacent(BlankRas, CellVec, directions=8, pairs=FALSE, target=CellID, sorted=TRUE, include=FALSE, id=FALSE))}
+Neighbors <- lapply(CellVec, neighbor)
+names(Neighbors) <- CellVec
+
+fam_neighbors <- Neighbors[CellID]
+famneighborvect <- unlist(lapply(fam_neighbors, length))
+
+
+# 4.4 Separate out occuppied cells with 8 and 7 occuppied neighbors
+FamCell8 <- CellID[which(famneighborvect==8)]
+FamNeighbors8 <-Neighbors[Cell8]
+FamNeighbors8 <- data.frame(FamNeighbors8)
+names(FamNeighbors8) <- FamCell8
+
+FamCell7 <- CellID[which(famneighborvect==7)]
+FamNeighbors7 <- Neighbors[Cell7]
+FamNeighbors7 <- data.frame(FamNeighbors7)
+names(FamNeighbors7) <- FamCell7
+
+
+# 4.5 Make beta diversity matrix for all cells
+FamBetaMat<-as.matrix(FamBetaMat)
+row.names(FamBetaMat) <- CellID
+names(FamBetaMat) <- CellID
+
+
+# 4.6 Make beta diversity matrix for cells with 8 neighbors and cells with 7 neighbors
+FamBetaMat8<- FamBetaMat[!FamCell8, !FamCell8, drop=TRUE]
+Faminx8 <- match(as.character(FamCell8), rownames(FamBetaMat8))
+FamBetaMat8 <- FamBetaMat8[Faminx8,Faminx8]
+
+BetaMat7 <- BetaMat[!Cell7, !Cell7, drop=TRUE]
+inx7 <- match(as.character(Cell7), rownames(BetaMat7))
+BetaMat7 <- BetaMat7[inx7,inx7]
+
+
+# 4.7 For each cell, pairwise beta diversity is calculated for that focal cell and each of its 8 (or 7) neighbors, and the mean of those values is found
+Cell8CH <- as.character(Cell8)
+famBeta8 <- lapply(Cell8CH, function(x)mean(FamBetaMat[x, as.character(Neighbors8[,x])]))
+names(famBeta8) <- Cell8CH
+
+Cell7CH <- as.character(Cell7)
+Beta7 <- lapply(Cell7CH, function(x)mean(BetaMat[x, as.character(Neighbors7[,x])]))
+names(Beta7) <- Cell7CH

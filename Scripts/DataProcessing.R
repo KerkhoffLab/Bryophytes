@@ -54,7 +54,7 @@ saveRDS(BryophytePresence, file = "Data/BryophytePresence.rds")
 
 
 ####Summer 2020 Additions####
-##Moss Diversity.R##
+##BryophyteDiversity.R##
 #Load data
 BryophytePresence <- readRDS("Data/BryophytePresence.rds")
 
@@ -73,7 +73,8 @@ betamat <- betadiver(SpeciesCellMatrix, method = "j", order = FALSE, help = FALS
 saveRDS(SpeciesCellMatrix, file="Data/SpeciesCellMatrix.rds")
 saveRDS(betamat, file="Data/BetaMat.rds")
 
-#Stop for Bryophytes.rmd --------------------------------------------
+#Stop for Bryophytes.rmd --------------------------------------------------------------
+
 
 ##Bryophytes.rmd##
 #Load blank raster and cell richness data + extract cell IDs and create vector for all cells
@@ -92,7 +93,13 @@ names(Neighbors) <- CellVec
 bryneighbors <- Neighbors[CellID]
 bryneighborvect <- unlist(lapply(bryneighbors, length))
 
-#Stop for NullModelWithWorldClimData.R & SpreadingDye.R---------------------------------
+#Make beta diversity matrix for all cells
+BetaMat<-as.matrix(BetaMat)
+row.names(BetaMat) <- CellID
+names(BetaMat) <- CellID
+
+#Stop for NullModelWithWorldClimData.R & SpreadingDye.R-------------------------------
+
 
 LongLatBetaVec <- rep(0, 15038)
 LongLatBetaVec[LongLatBetaVec==0]<-NA
@@ -115,5 +122,5 @@ colnames(BetaLongLat) <- c("Beta", "Longitude", "Latitude")
 
 saveRDS(LongLatBetaRaster, file="Data/LongLatBetaRaster.rds")
 
-#Stop for MontaneFamilies.R--------------------------------------
+#Stop for MontaneFamilies.R-------------------------------------------------------------
 

@@ -21,8 +21,9 @@ require(gridExtra)
 require(sf)
 require(rgdal)
 
+require(reshape2)
 
-# 1.0 Family diversity in montane regions--------------------------------------------------------------------
+# 1.0 Family alpha diversity in montane regions---------------------------------------------------------------
 
 # 1.1 Run MountainRanges.R to get necessary data
 
@@ -189,4 +190,42 @@ png("Figures/AppTopFamRichMapMean.png", width= 1000, height = 1000, pointsize = 
 AppTopFamRichnessMap
 dev.off()
 
+
+# 2.0 Family beta diversity in montane regions-------------------------------------------------------------
+
+# 2.1 Create occurrence by cell matrix by reshaping dataframe, then convert to presence-absence matrix
+#taken from BryophyteDiversity.R
+
+# 2.11 Andes
+AndesFamilyCellID <- AndesBryPres[,c(5,4)]
+melted <- melt(AndesFamilyCellID, id=c("Family", "CellID"), na.rm = TRUE)
+
+AndesFamilyCellMatrix <- acast(melted, CellID~Family, margins=FALSE)
+AndesFamilyCellMatrix[AndesFamilyCellMatrix > 0] <- 1
+
+#Using betadiver to compute B-diversity using Jaccard similarity
+#betadiver(help = TRUE) gives you indices
+require(vegan)
+andes_betamat <- betadiver(AndesFamilyCellMatrix, method = "j", order = FALSE, help = FALSE)
+
+#Save species-cell matrix and beta diversity matrix
+saveRDS(AndesFamilyCellMatrix, file="Data/AndesFamilyCellMatrix.rds")
+saveRDS(andes_betamat, file="Data/AndesBetaMat.rds")
+
+
+#2.12 Appalachians
+AppFamilyCellID <- AppBryPres[,c(5,4)]
+melted <- melt(AppFamilyCellID, id=c("Family", "CellID"), na.rm = TRUE)
+
+AppFamilyCellMatrix <- acast(melted, CellID~Family, margins=FALSE)
+AppFamilyCellMatrix[AppFamilyCellMatrix > 0] <- 1
+
+#Using betadiver to compute B-diversity using Jaccard similarity
+#betadiver(help = TRUE) gives you indices
+require(vegan)
+app_betamat <- betadiver(AppFamilyCellMatrix, method = "j", order = FALSE, help = FALSE)
+
+#Save species-cell matrix and beta diversity matrix
+saveRDS(AppFamilyCellMatrix, file="Data/AppFamilyCellMatrix.rds")
+saveRDS(app_betamat, file="Data/AppBetaMat.rds")
 

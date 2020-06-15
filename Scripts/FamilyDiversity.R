@@ -380,7 +380,7 @@ FamBetaScatterplot
 dev.off()
 
 
-# 5.0 Make beta diversity maps for each family
+# 5.0 Make beta diversity maps for each family------------------------------------------------------------------
 #####have not finished this, code below is for a-div
 
 for(i in 1:NumberFamilies){
@@ -403,9 +403,10 @@ for(i in 1:NumberFamilies){
 }
 
 
-# 6.0 Map families with more species than the mean
-MSFamCellID <- FamilyCellID %>%
-  filter(Family %in% FamMostSpeciesList)
+# 6.0 Map families with more species than the mean--------------------------------------------------------------
+MSFamCellID <- MostSpecioseFamPres %>%
+  filter(Family %in% FamMostSpeciesList) %>%
+  select(CellID, Family)
 
 melted <- melt(MSFamCellID, id=c("Family", "CellID"), na.rm = TRUE)
 
@@ -416,38 +417,11 @@ MSFamCellMatrix[MSFamCellMatrix > 0] <- 1
 #betadiver(help = TRUE) gives you indices
 MSFamBetaMat <- betadiver(MSFamCellMatrix, method = "j", order = FALSE, help = FALSE)
 
+#Make beta diversity matrix for all cells
+MSFamBetaMat<-as.matrix(MSFamBetaMat)
+row.names(MSFamBetaMat) <- CellID
+names(MSFamBetaMat) <- CellID
 
-# 4.2 Make/load other necessary data
-#adapted from Bryophytes.rmd
-CellVec <- c(1:15038)
-FamBetaMat <- readRDS("Data/FamBetaMat.rds")
-
-
-# 4.3 Identify occupied cells that are adjacent to each occuppied cell + convert to vector
-neighbor <- function(CellVec) {(adjacent(BlankRas, CellVec, directions=8, pairs=FALSE, target=CellID, sorted=TRUE, include=FALSE, id=FALSE))}
-Neighbors <- lapply(CellVec, neighbor)
-names(Neighbors) <- CellVec
-
-bryneighbors <- Neighbors[CellID]
-bryneighborvect <- unlist(lapply(bryneighbors, length))
-
-
-# 4.4 Separate out occuppied cells with 8 and 7 occuppied neighbors
-Cell8 <- CellID[which(bryneighborvect==8)]
-Neighbors8 <-Neighbors[Cell8]
-Neighbors8 <- data.frame(Neighbors8)
-names(Neighbors8) <- Cell8
-
-Cell7 <- CellID[which(bryneighborvect==7)]
-Neighbors7 <- Neighbors[Cell7]
-Neighbors7 <- data.frame(Neighbors7)
-names(Neighbors7) <- Cell7
-
-
-# 4.5 Make beta diversity matrix for all cells
-FamBetaMat<-as.matrix(FamBetaMat)
-row.names(FamBetaMat) <- CellID
-names(FamBetaMat) <- CellID
 
 
 # 4.6 Make beta diversity matrix for cells with 8 neighbors and cells with 7 neighbors

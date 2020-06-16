@@ -72,11 +72,14 @@ names(Beta7) <- Cell7CH
 
 Beta7Vec<-unlist(Beta7)
 Beta8Vec<-unlist(Beta8)
+
 BetaVec <- rep(0, 15038)
 
 BetaVec[Cell8]<-Beta8Vec
 BetaVec[Cell7]<-Beta7Vec
+
 BetaVec[BetaVec==0]<-NA
+
 
 plot(BetaVec, ylab = "Mean Pairwise β-Diversity", xlab = "Cell ID")
 
@@ -87,9 +90,32 @@ require(ggplot2)
 
 cols <- rev(wes_palette("Zissou1", 500, type = "continuous"))
 
-BetaVec[BetaVec<0.5]<-NA
+#BetaVec[BetaVec<0.5]<-NA
 BetaRaster <- setValues(BlankRas, BetaVec)
 
 theme_set(theme_void())
-gplot(BetaRaster, maxpixels=15038) + geom_raster(aes(fill = value))+ scale_fill_gradientn(colours=cols, na.value="transparent") +
+
+#Mapping method from MappingDiversity.R
+RawLivBetaMapRas <- gplot(BetaRaster, maxpixels=15038) + geom_raster(aes(fill = value))+ scale_fill_gradientn(name="β-diversity", colours=cols, na.value="transparent", limits=c(0,1)) +
   coord_equal() 
+RawLivBetaMapRas
+
+#Mapping method from Bryophytes.Rmd
+BetaRaster <- setValues(BlankRas, BetaVec)
+BetaPoints<-rasterToPoints(BetaRaster)
+BetaDF <- data.frame(BetaPoints)
+colnames(BetaDF) <- c("Longitude", "Latitude", "Beta")
+
+theme_set(theme_void())
+RawLivBetaMapTile <- ggplot() + geom_tile(data=BetaDF, aes(x=Longitude, y=Latitude, fill=Beta)) + 
+  scale_fill_gradientn(name="β-diversity", colours=cols, na.value="transparent", limits = c(0,1)) + 
+  coord_equal()
+RawLivBetaMapTile
+
+#Add continental and mountainous outlines
+nw_mount <- shapefile("Data/MapOutlines/Mountains/Koeppen-Geiger_biomes.shp")
+nw_bound <- shapefile("Data/MapOutlines/Global_bound/Koeppen-Geiger_biomes.shp")
+
+nw_mount_sf <- st_as_sf(nw_mount)
+nw_bound_sf <- st_as_sf(nw_bound)
+

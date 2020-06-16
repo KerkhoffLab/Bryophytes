@@ -1,4 +1,5 @@
-#Adapted from HLDiversity.R and MossDiversity.R by Kathryn Dawdy
+#Adapted from HLDiversity.R and MossDiversity.R
+#Kathryn Dawdy, Summer 2020
 
 #Load data
 BryophytePresence <- readRDS("Data/BryophytePresence.rds")

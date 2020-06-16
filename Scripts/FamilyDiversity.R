@@ -404,9 +404,17 @@ for(i in 1:NumberFamilies){
 
 
 # 6.0 Map families with more species than the mean--------------------------------------------------------------
+##this isn't working
 MSFamCellID <- MostSpecioseFamPres %>%
-  filter(Family %in% FamMostSpeciesList) %>%
-  select(CellID, Family)
+  dplyr::select(CellID, Family) %>%
+  filter(Family %in% FamMostSpeciesList)
+
+MSCellID <- unique(MSFamCellID$CellID)
+fix <- data.frame(setdiff(CellID, MSCellID))
+fix$Family <- NA
+names(fix)[1] <- "CellID"
+names(fix)[2] <- "Family"
+MSFamCellID <- bind_rows(MSFamCellID, fix)
 
 melted <- melt(MSFamCellID, id=c("Family", "CellID"), na.rm = TRUE)
 
@@ -422,90 +430,84 @@ MSFamBetaMat<-as.matrix(MSFamBetaMat)
 row.names(MSFamBetaMat) <- CellID
 names(MSFamBetaMat) <- CellID
 
+#Make beta diversity matrix for cells with 8 neighbors and cells with 7 neighbors
+MSFamBetaMat8<- MSFamBetaMat[!Cell8, !Cell8, drop=TRUE]
+inx8 <- match(as.character(Cell8), rownames(MSFamBetaMat8))
+MSFamBetaMat8 <- FamBetaMat8[inx8,inx8]
+
+MSFamBetaMat7 <- MSFamBetaMat[!Cell7, !Cell7, drop=TRUE]
+inx7 <- match(as.character(Cell7), rownames(MSFamBetaMat7))
+MSFamBetaMat7 <- MSFamBetaMat7[inx7,inx7]
+
+#For each cell, pairwise beta diversity is calculated for that focal cell and each of its 8 (or 7) neighbors, and the mean of those values is found
+MSfamBeta8 <- lapply(Cell8CH, function(x)mean(MSFamBetaMat[x, as.character(Neighbors8[,x])]))
+names(MSfamBeta8) <- Cell8CH
+
+MSfamBeta7 <- lapply(Cell7CH, function(x)mean(MSFamBetaMat[x, as.character(Neighbors7[,x])]))
+names(MSfamBeta7) <- Cell7CH
+
+#Plot mean pairwise beta diversity by Cell ID and convert to dissimilarity using 1-x where x is Jaccard similarity
+MSFamBeta7Vec<-unlist(MSfamBeta7)
+MSFamBeta8Vec<-unlist(MSfamBeta8)
+
+MSFamBetaVec <- rep(0, 15038)
+
+MSFamBetaVec[Cell8]<-MSFamBeta8Vec
+MSFamBetaVec[Cell7]<-MSFamBeta7Vec
+
+MSFamBetaVec[MSFamBetaVec==0]<-NA
+MSFamBetaVec <- 1-MSFamBetaVec
+
+#Convert UTM to longitude and latitude
+MSFamLongLatBetaVec <- rep(0, 15038)
+MSFamLongLatBetaVec[Cell8]<-MSFamBeta8Vec
+MSFamLongLatBetaVec[Cell7]<-MSFamBeta7Vec
+MSFamLongLatBetaVec[MSFamLongLatBetaVec==0]<-NA
+MSFamLongLatBetaVec <- 1-MSFamLongLatBetaVec
+
+MSFamLongLatBetaRaster <- setValues(BlankRas, MSFamLongLatBetaVec)
+MSFamLongLatBetaPoints<-rasterToPoints(MSFamLongLatBetaRaster)
+MSFamLongLatBetaDF <- data.frame(MSFamLongLatBetaPoints)
+colnames(MSFamLongLatBetaDF) <- c("Longitude", "Latitude", "Beta")
+
+coordinates(MSFamLongLatBetaDF) <- ~Longitude+Latitude 
+proj4string(MSFamLongLatBetaDF) <- CRS("+proj=utm +zone=10") 
+MSFamBetaLongLat <- spTransform(MSFamLongLatBetaDF, CRS("+proj=longlat")) 
+MSFamLongLatBetaDF <- data.frame(MSFamBetaLongLat)
+MSFamLongLatBetaDF[c("Longitude", "Latitude", "Beta")]
+saveRDS(MSFamLongLatBetaDF, file = "Data/MSFamLongLatBetaDF.rds")
+
+MSFamBetaLongLat <- data.frame(MSFamBetaLongLat)
+colnames(MSFamBetaLongLat) <- c("Beta", "Longitude", "Latitude")
+
+saveRDS(MSFamLongLatBetaRaster, file="Data/MSFamLongLatBetaRaster.rds")
 
 
-# 4.6 Make beta diversity matrix for cells with 8 neighbors and cells with 7 neighbors
-FamBetaMat8<- FamBetaMat[!Cell8, !Cell8, drop=TRUE]
-inx8 <- match(as.character(Cell8), rownames(FamBetaMat8))
-FamBetaMat8 <- FamBetaMat8[inx8,inx8]
-
-FamBetaMat7 <- FamBetaMat[!Cell7, !Cell7, drop=TRUE]
-inx7 <- match(as.character(Cell7), rownames(FamBetaMat7))
-FamBetaMat7 <- FamBetaMat7[inx7,inx7]
-
-
-# 4.7 For each cell, pairwise beta diversity is calculated for that focal cell and each of its 8 (or 7) neighbors, and the mean of those values is found
-Cell8CH <- as.character(Cell8)
-famBeta8 <- lapply(Cell8CH, function(x)mean(FamBetaMat[x, as.character(Neighbors8[,x])]))
-names(famBeta8) <- Cell8CH
-
-Cell7CH <- as.character(Cell7)
-famBeta7 <- lapply(Cell7CH, function(x)mean(FamBetaMat[x, as.character(Neighbors7[,x])]))
-names(famBeta7) <- Cell7CH
-
-
-# 4.8 Plot mean pairwise beta diversity by Cell ID and convert to dissimilarity using 1-x where x is Jaccard similarity
-FamBeta7Vec<-unlist(famBeta7)
-FamBeta8Vec<-unlist(famBeta8)
-
-FamBetaVec <- rep(0, 15038)
-
-FamBetaVec[Cell8]<-FamBeta8Vec
-FamBetaVec[Cell7]<-FamBeta7Vec
-
-FamBetaVec[FamBetaVec==0]<-NA
-FamBetaVec <- 1-FamBetaVec
-
-# 4.9 Convert UTM to longitude and latitude
-FamLongLatBetaVec <- rep(0, 15038)
-FamLongLatBetaVec[Cell8]<-FamBeta8Vec
-FamLongLatBetaVec[Cell7]<-FamBeta7Vec
-FamLongLatBetaVec[FamLongLatBetaVec==0]<-NA
-FamLongLatBetaVec <- 1-FamLongLatBetaVec
-
-FamLongLatBetaRaster <- setValues(BlankRas, FamLongLatBetaVec)
-FamLongLatBetaPoints<-rasterToPoints(FamLongLatBetaRaster)
-FamLongLatBetaDF <- data.frame(FamLongLatBetaPoints)
-colnames(FamLongLatBetaDF) <- c("Longitude", "Latitude", "Beta")
-
-coordinates(FamLongLatBetaDF) <- ~Longitude+Latitude 
-proj4string(FamLongLatBetaDF) <- CRS("+proj=utm +zone=10") 
-FamBetaLongLat <- spTransform(FamLongLatBetaDF, CRS("+proj=longlat")) 
-FamLongLatBetaDF <- data.frame(FamBetaLongLat)
-FamLongLatBetaDF[c("Longitude", "Latitude", "Beta")]
-saveRDS(FamLongLatBetaDF, file = "Data/FamLongLatBetaDF.rds")
-
-FamBetaLongLat <- data.frame(FamBetaLongLat)
-colnames(FamBetaLongLat) <- c("Beta", "Longitude", "Latitude")
-
-saveRDS(FamLongLatBetaRaster, file="Data/FamLongLatBetaRaster.rds")
-
-
-# 4.10 Map beta diversity with values over 0.5 shown in dark grey (19 values are over 0.5)
+#Map beta diversity with values over 0.5 shown in dark grey
 #theme_void for white background, theme_gray for latitude curves
-FamBetaRaster <- setValues(BlankRas, FamBetaVec)
-FamBetaPoints<-rasterToPoints(FamBetaRaster)
-FamBetaDF <- data.frame(FamBetaPoints)
-colnames(FamBetaDF) <- c("Longitude", "Latitude", "Beta")
+MSFamBetaRaster <- setValues(BlankRas, MSFamBetaVec)
+MSFamBetaPoints<-rasterToPoints(MSFamBetaRaster)
+MSFamBetaDF <- data.frame(MSFamBetaPoints)
+colnames(MSFamBetaDF) <- c("Longitude", "Latitude", "Beta")
 
 # 4.11 Outlier beta values (>0.5)
-FamOutlierBetaVec <- rep(0, 15038)
-FamOutlierBetaVec[Cell8]<-FamBeta8Vec
-FamOutlierBetaVec[Cell7]<-FamBeta7Vec
-FamOutlierBetaVec[FamOutlierBetaVec==0]<-NA
-FamOutlierBetaVec[FamOutlierBetaVec>0.5]<-NA
+MSFamOutlierBetaVec <- rep(0, 15038)
+MSFamOutlierBetaVec[Cell8]<-MSFamBeta8Vec
+MSFamOutlierBetaVec[Cell7]<-MSFamBeta7Vec
+MSFamOutlierBetaVec[MSFamOutlierBetaVec==0]<-NA
+MSFamOutlierBetaVec[MSFamOutlierBetaVec>0.5]<-NA
 
-FamOutlierBetaRaster <- setValues(BlankRas, FamOutlierBetaVec)
-FamOutlierBetaPoints<-rasterToPoints(FamOutlierBetaRaster)
-FamOutlierBetaDF <- data.frame(FamOutlierBetaPoints)
-colnames(FamOutlierBetaDF) <- c("Longitude", "Latitude", "Beta")
+MSFamOutlierBetaRaster <- setValues(BlankRas, MSFamOutlierBetaVec)
+MSFamOutlierBetaPoints<-rasterToPoints(MSFamOutlierBetaRaster)
+MSFamOutlierBetaDF <- data.frame(MSFamOutlierBetaPoints)
+colnames(MSFamOutlierBetaDF) <- c("Longitude", "Latitude", "Beta")
 
 # 4.12 Mapping
 source("Functions/gplot_data.R")
-gplotB<- gplot_data(FamBetaRaster)
-gplotOutlier<- gplot_data(FamOutlierBetaRaster)
+gplotB<- gplot_data(MSFamBetaRaster)
+gplotOutlier<- gplot_data(MSFamOutlierBetaRaster)
 
-FamBetaMap <- ggplot() +
+MSFamBetaMap <- ggplot() +
   geom_tile(data = dplyr::filter(gplotOutlier, !is.na(value)), 
             aes(x = x, y = y), fill = "gray25") +
   geom_tile(data = gplotB, 
@@ -514,10 +516,10 @@ FamBetaMap <- ggplot() +
   coord_quickmap() + geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
   geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() +
   theme(legend.text=element_text(size=20), legend.title=element_text(size=32), axis.title = element_blank())
-FamBetaMap
+MSFamBetaMap
 
-png("Figures/fam_beta.png", width = 1000, height = 1000, pointsize = 30)
-FamBetaMap
+png("Figures/ms_fam_beta.png", width = 1000, height = 1000, pointsize = 30)
+MSFamBetaMap
 dev.off()
 
 # 4.13 Scatterplot of beta diversity by family x latitude

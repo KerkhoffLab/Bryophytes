@@ -9,6 +9,7 @@ require(sp)
 require(ape)
 require(vegan)
 require(reshape2)
+require(raster)
 
 #Load data and source functions
 SpeciesPresence <- read.csv("Data/SpeciesPresence_by_100km_Cell.csv")

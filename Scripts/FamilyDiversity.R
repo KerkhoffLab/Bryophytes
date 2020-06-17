@@ -404,7 +404,6 @@ for(i in 1:NumberFamilies){
 
 
 # 6.0 Map families with more species than the mean--------------------------------------------------------------
-##this isn't working
 MSFamCellID <- MostSpecioseFamPres %>%
   dplyr::select(CellID, Family) %>%
   filter(Family %in% FamMostSpeciesList)
@@ -433,7 +432,7 @@ names(MSFamBetaMat) <- CellID
 #Make beta diversity matrix for cells with 8 neighbors and cells with 7 neighbors
 MSFamBetaMat8<- MSFamBetaMat[!Cell8, !Cell8, drop=TRUE]
 inx8 <- match(as.character(Cell8), rownames(MSFamBetaMat8))
-MSFamBetaMat8 <- FamBetaMat8[inx8,inx8]
+MSFamBetaMat8 <- MSFamBetaMat8[inx8,inx8]
 
 MSFamBetaMat7 <- MSFamBetaMat[!Cell7, !Cell7, drop=TRUE]
 inx7 <- match(as.character(Cell7), rownames(MSFamBetaMat7))
@@ -522,21 +521,21 @@ png("Figures/ms_fam_beta.png", width = 1000, height = 1000, pointsize = 30)
 MSFamBetaMap
 dev.off()
 
-# 4.13 Scatterplot of beta diversity by family x latitude
-FamBetaLongLat$pc <- predict(prcomp(~Latitude+Beta, FamBetaLongLat))[,1]
+#Scatterplot of beta diversity by family x latitude
+MSFamBetaLongLat$pc <- predict(prcomp(~Latitude+Beta, MSFamBetaLongLat))[,1]
 cols2 <- rev(wes_palette("Zissou1", 1, type = "continuous"))
 
-FamBetaLongLat
-FamBetaScatterplot <- ggplot(FamBetaLongLat, aes(Latitude, Beta)) + 
+MSFamBetaLongLat
+MSFamBetaScatterplot <- ggplot(MSFamBetaLongLat, aes(Latitude, Beta)) + 
   geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "orangered2") + 
   ylab("β diversity") + 
   ylim(0,0.5)+ 
   theme_minimal() + 
   theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
-FamBetaScatterplot
+MSFamBetaScatterplot
 
-png("Figures/fam_beta_scatter.png", width = 1000, height = 1000, pointsize = 30)
-FamBetaScatterplot
+png("Figures/ms_fam_beta_scatter.png", width = 1000, height = 1000, pointsize = 30)
+MSFamBetaScatterplot
 dev.off()
 
 

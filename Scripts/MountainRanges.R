@@ -8,6 +8,7 @@ library(rgeos)
 library(maptools)
 require(rgdal)
 require(rworldmap)
+require(sp)
 
 # 0. Downloading data  ----------------------------------------------------
 ## from http://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-physical-labels/
@@ -149,20 +150,20 @@ saveRDS(LongLatDF, "Data/LongLatDF.rds")
 # 8. Creates a dataframe w/beta diversity grouped by montane region------------
 LongLatDF <- readRDS("Data/LongLatDF.rds")
 
-AndesBeta <- extract(LongLatBetaRaster, andes_range, df = TRUE, cellnumbers = TRUE)
-colnames(AndesBeta) <- c("Range", "CellID", "Beta")
+AndesBeta <- extract(LongLatBetaRaster, andes_range, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+colnames(AndesBeta) <- c("Range", "CellID", "Beta", "Weight")
 AndesBeta$Range <- "Andes"
 AndesVec <- AndesBeta$CellID
 AndesBeta <- merge(AndesBeta, LongLatDF)
 
-AppalachianBeta <- extract(LongLatBetaRaster, appalachian_range, df = TRUE, cellnumbers = TRUE)
-colnames(AppalachianBeta) <- c("Range", "CellID", "Beta")
+AppalachianBeta <- extract(LongLatBetaRaster, appalachian_range, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+colnames(AppalachianBeta) <- c("Range", "CellID", "Beta", "Weight")
 AppalachianBeta$Range <- "Appalachians"
 AppVec <- AppalachianBeta$CellID
 AppalachianBeta <- merge(AppalachianBeta, LongLatDF)
 
-RockyBeta <- extract(LongLatBetaRaster, rocky_range, df = TRUE, cellnumbers = TRUE)
-colnames(RockyBeta) <- c("Range", "CellID", "Beta")
+RockyBeta <- extract(LongLatBetaRaster, rocky_range, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+colnames(RockyBeta) <- c("Range", "CellID", "Beta", "Weight")
 RockyBeta$Range <- "Rockies"
 RockyVec <- RockyBeta$CellID
 RockyBeta <- merge(RockyBeta, LongLatDF)
@@ -172,7 +173,3 @@ RockyBeta <- merge(RockyBeta, LongLatDF)
 AndesAlphaBeta <- left_join(AndesBeta, CellRichness, by = "CellID")
 AppAlphaBeta <- left_join(AppalachianBeta, CellRichness, by = "CellID")
 RockyAlphaBeta <- left_join(RockyBeta, CellRichness, by = "CellID")
-
-
-
-

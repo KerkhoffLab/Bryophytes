@@ -1,5 +1,5 @@
-#MAPPING LIVERWORT BETA DIVERSITY
-#Adapted from MappingDiversity.R and Bryophytes.Rmd
+#MAPPING MOSS BETA DIVERSITY
+#Adapted from MappingLiverwortDiversity.R
 #Kathryn Dawdy, Summer 2020
 
 #Load Packages
@@ -15,13 +15,13 @@ require(gridExtra)
 require(sf)
 require(rgdal)
 
-# 0.0 Run DataProcessing.R and LiverwortDiversity.R to generate necessary data -----------------------------------------------------------------
+# 0.0 Run DataProcessing.R and MossDiversity.R to generate necessary data -----------------------------------------------------------------
 
 ## Load blank raster and cell richness data 
 ##Change file depending on if you want to map bryophytes, mosses, liverworts, etc. 
 BlankRas <-raster("Data/blank_100km_raster.tif")
-BetaMat <- readRDS("Data/LiverwortBetaMat.rds")
-CellRichness <- readRDS("Data/LiverwortRichness.rds")
+BetaMat <- readRDS("Data/MossBetaMat.rds")
+CellRichness <- readRDS("Data/MossRichness.rds")
 
 
 # 1.0 Extract cell IDs and create vector for all cells -----------------------------------------------------------------------------------------
@@ -91,7 +91,7 @@ BetaVec <- 1-BetaVec
 plot(BetaVec, ylab = "Mean Pairwise β-Diversity", xlab = "Cell ID")
 
 
-# 2.0 Map liverwort beta diversity -------------------------------------------------------------------------------------------------------------
+# 2.0 Map moss beta diversity -------------------------------------------------------------------------------------------------------------
 
 # 2.1 Create colorscheme
 cols <- (wes_palette("Zissou1", 500, type = "continuous"))
@@ -142,7 +142,7 @@ source("Functions/gplot_data.R")
 gplotB<- gplot_data(BetaRaster)
 gplotOutlier<- gplot_data(OutlierBetaRaster)
 
-LiverwortBetaMap <- ggplot() +
+MossBetaMap <- ggplot() +
   geom_tile(data = dplyr::filter(gplotOutlier, !is.na(value)), 
             aes(x = x, y = y), fill = "gray25") +
   geom_tile(data = gplotB, 
@@ -151,8 +151,8 @@ LiverwortBetaMap <- ggplot() +
   coord_quickmap() + geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
   geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() +
   theme(legend.text=element_text(size=20), legend.title=element_text(size=32), axis.title = element_blank())
-LiverwortBetaMap
+MossBetaMap
 
-png("Figures/LiverwortBetaMap.png", width = 1000, height = 1000, pointsize = 30)
-LiverwortBetaMap
+png("Figures/MossBetaMap.png", width = 1000, height = 1000, pointsize = 30)
+MossBetaMap
 dev.off()

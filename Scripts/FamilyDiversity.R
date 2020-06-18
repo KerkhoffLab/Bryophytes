@@ -527,7 +527,7 @@ cols2 <- rev(wes_palette("Zissou1", 1, type = "continuous"))
 
 MSFamBetaLongLat
 MSFamBetaScatterplot <- ggplot(MSFamBetaLongLat, aes(Latitude, Beta)) + 
-  geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "orangered2") + 
+  geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "royalblue2") + 
   ylab("β diversity") + 
   ylim(0,0.5)+ 
   theme_minimal() + 
@@ -536,6 +536,11 @@ MSFamBetaScatterplot
 
 png("Figures/ms_fam_beta_scatter.png", width = 1000, height = 1000, pointsize = 30)
 MSFamBetaScatterplot
+dev.off()
+
+# 4.13 Arrange total beta diversity map and MSFam map on top of each other
+png("Figures/Total_MSFam_Beta_Scatter.png", width = 1000, height = 1000, pointsize = 20)
+grid.arrange(MSFamBetaScatterplot, FamBetaScatterplot, nrow=2)
 dev.off()
 
 

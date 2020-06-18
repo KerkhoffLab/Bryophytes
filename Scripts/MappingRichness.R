@@ -1,6 +1,7 @@
 #Mapping Mosses
 #Julia Eckberg and Jackie O'Malley, Summer 2019
 #Uses data from DataProcessing.R
+#Edit by Kathryn Dawdy, June 2020: Under #Plot HL richness, changed RichnessRaster to HLRichnessRaster
 
 #Load packages
 require(BIEN)
@@ -77,7 +78,7 @@ HLRichness[which(HLRichness==0)]=NA
 
 #Plot HL richness
 HLRichnessRaster <- setValues(BlankRas, HLRichness)
-gplot(RichnessRaster, maxpixels=15038) + geom_raster(aes(fill = value))+ scale_fill_gradientn(colours=cols, na.value="transparent") +
+gplot(HLRichnessRaster, maxpixels=15038) + geom_raster(aes(fill = value))+ scale_fill_gradientn(colours=cols, na.value="transparent") +
   coord_equal()    
 
 

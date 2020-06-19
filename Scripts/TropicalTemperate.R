@@ -1,3 +1,5 @@
+#Jackie O'Malley and Julia Eckberg
+#Summer 2019
 ###Separate tropical and temperate beta diversity values###
 #Load in data for all zones 
 LongLatBetaDF <- readRDS("Data/LongLatBetaDF.rds")

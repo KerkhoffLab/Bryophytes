@@ -54,12 +54,12 @@ length(AppSpecies)
 
 AndesSF <- BrySpecies %>%
   filter(Species %in% AndesSpecies) %>%
-  select(Family, Species)
+  dplyr::select(Family, Species)
 AndesSF <- AndesSF[!duplicated(AndesSF$Species),]
 
 AppSF <- BrySpecies %>%
   filter(Species %in% AppSpecies) %>%
-  select(Family, Species)
+  dplyr::select(Family, Species)
 AppSF <- AppSF[!duplicated(AppSF$Species),]
 
 AndesFamNSpecies <- data.frame(tally(group_by(AndesSF, Family)))
@@ -326,7 +326,7 @@ cols2 <- rev(wes_palette("Zissou1", 1, type = "continuous"))
 AndesBetaLongLat
 AndesBetaScatterplot <- ggplot(AndesBetaLongLat, aes(Latitude, Beta)) + 
   geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "orangered2") + 
-  ylab("β diversity") + 
+  ylab("β diversity (All Families Present in Andes)") + 
   ylim(0,0.5)+ 
   theme_minimal() + 
   theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
@@ -464,8 +464,8 @@ cols2 <- rev(wes_palette("Zissou1", 1, type = "continuous"))
 
 AppBetaLongLat
 AppBetaScatterplot <- ggplot(AppBetaLongLat, aes(Latitude, Beta)) + 
-  geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "orangered2") + 
-  ylab("β diversity") + 
+  geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "mediumseagreen") + 
+  ylab("β diversity (All Families Present in Appalachians)") + 
   ylim(0,0.5)+ 
   theme_minimal() + 
   theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
@@ -603,7 +603,7 @@ cols2 <- rev(wes_palette("Zissou1", 1, type = "continuous"))
 TFAndesBetaLongLat
 TFAndesBetaScatterplot <- ggplot(TFAndesBetaLongLat, aes(Latitude, Beta)) + 
   geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "orangered2") + 
-  ylab("β diversity") + 
+  ylab("β diversity (Most Speciose Families in Andes)") + 
   ylim(0,0.5)+ 
   theme_minimal() + 
   theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
@@ -738,7 +738,7 @@ cols2 <- rev(wes_palette("Zissou1", 1, type = "continuous"))
 TFAppBetaLongLat
 TFAppBetaScatterplot <- ggplot(TFAppBetaLongLat, aes(Latitude, Beta)) + 
   geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "mediumseagreen") + 
-  ylab("β diversity") + 
+  ylab("β diversity (Most Speciose Families in Appalachians)") + 
   ylim(0,0.5)+ 
   theme_minimal() + 
   theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
@@ -750,6 +750,11 @@ options(device = "RStudioGD")
 dev.off()
 
 # 3.0 Arrange plots----------------------------------------------------------------------------------------------------
-png("Figures/AndesApp_Beta.png", width = 1000, height = 1000, pointsize = 20)
+png("Figures/TFAndesApp_Beta.png", width = 1000, height = 1000, pointsize = 20)
 grid.arrange(TFAppBetaScatterplot, TFAndesBetaScatterplot, nrow=2)
 dev.off()
+
+png("Figures/AndesApp_Beta.png", width = 1000, height = 1000, pointsize = 20)
+grid.arrange(AppBetaScatterplot, AndesBetaScatterplot, nrow=2)
+dev.off()
+

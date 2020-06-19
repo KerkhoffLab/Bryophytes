@@ -369,7 +369,7 @@ cols2 <- rev(wes_palette("Zissou1", 1, type = "continuous"))
 FamBetaLongLat
 FamBetaScatterplot <- ggplot(FamBetaLongLat, aes(Latitude, Beta)) + 
   geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "orangered2") + 
-  ylab("β diversity") + 
+  ylab("β diversity (All Families)") + 
   ylim(0,0.5)+ 
   theme_minimal() + 
   theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
@@ -528,19 +528,104 @@ cols2 <- rev(wes_palette("Zissou1", 1, type = "continuous"))
 MSFamBetaLongLat
 MSFamBetaScatterplot <- ggplot(MSFamBetaLongLat, aes(Latitude, Beta)) + 
   geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "royalblue2") + 
-  ylab("β diversity") + 
+  ylab("β diversity (Most Speciose Families)") +
   ylim(0,0.5)+ 
   theme_minimal() + 
-  theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
+  theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=15))
 MSFamBetaScatterplot
 
 png("Figures/ms_fam_beta_scatter.png", width = 1000, height = 1000, pointsize = 30)
 MSFamBetaScatterplot
 dev.off()
 
-# 4.13 Arrange total beta diversity map and MSFam map on top of each other
+
+# 5.0 Plots----------------------------------------------------------------------------------------------
+
+# 5.1 Beta Diversity #
+# 5.11 Plot beta div for all families and most speciose families next to each other
 png("Figures/Total_MSFam_Beta_Scatter.png", width = 1000, height = 1000, pointsize = 20)
 grid.arrange(MSFamBetaScatterplot, FamBetaScatterplot, nrow=2)
 dev.off()
+
+# 5.12 Plot beta diversity for all families and most speciose families on top of each other
+MSFamBetaLongLat$pc <- NULL
+MSFamBetaLongLat$Type <- "MostSpeciose"
+FamBetaLongLat$Type <- "AllFam"
+FullFamBeta <- rbind(MSFamBetaLongLat, FamBetaLongLat)
+
+AllBetaFamScatter <- ggplot(data = FullFamBeta, aes(Latitude, Beta, color=Type)) + 
+  geom_point(shape = 16, size = 3, show.legend=FALSE, alpha=0.8) + 
+  ylab("β diversity") + ylim(0, 0.5) +
+  theme_minimal() + theme(axis.title.y = element_text(size=40), axis.title.x = element_blank(),  
+                          axis.text = element_text(size=20)) + 
+  scale_color_manual(values = c("cyan4", "goldenrod2")) + geom_smooth(size = 2, show.legend = T)
+AllBetaFamScatter
+
+png("Figures/AllBetaFamScatter.png", width = 1000, height = 1000, pointsize = 20)
+AllBetaFamScatter
+dev.off()
+
+
+# 5.2 Alpha Diversity #
+
+# 5.21 Plot alpha diversity for all families
+#(from Bryophytes.rmd)
+coordinates(RichnessDF) <- ~Longitude+Latitude 
+proj4string(RichnessDF) <- CRS("+proj=utm +zone=10") 
+AlphaLongLat <- spTransform(RichnessDF, CRS("+proj=longlat")) 
+AlphaLongLat <- data.frame(AlphaLongLat)
+colnames(AlphaLongLat) <- c("Alpha", "Longitude", "Latitude")
+
+theme_set(theme_gray())
+AlphaScatterplot <- ggplot(AlphaLongLat, aes(Latitude, Alpha)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "orangered2") + ylab("α diversity") + xlab(" ") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.text.y = element_text(size=20), axis.text.x = element_text(size=0))
+AlphaScatterplot
+
+
+# 5.21 Plot alpha diversity for most speciose families 
+MSFBryPres <- BryophytePresence %>%
+  filter(Family %in% FamMostSpeciesList)
+MSFRichness <- tally(group_by(MSFBryPres, CellID))
+names(MSFRichness)[2] <- "Alpha"
+
+MSFAlphaLongLat <- data.frame(numeric(15038))
+colnames(MSFAlphaLongLat) <- "Alpha"
+MSFAlphaLongLat$Alpha[MSFRichness$CellID] <- MSFRichness$Alpha
+MSFAlphaLongLat$Alpha[MSFAlphaLongLat$Alpha == 0]<- NA
+MSFAlphaLongLat <- bind_cols(MSFAlphaLongLat, LongLatDF)
+
+theme_set(theme_gray())
+MSFAlphaScatter <- ggplot(MSFAlphaLongLat, aes(Latitude, Alpha)) + 
+  geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "orangered2") + 
+  ylab("α diversity") + xlab(" ") + 
+  theme_minimal() + 
+  theme(axis.title.y = element_text(size=32), axis.text.y = element_text(size=20), axis.text.x = element_text(size=0))
+MSFAlphaScatter
+
+png("Figures/MSFAlphaScatter.png", width = 1000, height = 1000, pointsize = 20)
+MSFAlphaScatter
+dev.off()
+
+# 5.22 Plot alpha diversity for all families and most speciose families on top of each other
+AlphaLongLat$"NA" <- NULL
+MSFAlphaLongLat$CellID <- NULL
+AlphaLongLat$Type <- "AllFamilies"
+MSFAlphaLongLat$Type <- "MostSpeciose"
+FullFamAlpha <- rbind(AlphaLongLat, MSFAlphaLongLat)
+
+AllAlphaFamScatter <- ggplot(data = FullFamAlpha, aes(Latitude, Alpha, color=Type)) + 
+  geom_point(shape = 16, size = 3, show.legend=FALSE, alpha=0.5) + 
+  ylab("α diversity") + ylim(0, 800) +
+  theme_minimal() + theme(axis.title.y = element_text(size=40), axis.title.x = element_blank(),  
+                          axis.text = element_text(size=20)) + 
+  scale_color_manual(values = c("skyblue3", "tomato2")) + geom_smooth(size = 2, show.legend = T)
+AllAlphaFamScatter
+
+png("Figures/AllAlphaFamScatter.png", width = 1000, height = 1000, pointsize = 20)
+AllAlphaFamScatter
+options(device = "RStudioGD")
+dev.off()
+
+
+
 
 

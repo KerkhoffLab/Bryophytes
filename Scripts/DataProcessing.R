@@ -51,13 +51,14 @@ RichnessVec[CellRichness$CellID] <- CellRichness$Richness
 #Save richness and presence data
 saveRDS(CellRichness, file = "Data/CellRichness.rds")
 saveRDS(RichnessVec, file = "Data/RichnessVec.rds")
-saveRDS(BryophytePresence, file = "Data/BryophytePresence.rds")
+saveRDS(BryophytePresence, file = "Data/Old_BryophytePresence.rds")
 
 
 ####Summer 2020 Additions####
 ##BryophyteDiversity.R##
 #Load data
-BryophytePresence <- readRDS("Data/BryophytePresence.rds")
+#New updated BryophytePresence (as of June 18, 2020)
+BryophytePresence <- read.csv("Data/BryophytePresence6:8:20.csv")
 
 #Create occurrence by cell matrix by reshaping dataframe, then convert to presence-absence matrix
 SpeciesCellID <- BryophytePresence[,c(1,4)]

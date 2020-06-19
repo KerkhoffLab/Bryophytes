@@ -116,7 +116,8 @@ RHDF <- full_join(RHDF, FamNSpecies, by = "Family")
 RHDF <-full_join(RHDF, FOG, by = "Family")
 
 
-#4.6 Save as .csv
+#4.6 Save as .rds and .csv
+saveRDS(RHDF, "Data/RichnessHotspotsDF.rds")
 write.csv(RHDF, "Data/RichnessHotspotsDF.csv")
 
 

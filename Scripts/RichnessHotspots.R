@@ -109,7 +109,7 @@ RHDF <- RHDF %>%
   dplyr::select(!c(Order, Group, NumberSpecies))
 
 #add redone Order, Group, and NumberSpecies columns back
-FOG <- BryophytePresence %>%
+FOG <- BryPres %>%
   dplyr::select(c(Family, Order, Group))
 
 RHDF <- full_join(RHDF, FamNSpecies, by = "Family")

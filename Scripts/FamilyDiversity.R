@@ -105,6 +105,10 @@ for(i in 1:NumberFamilies){
   FamRichList[[i]][which(FamRichList[[i]]==0)] = NA
 }
 
+
+#for(i in NumberFamilies){
+  #sum(Fam)
+  
 # 2.3 Make a new folder for richness maps w/in each family
 setwd("./Figures")
 dir.create("./RichnessByFamilyMaps")
@@ -115,19 +119,22 @@ dir.create("./RichnessByFamilyMaps")
 #make sure to set working directory to default
 
 for(i in 1:NumberFamilies){
+  i = 1
+  
   TempFamRichnessRaster <- setValues(BlankRas, FamRichList[[i]])
   TempFamDF <- rasterToPoints(TempFamRichnessRaster)
   TempFamDF <- data.frame(TempFamDF)
   colnames(TempFamDF) <- c("Longitude", "Latitude", "Alpha")
+
   
   Map <- ggplot() + geom_tile(data=TempFamDF, aes(x=Longitude, y=Latitude, fill=Alpha)) +   
-    scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent") +
+    scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent", limits = c(0, 100)) +
     coord_equal() +
     geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
     geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() + 
     theme(legend.text=element_text(size=20), legend.title=element_text(size=32))
   
-  filename <- paste("./Figures/RichnessByFamilyMaps/RichMap_", FamilyNames[i], ".png", sep = "")
+  filename <- paste("./Figures/RichnessByFamilyMaps/NEWRichMap_", FamilyNames[i], ".png", sep = "")
   png(filename, width= 1000, height = 1000, pointsize = 30)
   print({Map})
   dev.off()

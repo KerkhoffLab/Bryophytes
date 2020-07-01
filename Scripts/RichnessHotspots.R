@@ -95,6 +95,8 @@ Old_Fam <- Old_BryophytePresence$Family
 
 changedFam <- setdiff(Old_Fam, New_Fam)
 
+BryophytePresence <- New_BryophytePresence
+
 # 4.5 Alter RichnessHotspots
 RHDF <- RichnessHotspots
 
@@ -112,8 +114,8 @@ RHDF <- RHDF %>%
 FOG <- BryPres %>%
   dplyr::select(c(Family, Order, Group))
 
-RHDF <- full_join(RHDF, FamNSpecies, by = "Family")
-RHDF <-full_join(RHDF, FOG, by = "Family")
+RHDF <- left_join(RHDF, FamilyNSpecies, by = "Family")
+RHDF <-left_join(RHDF, FOG, by = "Family")
 
 
 #4.6 Save as .rds and .csv
@@ -121,14 +123,122 @@ saveRDS(RHDF, "Data/RichnessHotspotsDF.rds")
 write.csv(RHDF, "Data/RichnessHotspotsDF.csv")
 
 
+# 5.0 Order list
+BrySpec <- BryophytePresence %>%
+  dplyr::select(Family, Order, Species)
+BrySpec <- BrySpec[!duplicated(BrySpec$Species),]
+
+OrderNSpecies <- data.frame(tally(group_by(BrySpec, Order)))
+FamilyNSpecies <-data.frame(tally(group_by(BrySpec, Family))) 
+
+# 5.1 Dicranales
+Dicranales <- FOG %>%
+  filter(Order == "Dicranales")
+
+DicranalesRH <- RHDF %>%
+  filter(Order == "Dicranales")
+
+# 5.2 Bryales
+Bryales <- FOG %>%
+  filter(Order == "Bryales")
+
+BryalesRH <- RHDF %>%
+  filter(Order == "Bryales")
+
+# 5.3 Jungermanniales
+Jungermanniales <- FOG %>%
+  filter(Order == "Jungermanniales")
+
+JungermannialesRH <- RHDF %>%
+  filter(Order == "Jungermanniales")
+
+test <- BryophytePresence %>%
+  filter(Family == "Cephaloziaceae") %>%
+  dplyr::select(Species)
+length(unique(test))
 
 
+#write OrderNSpecies & FamilyNSpecies to .csv
+write.csv(OrderNSpecies, "Data/OrderNSpecies.csv")
+write.csv(FamilyNSpecies, "Data/FamilyNSpecies.csv")
 
+# 5.4 Pottiales
+Pottiales <- FOG %>%
+  filter(Order == "Pottiales")
 
+PottialesRH <- RHDF %>%
+  filter(Order == "Pottiales")
 
+# 5.5 Grimmiales
+Grimmiales <- FOG %>%
+  filter(Order == "Grimmiales")
 
+GrimmialesRH <- RHDF %>%
+  filter(Order == "Grimmiales")
 
+# 5.6 Orthotrichales
+OrthotrichalesRH <- RHDF %>%
+  filter(Order == "Orthotrichales")
 
+# 5.7 Bartramiales
+BartramialesRH <- RHDF %>%
+  filter(Order == "Bartramiales")
+
+# 5.8 Polytrichales
+PolytrichalesRH <- RHDF %>%
+  filter(Order == "Polytrichales")
+
+# 5.9 Metzgeriales
+MetzgerialesRH <- RHDF %>%
+  filter(Order == "Metzgeriales")
+
+# 5.10 Funariales
+FunarialesRH <- RHDF %>%
+  filter(Order == "Funariales")
+
+# 5.11 Marchantiales
+MarchantialesRH <- RHDF %>%
+  filter(Order == "Marchantiales")
+
+# 5.12 Sphagnales
+SphagnalesRH <- RHDF %>%
+  filter(Order == "Sphagnales")
+
+# 5.13 Ricciales
+RiccialesRH <- RHDF %>%
+  filter(Order == "Ricciales")
+
+# 5.14 Buxbaumiales
+BuxbaumialesRH <- RHDF %>%
+  filter(Order == "Buxbaumiales")
+
+# 5.14 Ptychomniales
+PtychomnialesRH <- RHDF %>%
+  filter(Order == "Ptychomniales")
+
+# 5.15 Rhizogoniales
+RhizogonialesRH <- RHDF %>%
+  filter(Order == "Rhizogoniales")
+
+# 5.16 Hypnodendrales
+HypnodendralesRH <- RHDF %>%
+  filter(Order == "Hypnodendrales")
+
+# 5.17 Pelliales
+PellialesRH <- RHDF %>%
+  filter(Order == "Pelliales")
+
+# 5.18 Notothyladales
+NotothyladalesRH <- RHDF %>%
+  filter(Order == "Notothyladales")
+
+# 5.19 Ptilidiales
+PtilidialesRH <- RHDF %>%
+  filter(Order == "Ptilidiales")
+
+# 5.20 Sphaerocarpales
+SphaerocarpalesRH <- RHDF %>%
+  filter(Order == "Sphaerocarpales")
 
 
 

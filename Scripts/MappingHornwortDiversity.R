@@ -137,7 +137,7 @@ OutlierBetaMap <- gplot(OutlierBetaRaster, maxpixels=15038) +  geom_tile(aes(fil
 OutlierBetaMap
 
 
-#Map beta diversity with values over 0.5 shown in dark grey (how many values over 0.5?)
+# 2.5 Map beta diversity with values over 0.5 shown in dark grey (how many values over 0.5?)
 source("Functions/gplot_data.R")
 gplotB<- gplot_data(BetaRaster)
 gplotOutlier<- gplot_data(OutlierBetaRaster)

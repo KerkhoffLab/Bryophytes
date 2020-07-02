@@ -16,3 +16,4 @@ BIENFamAndOrder <- BIENFamilies %>%
 BIENFamAndOrder <- BIENFamAndOrder[!duplicated(BIENFamAndOrder$scrubbed_family),]
 
 # 2.0 From research----------------------------
+BryophytePresence <- read.csv("Data/BryophytePresence_7.2.20(2).csv")

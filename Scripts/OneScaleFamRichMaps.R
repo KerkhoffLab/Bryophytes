@@ -23,17 +23,23 @@ for(i in 1:NumberFamilies){
   FamRichList[[i]][which(FamRichList[[i]]==0)] = NA
 }
 
-# 1.3 Find the highest richness value in the data for an individual cell
-# loop through all families and store richness values for each cell in a vector
+# 1.3 Mapping details
+# 1.31 Find the highest richness value in the data for an individual cell
+# loop through all families and store richness values for each cell in a vector, then find max value
 for(i in 1:NumberFamilies){
   FamCellMaxRichness[i] <- max(FamRichList[[i]], na.rm=T)
 }
 max(FamCellMaxRichness, na.rm = T)
 
+# 1.32 Make a dataframe with families and associated orders
+FamilyOrderGroup <- BryophytePresence %>%
+  dplyr::select(Family, Order, Group)
+FamilyOrderGroup <- FamilyOrderGroup[!duplicated(FamilyOrderGroup$Family),]
 
 # 1.4 Make a new folder for richness maps w/in each family
-setwd("./Figures")
-dir.create("./OneScale_RichByFamMaps")
+#If you run this and you've already made the folder it will delete everything in it
+#setwd("./Figures")
+#dir.create("./OneScale_RichByFamMaps")
 
 
 # 1.5 Loop through families and map all species in each family (one map for each family)
@@ -54,7 +60,7 @@ for(i in 1:NumberFamilies){
     geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() + 
     theme(legend.text=element_text(size=20), legend.title=element_text(size=32))
   
-  filename <- paste("./Figures/OneScale_RichByFamMaps/OneScaleRichMap_", FamilyNames[i], ".png", sep = "")
+  filename <- paste("./Figures/OneScale_RichByFamMaps/", FamilyOrder$Order[which(FamilyOrder$Family == FamilyNames[i])], "/OneScaleRichMap_", FamilyNames[i], ".png", sep = "")
   png(filename, width= 1000, height = 1000, pointsize = 30)
   print({Map})
   dev.off()
@@ -64,7 +70,7 @@ for(i in 1:NumberFamilies){
 # 2.0 Make order richness maps the same way (one map for each order) just because I'm curious-----------------
 # 2.1 Loop through order names and subset BryophtePresence for each order, store them in a list
 OrderNames <- unique(BryophytePresence$Order)
-#OrderNames <- OrderNames[-8]
+OrderNames <- OrderNames[!is.na(OrderNames)]
 NumberOrders <- length(OrderNames)
 OrderList <- list()
 for(i in 1:NumberOrders){
@@ -94,8 +100,9 @@ for(i in 1:NumberOrders){
 max(OrderCellMaxRichness, na.rm = T)
 
 # 2.4 Make a new folder for richness maps w/in each order
-setwd("./Figures")
-dir.create("./RichByOrderMaps")
+#If you run this it wil delete everything in the folder if you've already made it
+#setwd("./Figures")
+#dir.create("./RichByOrderMaps")
 
 
 # 2.5 Loop through families and map all species in each order (one map for each order)
@@ -110,17 +117,16 @@ for(i in 1:NumberOrders){
   
   
   Map <- ggplot() + geom_tile(data=TempOrderDF, aes(x=Longitude, y=Latitude, fill=Alpha)) +   
-    scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent", limits = c(0, 170)) +
+    scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent", limits = c(0, 200)) +
     coord_equal() +
     geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
     geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() + 
     theme(legend.text=element_text(size=20), legend.title=element_text(size=32))
   
-  filename <- paste("./Figures/RichByOrderMaps/OrderRichMap_", OrderNames[i], ".png", sep = "")
+  filename <- paste("./Figures/OneScale_RichByFamMaps/", OrderNames[i], "/OneScaleRichMap_", OrderNames[i], ".png", sep = "")
   png(filename, width= 1000, height = 1000, pointsize = 30)
   print({Map})
   dev.off()
 }
-
 
 

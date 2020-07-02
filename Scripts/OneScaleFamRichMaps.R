@@ -64,7 +64,7 @@ for(i in 1:NumberFamilies){
 # 2.0 Make order richness maps the same way (one map for each order) just because I'm curious-----------------
 # 2.1 Loop through order names and subset BryophtePresence for each order, store them in a list
 OrderNames <- unique(BryophytePresence$Order)
-OrderNames <- OrderNames[-8]
+#OrderNames <- OrderNames[-8]
 NumberOrders <- length(OrderNames)
 OrderList <- list()
 for(i in 1:NumberOrders){
@@ -110,7 +110,7 @@ for(i in 1:NumberOrders){
   
   
   Map <- ggplot() + geom_tile(data=TempOrderDF, aes(x=Longitude, y=Latitude, fill=Alpha)) +   
-    scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent", limits = c(0, 100)) +
+    scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent", limits = c(0, 170)) +
     coord_equal() +
     geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
     geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() + 

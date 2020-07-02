@@ -64,7 +64,8 @@ for(i in 1:NumberFamilies){
 # 2.0 Make order richness maps the same way (one map for each order) just because I'm curious-----------------
 # 2.1 Loop through order names and subset BryophtePresence for each order, store them in a list
 OrderNames <- unique(BryophytePresence$Order)
-NumberOrders <- length(unique(BryophytePresence$Order))
+OrderNames <- OrderNames[-8]
+NumberOrders <- length(OrderNames)
 OrderList <- list()
 for(i in 1:NumberOrders){
   ord <- OrderNames[i]
@@ -75,46 +76,47 @@ for(i in 1:NumberOrders){
 # 2.2 Loop through orders and tally richness for each order, store in a list
 OrderRichList <- list()
 OrderPresList <- list()
-for(i in 1:NumberFamilies){
-  FamPresList[[i]] <- tally(group_by(FamList[[i]], CellID))
-  names(FamPresList[[i]])[2] <- "Richness"
-  FamRichList[[i]] <- numeric(15038)
-  FamRichList[[i]][FamPresList[[i]]$CellID] <- FamPresList[[i]]$Richness
-  FamRichList[[i]][which(FamRichList[[i]]==0)] = NA
+for(i in 1:NumberOrders){
+  OrderPresList[[i]] <- tally(group_by(OrderList[[i]], CellID))
+  names(OrderPresList[[i]])[2] <- "Richness"
+  OrderRichList[[i]] <- numeric(15038)
+  OrderRichList[[i]][OrderPresList[[i]]$CellID] <- OrderPresList[[i]]$Richness
+  OrderRichList[[i]][which(OrderRichList[[i]]==0)] = NA
 }
 
 # 2.3 Find the highest richness value in the data for an individual cell
 # loop through all orders and store richness values for each cell in a vector
-for(i in 1:NumberFamilies){
-  FamCellMaxRichness[i] <- max(FamRichList[[i]], na.rm=T)
-}
-max(FamCellMaxRichness, na.rm = T)
+OrderCellMaxRichness <- c()
 
+for(i in 1:NumberOrders){
+  OrderCellMaxRichness[i] <- max(OrderRichList[[i]], na.rm=T)
+}
+max(OrderCellMaxRichness, na.rm = T)
 
 # 2.4 Make a new folder for richness maps w/in each order
 setwd("./Figures")
-dir.create("./OneScale_RichByFamMaps")
+dir.create("./RichByOrderMaps")
 
 
 # 2.5 Loop through families and map all species in each order (one map for each order)
 
 #make sure to set working directory to default
 
-for(i in 1:NumberFamilies){
-  TempFamRichnessRaster <- setValues(BlankRas, FamRichList[[i]])
-  TempFamDF <- rasterToPoints(TempFamRichnessRaster)
-  TempFamDF <- data.frame(TempFamDF)
-  colnames(TempFamDF) <- c("Longitude", "Latitude", "Alpha")
+for(i in 1:NumberOrders){
+  TempOrderRichnessRaster <- setValues(BlankRas, FamRichList[[i]])
+  TempOrderDF <- rasterToPoints(TempOrderRichnessRaster)
+  TempOrderDF <- data.frame(TempOrderDF)
+  colnames(TempOrderDF) <- c("Longitude", "Latitude", "Alpha")
   
   
-  Map <- ggplot() + geom_tile(data=TempFamDF, aes(x=Longitude, y=Latitude, fill=Alpha)) +   
+  Map <- ggplot() + geom_tile(data=TempOrderDF, aes(x=Longitude, y=Latitude, fill=Alpha)) +   
     scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent", limits = c(0, 100)) +
     coord_equal() +
     geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
     geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() + 
     theme(legend.text=element_text(size=20), legend.title=element_text(size=32))
   
-  filename <- paste("./Figures/OneScale_RichByFamMaps/OneScaleRichMap_", FamilyNames[i], ".png", sep = "")
+  filename <- paste("./Figures/RichByOrderMaps/OrderRichMap_", OrderNames[i], ".png", sep = "")
   png(filename, width= 1000, height = 1000, pointsize = 30)
   print({Map})
   dev.off()

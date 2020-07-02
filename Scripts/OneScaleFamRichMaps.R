@@ -64,7 +64,8 @@ for(i in 1:NumberFamilies){
 # 2.0 Make order richness maps the same way (one map for each order) just because I'm curious-----------------
 # 2.1 Loop through order names and subset BryophtePresence for each order, store them in a list
 OrderNames <- unique(BryophytePresence$Order)
-NumberOrders <- length(unique(BryophytePresence$Order))
+OrderNames <- OrderNames[-8]
+NumberOrders <- length(OrderNames)
 OrderList <- list()
 for(i in 1:NumberOrders){
   ord <- OrderNames[i]
@@ -86,11 +87,6 @@ for(i in 1:NumberOrders){
 # 2.3 Find the highest richness value in the data for an individual cell
 # loop through all orders and store richness values for each cell in a vector
 OrderCellMaxRichness <- c()
-i <- 8
-max(OrderRichList[[8]], na.rm=T)
-OrderRichList[[8]]
-
-Order
 
 for(i in 1:NumberOrders){
   OrderCellMaxRichness[i] <- max(OrderRichList[[i]], na.rm=T)
@@ -120,7 +116,7 @@ for(i in 1:NumberOrders){
     geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() + 
     theme(legend.text=element_text(size=20), legend.title=element_text(size=32))
   
-  filename <- paste("./Figures/RichByOrder/OrderRichMap_", OrderNames[i], ".png", sep = "")
+  filename <- paste("./Figures/RichByOrderMaps/OrderRichMap_", OrderNames[i], ".png", sep = "")
   png(filename, width= 1000, height = 1000, pointsize = 30)
   print({Map})
   dev.off()

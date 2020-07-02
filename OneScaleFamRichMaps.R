@@ -41,8 +41,6 @@ dir.create("./OneScale_RichByFamMaps")
 #make sure to set working directory to default
 
 for(i in 1:NumberFamilies){
-  i = 1
-  
   TempFamRichnessRaster <- setValues(BlankRas, FamRichList[[i]])
   TempFamDF <- rasterToPoints(TempFamRichnessRaster)
   TempFamDF <- data.frame(TempFamDF)
@@ -56,7 +54,7 @@ for(i in 1:NumberFamilies){
     geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() + 
     theme(legend.text=element_text(size=20), legend.title=element_text(size=32))
   
-  filename <- paste("./Figures/RichnessByFamilyMaps/OneScaleRichMap_", FamilyNames[i], ".png", sep = "")
+  filename <- paste("./Figures/OneScale_RichByFamMaps/OneScaleRichMap_", FamilyNames[i], ".png", sep = "")
   png(filename, width= 1000, height = 1000, pointsize = 30)
   print({Map})
   dev.off()

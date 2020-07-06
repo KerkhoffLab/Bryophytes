@@ -112,7 +112,7 @@ max(OrderCellMaxRichness, na.rm = T)
 #make sure to set working directory to default
 
 for(i in 1:NumberOrders){
-  TempOrderRichnessRaster <- setValues(BlankRas, FamRichList[[i]])
+  TempOrderRichnessRaster <- setValues(BlankRas, OrderRichList[[i]])
   TempOrderDF <- rasterToPoints(TempOrderRichnessRaster)
   TempOrderDF <- data.frame(TempOrderDF)
   colnames(TempOrderDF) <- c("Longitude", "Latitude", "Alpha")

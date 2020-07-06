@@ -35,6 +35,9 @@ max(FamCellMaxRichness, na.rm = T)
 FamilyOrderGroup <- BryophytePresence %>%
   dplyr::select(Family, Order, Group)
 FamilyOrderGroup <- FamilyOrderGroup[!duplicated(FamilyOrderGroup$Family),]
+#The last row is all NAs, so get rid of that
+FamilyOrderGroup <- FamilyOrderGroup[complete.cases(FamilyOrderGroup),]
+
 
 # 1.4 Make a new folder for richness maps w/in each family
 #If you run this and you've already made the folder it will delete everything in it
@@ -60,12 +63,11 @@ for(i in 1:NumberFamilies){
     geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() + 
     theme(legend.text=element_text(size=20), legend.title=element_text(size=32))
   
-  filename <- paste("./Figures/OneScale_RichByFamMaps/", FamilyOrder$Order[which(FamilyOrder$Family == FamilyNames[i])], "/OneScaleRichMap_", FamilyNames[i], ".png", sep = "")
+  filename <- paste("./Figures/OneScale_RichByFamMaps/", unique(FamilyOrderGroup$Group[which(FamilyOrderGroup$Family == FamilyNames[i])]), "/", FamilyOrder$Order[which(FamilyOrder$Family == FamilyNames[i])], "/OneScaleRichMap_", FamilyNames[i], ".png", sep = "")
   png(filename, width= 1000, height = 1000, pointsize = 30)
   print({Map})
   dev.off()
 }
-
 
 # 2.0 Make order richness maps the same way (one map for each order) just because I'm curious-----------------
 # 2.1 Loop through order names and subset BryophtePresence for each order, store them in a list
@@ -123,10 +125,9 @@ for(i in 1:NumberOrders){
     geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() + 
     theme(legend.text=element_text(size=20), legend.title=element_text(size=32))
   
-  filename <- paste("./Figures/OneScale_RichByFamMaps/", OrderNames[i], "/OneScaleRichMap_", OrderNames[i], ".png", sep = "")
+  filename <- paste("./Figures/OneScale_RichByFamMaps/",unique(FamilyOrderGroup$Group[which(FamilyOrderGroup$Order == OrderNames[i])]), "/", OrderNames[i], "/ORDEROneScaleRichMap_", OrderNames[i], ".png", sep = "")
   png(filename, width= 1000, height = 1000, pointsize = 30)
   print({Map})
   dev.off()
 }
-
 

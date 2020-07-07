@@ -67,7 +67,7 @@ ggtree(testtreetwo, branch.length = "none") +
   ggplot2::xlim(0,40)
 
 
-#3.0 Try  to clean up data -------------------
+#3.0 Clean up tree data -------------------
 #look at data
 testtreetwo.df <- ggtree(testtreetwo)$data
 
@@ -677,3 +677,153 @@ for(i in 1:nrow(FigS7_names)){
 
 FigS7_FOG <- bind_cols(FigS7_FOG, FigS7_names)
 write.csv(FigS7_FOG, "Data/FamilyTrees/FigS7_FOG.csv")
+
+
+# 4.0 Compare families in each tree --------------
+F8Fam <- data.frame(unique(FigS8_names$family))
+names(F8Fam)[1] <- "Family"
+F8Fam$Tree <- "F8"
+LiuTreeFam <- F8Fam
+F7Fam <- data.frame(unique(FigS7_names$family))
+names(F7Fam)[1] <- "Family"
+F7Fam$Tree <- "F7"
+LiuTreeFam <- bind_rows(LiuTreeFam, F7Fam)
+F25Fam <- data.frame(unique(FigS25_names$family))
+names(F25Fam)[1] <- "Family"
+F25Fam$Tree <- "F25"
+LiuTreeFam <- bind_rows(LiuTreeFam, F25Fam)
+F24Fam <- data.frame(unique(FigS24_names$family))
+names(F24Fam)[1] <- "Family"
+F24Fam$Tree <- "F24"
+LiuTreeFam <- bind_rows(LiuTreeFam, F24Fam)
+F22Fam <- data.frame(unique(FigS22_names$family))
+names(F22Fam)[1] <- "Family"
+F22Fam$Tree <- "F22"
+LiuTreeFam <- bind_rows(LiuTreeFam, F22Fam)
+F21Fam <- data.frame(unique(FigS21_names$family))
+names(F21Fam)[1] <- "Family"
+F21Fam$Tree <- "F21"
+LiuTreeFam <- bind_rows(LiuTreeFam, F21Fam)
+F20Fam <- data.frame(unique(FigS20_names$family))
+names(F20Fam)[1] <- "Family"
+F20Fam$Tree <- "F20"
+LiuTreeFam <- bind_rows(LiuTreeFam, F20Fam)
+F19Fam <- data.frame(unique(FigS19_names$family))
+names(F19Fam)[1] <- "Family"
+F19Fam$Tree <- "F19"
+LiuTreeFam <- bind_rows(LiuTreeFam, F19Fam)
+F18Fam <- data.frame(unique(FigS18_names$family))
+names(F18Fam)[1] <- "Family"
+F18Fam$Tree <- "F18"
+LiuTreeFam <- bind_rows(LiuTreeFam, F18Fam)
+F16Fam <- data.frame(unique(FigS16_names$family))
+names(F16Fam)[1] <- "Family"
+F16Fam$Tree <- "F16"
+LiuTreeFam <- bind_rows(LiuTreeFam, F16Fam)
+F15Fam <- data.frame(unique(FigS15_names$family))
+names(F15Fam)[1] <- "Family"
+F15Fam$Tree <- "F15"
+LiuTreeFam <- bind_rows(LiuTreeFam, F15Fam)
+F14Fam <- data.frame(unique(FigS14_FOG$family))
+names(F14Fam)[1] <- "Family"
+F14Fam$Tree <- "F14"
+LiuTreeFam <- bind_rows(LiuTreeFam, F14Fam)
+F13Fam <- data.frame(unique(FigS13_names$family))
+names(F13Fam)[1] <- "Family"
+F13Fam$Tree <- "F13"
+LiuTreeFam <- bind_rows(LiuTreeFam, F13Fam)
+F12Fam <- data.frame(unique(FigS12_names$family))
+names(F12Fam)[1] <- "Family"
+F12Fam$Tree <- "F12"
+LiuTreeFam <- bind_rows(LiuTreeFam, F12Fam)
+F11Fam <- data.frame(unique(FigS11_names$family))
+names(F11Fam)[1] <- "Family"
+F11Fam$Tree <- "F11"
+LiuTreeFam <- bind_rows(LiuTreeFam, F11Fam)
+F10Fam <- data.frame(unique(FigS10_names$family))
+names(F10Fam)[1] <- "Family"
+F10Fam$Tree <- "F10"
+LiuTreeFam <- bind_rows(LiuTreeFam, F10Fam)
+
+length(unique(LiuTreeFam$Family))
+unique(LiuTreeFam$Family)
+
+length(FamilyNames)
+
+write.csv(LiuTreeFam, "Data/FamilyTrees/LiuTreeFam.csv")
+
+
+# 5.0 Compare orders in each tree ----------------
+F8Order <- data.frame(unique(FigS8_names$order))
+names(F8Order)[1] <- "order"
+F8Order$Tree <- "F8"
+LiuTreeOrder <- F8Order
+F7Order <- data.frame(unique(FigS7_names$order))
+names(F7Order)[1] <- "order"
+F7Order$Tree <- "F7"
+LiuTreeOrder <- bind_rows(LiuTreeOrder, F7Order)
+F25Order <- data.frame(unique(FigS25_names$order))
+names(F25Order)[1] <- "order"
+F25Order$Tree <- "F25"
+LiuTreeOrder <- bind_rows(LiuTreeOrder, F25Order)
+F24Order <- data.frame(unique(FigS24_names$order))
+names(F24Order)[1] <- "order"
+F24Order$Tree <- "F24"
+LiuTreeOrder <- bind_rows(LiuTreeOrder, F24Order)
+F22Order <- data.frame(unique(FigS22_names$order))
+names(F22Order)[1] <- "order"
+F22Order$Tree <- "F22"
+LiuTreeOrder <- bind_rows(LiuTreeOrder, F22Order)
+F21Order <- data.frame(unique(FigS21_names$order))
+names(F21Order)[1] <- "order"
+F21Order$Tree <- "F21"
+LiuTreeOrder <- bind_rows(LiuTreeOrder, F21Order)
+F20Order <- data.frame(unique(FigS20_names$order))
+names(F20Order)[1] <- "order"
+F20Order$Tree <- "F20"
+LiuTreeOrder <- bind_rows(LiuTreeOrder, F20Order)
+F19Order <- data.frame(unique(FigS19_names$order))
+names(F19Order)[1] <- "order"
+F19Order$Tree <- "F19"
+LiuTreeOrder <- bind_rows(LiuTreeOrder, F19Order)
+F18Order <- data.frame(unique(FigS18_names$order))
+names(F18Order)[1] <- "order"
+F18Order$Tree <- "F18"
+LiuTreeOrder <- bind_rows(LiuTreeOrder, F18Order)
+F16Order <- data.frame(unique(FigS16_names$order))
+names(F16Order)[1] <- "order"
+F16Order$Tree <- "F16"
+LiuTreeOrder <- bind_rows(LiuTreeOrder, F16Order)
+F15Order <- data.frame(unique(FigS15_names$order))
+names(F15Order)[1] <- "order"
+F15Order$Tree <- "F15"
+LiuTreeOrder <- bind_rows(LiuTreeOrder, F15Order)
+F14Order <- data.frame(unique(FigS14_FOG$order))
+names(F14Order)[1] <- "order"
+F14Order$Tree <- "F14"
+LiuTreeOrder <- bind_rows(LiuTreeOrder, F14Order)
+F13Order <- data.frame(unique(FigS13_names$order))
+names(F13Order)[1] <- "order"
+F13Order$Tree <- "F13"
+LiuTreeOrder <- bind_rows(LiuTreeOrder, F13Order)
+F12Order <- data.frame(unique(FigS12_names$order))
+names(F12Order)[1] <- "order"
+F12Order$Tree <- "F12"
+LiuTreeOrder <- bind_rows(LiuTreeOrder, F12Order)
+F11Order <- data.frame(unique(FigS11_names$order))
+names(F11Order)[1] <- "order"
+F11Order$Tree <- "F11"
+LiuTreeOrder <- bind_rows(LiuTreeOrder, F11Order)
+F10Order <- data.frame(unique(FigS10_names$order))
+names(F10Order)[1] <- "order"
+F10Order$Tree <- "F10"
+LiuTreeOrder <- bind_rows(LiuTreeOrder, F10Order)
+
+length(unique(LiuTreeOrder$order))
+length(OrderNames)
+
+write.csv(LiuTreeOrder, "Data/FamilyTrees/LiuTreeOrder.csv")
+
+
+# 6.0 Plot trees with new information --------------------
+

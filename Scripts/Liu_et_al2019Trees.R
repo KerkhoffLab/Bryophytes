@@ -11,7 +11,10 @@ library(phytools)
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
 BiocManager::install("ggtree")
+BiocManager::install("treeio")
+BiocManager::install("rphast")
 library(ggtree)
+library(treeio)
 library(ggplot2)
 library(ggimage)
 
@@ -826,4 +829,206 @@ write.csv(LiuTreeOrder, "Data/FamilyTrees/LiuTreeOrder.csv")
 
 
 # 6.0 Plot trees with new information --------------------
+test_F11Tree <- FigS11_FOG
+test_F11Tree$label <- test_F11Tree$family
+test_F11Tree$genus <- NULL
+test_F11Tree$group <- NULL
+test_F11Tree$order <- NULL
+test_F11Tree$family <- NULL
 
+test_F11Tree_node <- test_F11Tree %>%
+  filter(isTip == "FALSE")
+test_F11Tree_tip <- test_F11Tree %>%
+  filter(isTip == "TRUE") %>%
+  filter(label != "NA")
+test_F11Tree_pruned <- bind_rows(test_F11Tree_node, test_F11Tree_tip)
+
+ggtree(test_F11Tree_pruned) + 
+  geom_tiplab(size = 2.0)
+
+ggtree(test_F11Tree) +
+  geom_tiplab(size = 2.0) 
+
+to_drop <- "NA"
+test_F11Tree_drop <- drop.tip(test_F11Tree, to_drop)
+
+#try to make data.frame into tree object
+phylo4d(test_F11Tree)
+
+get.tree(test_F11Tree)
+
+as.phylo.data.frame(test_F11Tree)
+
+
+#make tree from $data
+test <- read.tree("Data/trees/nt-mt-RAxML-FigS11.tre")
+ggtree(test)$data
+test$tip.label
+
+#this works!
+test_tree <- get.tree(ggtree(test)$data)
+ggtree(test_tree) +
+  geom_tiplab(size = 2.0)
+#this works too, but it's basically the same thing
+test_tree <- ggtree(test)$data
+get.tree(test_tree)
+ggtree(test_tree) +
+  geom_tiplab(size = 2.0)
+
+#says it's not a tree, so can't make it a data.frame
+test_tree.df <- data.frame(ggtree(test)$data)
+test_get <- get.tree(test_tree.df)
+
+#doesn't work
+#calling ggtree here seems to shut down R, so that's not good
+  ##it looks like instead of replacing just the tip labels it ends up replacing all the data --- 
+  ##don't know why that shuts down R, seems like it could just say it doesn't work, but I guess it might be something
+  ##about it being in the same format as a tree that should work.
+clean11tiplabel <- test_F11Tree %>%
+  filter(isTip == "TRUE") %>%
+  select(label)
+clean11label <- test_F11Tree %>%
+  select(label)
+clean11label
+test$tip.label
+#test$tip.label <- clean11label
+#ggtree(test) +
+  #geom_tiplab(size = 2.0)
+
+#use treeio to rename taxa?
+lab <- data.frame(test$tip.label)
+names(lab)[1] <- "tip.label"
+lab$lab2 <- clean11tiplabel
+#this also crashed R
+##for some reason the rename_taxa sets the tip labels to nothing
+test_rename <- rename_taxa(test, lab, lab1, lab2.label)
+#ggtree(test_rename)
+
+#try a different method --> store new tip labels as a tip annotation 
+newlabs <- data.frame(ggtree(test)$data[4])
+newlabs$lab2 <- clean11label
+test2 <- full_join(test, newlabs, by = "label")
+test2
+
+#this crashed R
+#ggtree(test2) + 
+  #geom_tiplab
+
+#Try another way 
+#hmmm, this isn't working either
+test <- read.tree("Data/trees/nt-mt-RAxML-FigS11.tre")
+newlabs <- data.frame(label = ggtree(test)$data[4])
+newlabs$lab2 <- clean11label
+
+#crazy tree taken over by the black death
+ggtree(test) %<+% newlabs + 
+  geom_tiplab(aes(label = lab2))
+
+###########################################
+#WORKING WITH KATHRYN'S CODE ------
+#went through LiuTreeFam and FigS11_FOG manually to identify which species are in what family
+#then type that into the top line of code
+      #TO DO
+        #1 make a program that assigns a family to each species in the data --- DONE
+        #2 add maps to tree
+        #3 make tree work for multiple families --- DONE
+      
+Pterobryaceae <- c("Jaegerina_solitaria", "Calyptothecium_pinnatum_3742")
+Pterobryaceae11 <- ggtree(F11tree, branch.length="none") + 
+  geom_tiplab(aes(color = label %in% Pterobryaceae), size = 0.7) +
+  geom_text2(aes(subset=!isTip, label=node), hjust=-.3, size=2)
+Pterobryaceae11
+
+###########################################
+
+
+# 1. Program that assigns a family to each species in the data
+#get family names
+tree20 <- read.tree("Data/trees/aa-nu-RAxML-FigS20.tre")
+clean20famlabels <- FigS20_FOG %>%
+  filter(isTip == "TRUE") %>%
+  select(family)
+Ref20DF <- data.frame(tree20$tip.label)
+Ref20DF$Family <- clean20famlabels
+names(Ref20DF)[1] <- "Species"
+
+#find species in Pterobryaceae
+Pterobryaceae <- Ref20DF %>%
+  filter(Family == "Pterobryaceae")
+Pterobryaceae <- Pterobryaceae$Species
+Pterobryaceae
+
+#loop to find species in each family -- creates a vector of species names for each family name (does first line of Kathryn's code) 
+tree20fam <- F20Fam$Family
+tree20fam
+for(i in 1:length(tree20fam)){
+  fam <- tree20fam[i]
+  tempdf <- Ref20DF %>%
+    filter(Family == fam)
+  tempvec <- tempdf$Species
+  assign(fam, tempvec)
+}
+
+
+#3 Make the tree work with multiple families
+#same color for multiple families
+PterobryaceaeBryaceae11 <- ggtree(tree11, branch.length="none") + 
+  geom_tiplab(aes(color = label %in% c(Pterobryaceae, Bryaceae)), size = 0.7) +
+  geom_text2(aes(subset=!isTip, label=node), hjust=-.3, size=2)
+PterobryaceaeBryaceae11
+
+PterobryaceaeBryaceae11diffcol <- ggtree(tree11, branch.length="none") + 
+  geom_tiplab(aes(color = label %in% c(Pterobryaceae, Bryaceae)) , size = 0.7) +
+  geom_text2(aes(subset=!isTip, label=node), hjust=-.3, size=2) +
+  scale_color_manual(values = c("gray63", "cyan4"))
+PterobryaceaeBryaceae11diffcol
+
+###########
+#Go through each family  and find the nodes -- put them in a spreadsheet
+ggtree(tree20, branch.length="none") + 
+  geom_tiplab(aes(color = label %in%  Rhizogoniaceae), size = 0.7) +
+  geom_text2(aes(subset=!isTip, label=node), hjust=-.3, size=2)
+
+
+
+
+################
+###############
+
+
+#Do it with orders!
+#Program that assigns a order to each species in the data
+#get order names
+tree20 <- read.tree("Data/trees/aa-nu-RAxML-FigS20.tre")
+ggtree20 <- ggtree(tree20)
+clean20orderlabels <- FigS20_FOG %>%
+  filter(FigS20_FOG$isTip == "TRUE") %>%
+  select(order)
+Ref20DF <- data.frame(tree20$tip.label)
+Ref20DF$Family <- clean20famlabels
+Ref20DF$Order <- clean20orderlabels
+names(Ref20DF)[1] <- "Species"
+
+#loop to find species in each order -- creates a vector of species names for each order name (does first line of Kathryn's code, for orders) 
+tree20order <- unique(FigS20_FOG$order)
+tree20order <- tree20order[complete.cases(tree20order)]
+tree20orderlist <- list()
+for(i in 1:length(tree20order)){
+  order <- tree20order[i]
+  tempdf <- Ref20DF %>%
+    filter(Order == order)
+  tempvec <- tempdf$Species
+  tree20orderlist[[i]] <- tempvec
+}
+
+#Make a loop that goes through each  order and finds the most recent common ancestor then puts it into a data.frame
+Tree20MRCA <- data.frame(Order = NA, Node = NA)
+for(i in 1:length(tree20order)){
+  order <- tree20order[i]
+  tiplabs <- tree20orderlist[[i]]
+  node <- MRCA(tree20, tiplabs)
+  tempdf <- data.frame(Order = order, Node = node)
+  Tree20MRCA <- bind_rows(Tree20MRCA, tempdf)
+}
+
+Tree20MRCA <- Tree20MRCA[complete.cases(Tree20MRCA),]

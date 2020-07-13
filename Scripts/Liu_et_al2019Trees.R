@@ -22,6 +22,11 @@ library(tidyr)
 library(dplyr)
 library(tools)
 
+library(grid)
+library(gridExtra)
+
+library(png)
+
 # 1.0 try the read.tree function --------
 read.tree("Data/trees/nt-pt-MrBayes-FigS8.tre")
 
@@ -986,11 +991,8 @@ PterobryaceaeBryaceae11diffcol
 ###########
 #Go through each family  and find the nodes -- put them in a spreadsheet
 ggtree(tree20, branch.length="none") + 
-  geom_tiplab(aes(color = label %in%  Rhizogoniaceae), size = 0.7) +
+  geom_tiplab(aes(color = label %in%  tree20orderlist[[8]]), size = 0.7) +
   geom_text2(aes(subset=!isTip, label=node), hjust=-.3, size=2)
-
-
-
 
 ################
 ###############
@@ -1012,6 +1014,7 @@ names(Ref20DF)[1] <- "Species"
 #loop to find species in each order -- creates a vector of species names for each order name (does first line of Kathryn's code, for orders) 
 tree20order <- unique(FigS20_FOG$order)
 tree20order <- tree20order[complete.cases(tree20order)]
+tree20order
 tree20orderlist <- list()
 for(i in 1:length(tree20order)){
   order <- tree20order[i]
@@ -1030,5 +1033,377 @@ for(i in 1:length(tree20order)){
   tempdf <- data.frame(Order = order, Node = node)
   Tree20MRCA <- bind_rows(Tree20MRCA, tempdf)
 }
-
+#get rid of NAs
 Tree20MRCA <- Tree20MRCA[complete.cases(Tree20MRCA),]
+
+
+####################
+#Kathryn's order tree with manually labeled nodes
+###################
+#using manually gathered nodes
+df <- data.frame(node = c(272,197,262,231,218,249,239,261,268,269,200),
+                 images = c("Figures/TreeMaps/Splachnales.png",
+                            "Figures/TreeMaps/Rhizogoniales.png",
+                            "Figures/TreeMaps/Bryales.png",
+                            "Figures/TreeMaps/Hookeriales.png",
+                            "Figures/TreeMaps/Hypnales.png",
+                            "Figures/TreeMaps/Hypnodendrales.png",
+                            "Figures/TreeMaps/Ptychomniales.png",
+                            "Figures/TreeMaps/Aulacomniales.png",
+                            "Figures/TreeMaps/Bartramiales.png",
+                            "Figures/TreeMaps/Hedwigiales.png",
+                            "Figures/TreeMaps/Orthotrichales.png"))
+ggtree(F20tree, branch.length = "none") %<+% df +
+  geom_nodelab(aes(image=images), geom="image", image_fun = function(.) magick::image_transparent(., "white")) +
+  geom_cladelabel(node=272, label="Splachnales", fontsize=2) +
+  geom_cladelabel(node=197, label="Rhizogoniales", fontsize=2) +
+  geom_cladelabel(node=262, label="Bryales", fontsize=2) +
+  geom_cladelabel(node=231, label="Hookeriales", fontsize=2) +
+  geom_cladelabel(node=218, label="Hypnales", fontsize=2) +
+  geom_cladelabel(node=249, label="Hypnodendrales", fontsize=2) +
+  geom_cladelabel(node=239, label="Ptychomniales", fontsize=2) +
+  geom_cladelabel(node=261, label="Aulacomniales", fontsize=2) +
+  geom_cladelabel(node=268, label="Bartramiales", fontsize=2) +
+  geom_cladelabel(node=269, label="Hedwigiales", fontsize=2) +
+  geom_cladelabel(node=200, label="Orthotrichales", fontsize=2)
+
+######################
+######################
+
+#Use function to find MRCA for families
+
+#make a list of vectors of species in each family
+tree20fam <- unique(FigS20_FOG$family)
+tree20fam <- tree20fam[complete.cases(tree20fam)]
+tree20fam
+tree20famlist <- list()
+for(i in 1:length(tree20fam)){
+  fam <- tree20fam[i]
+  tempdf <- Ref20DF %>%
+    filter(Family == fam)
+  tempvec <- tempdf$Species
+  tree20famlist[[i]] <- tempvec
+}
+
+Tree20FamMRCA <- data.frame(Family = NA, Node = NA)
+for(i in 1:length(tree20fam)){
+  fam <- tree20fam[i]
+  tiplabs <- tree20famlist[[i]]
+  node <- MRCA(tree20, tiplabs)
+  tempdf <- data.frame(Family = fam, Node = node)
+  Tree20FamMRCA <- bind_rows(Tree20FamMRCA, tempdf)
+}
+#get rid of NAs
+Tree20FamMRCA <- Tree20FamMRCA[complete.cases(Tree20FamMRCA),]
+
+
+df <- data.frame(Tree20FamMRCA$Node)
+names(df)[1] <- "node"
+mrcanodes <- Tree20FamMRCA$Node
+
+
+ggtree(tree20, branch.length="none") + 
+  geom_tiplab(size = 0.7) +
+  geom_point2(aes(subset=node==mrcanodes[1]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[2]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[3]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[4]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[5]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[6]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[7]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[8]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[9]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[10]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[11]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[12]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[13]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[14]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[15]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[16]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[17]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[18]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[19]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[20]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[21]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[22]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[23]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[24]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[25]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[26]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[27]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[28]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[29]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[30]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[31]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[32]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[33]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[34]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[35]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[36]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[37]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[38]), color = "orangered", size=0.5) +
+  geom_point2(aes(subset=node==mrcanodes[39]), color = "orangered", size=0.5) 
+
+
+# this kind of works, but I can't seem to change the size/color of the points
+p <- ggtree(tree20, branch.length = "none") + 
+  geom_tiplab(size = 0.7)
+for(i in 2:length(mrcanodes)){
+  n <- mrcanodes[i]
+  loop_input = paste("geom_point2(aes(subset=node==",n,", size = 1))", sep="")
+  p <- p + eval(parse(text=loop_input))
+}
+p
+
+#Try it a different way, this just puts points on all the nodes
+p <- ggtree(tree20, branch.length = "none") + 
+  geom_tiplab(size = 0.7)
+for(i in 1:length(mrcanodes)){
+  n <- mrcanodes[i]
+  p <- p + geom_point2(aes_string(subset=node==mrcanodes[i]), color = "orangered", size=0.5)
+}
+p
+
+
+#Make tree with different colored branches by order
+#using manually gathered nodes
+df <- data.frame(node = c(272,197,262,231,218,249,239,261,268,269,200),
+                 images = c("Figures/TreeMaps/Splachnales.png",
+                            "Figures/TreeMaps/Rhizogoniales.png",
+                            "Figures/TreeMaps/Bryales.png",
+                            "Figures/TreeMaps/Hookeriales.png",
+                            "Figures/TreeMaps/Hypnales.png",
+                            "Figures/TreeMaps/Hypnodendrales.png",
+                            "Figures/TreeMaps/Ptychomniales.png",
+                            "Figures/TreeMaps/Aulacomniales.png",
+                            "Figures/TreeMaps/Bartramiales.png",
+                            "Figures/TreeMaps/Hedwigiales.png",
+                            "Figures/TreeMaps/Orthotrichales.png"))
+
+tree2 <- groupClade(tree20, c(272, 197, 262, 231, 218, 249, 239, 261, 268, 269, 200))
+
+ggtree(tree2, branch.length = "none", aes(color=group)) %<+% df +
+  geom_cladelabel(node=272, label="Splachnales", fontsize=2) +
+  geom_cladelabel(node=197, label="Rhizogoniales", fontsize=2) +
+  geom_cladelabel(node=262, label="Bryales", fontsize=2) +
+  geom_cladelabel(node=231, label="Hookeriales", fontsize=2) +
+  geom_cladelabel(node=218, label="Hypnales", fontsize=2) +
+  geom_cladelabel(node=249, label="Hypnodendrales", fontsize=2) +
+  geom_cladelabel(node=239, label="Ptychomniales", fontsize=2) +
+  geom_cladelabel(node=261, label="Aulacomniales", fontsize=2) +
+  geom_cladelabel(node=268, label="Bartramiales", fontsize=2) +
+  geom_cladelabel(node=269, label="Hedwigiales", fontsize=2) +
+  geom_cladelabel(node=200, label="Orthotrichales", fontsize=2) +
+  theme(legend.position = "none") + 
+  geom_nodelab(aes(image=images), geom="image", image_fun = function(.) magick::image_transparent(., "white")) 
+
+#Highlight clades
+tree <- ggtree(tree2, branch.length = "none") %<+% df + xlim(NA,38) +
+  geom_cladelabel(node=272, label="Splachnales", fontsize=2) +
+  geom_cladelabel(node=197, label="Rhizogoniales", fontsize=2) +
+  geom_cladelabel(node=262, label="Bryales", fontsize=2) +
+  geom_cladelabel(node=231, label="Hookeriales", fontsize=2) +
+  geom_cladelabel(node=218, label="Hypnales", fontsize=2) +
+  geom_cladelabel(node=249, label="Hypnodendrales", fontsize=2, col = "steelblue") +
+  geom_cladelabel(node=239, label="Ptychomniales", fontsize=2) +
+  geom_cladelabel(node=261, label="Aulacomniales", fontsize=2) +
+  geom_cladelabel(node=268, label="Bartramiales", fontsize=2) +
+  geom_cladelabel(node=269, label="Hedwigiales", fontsize=2, col = "darkgreen") +
+  geom_cladelabel(node=200, label="Orthotrichales", fontsize=2) +
+  geom_nodelab(aes(image=images), geom="image", image_fun = function(.) magick::image_transparent(., "white")) 
+
+tree +
+  geom_hilight(249,fill = "steelblue") +
+  geom_hilight(269, fill = "darkgreen") 
+
+tree +
+  geom_balance(node=249, fill='steelblue', alpha=0.6, extend=1) +
+  geom_balance(node=269, fill='darkgreen', alpha=0.6, extend=1) 
+
+
+##############
+#try to make tree with loop
+tree <- ggtree(tree2, branch.length = "none") %<+% df + xlim(NA,38) 
+
+  geom_cladelabel(node=272, label="Splachnales", fontsize=2) +
+  geom_cladelabel(node=197, label="Rhizogoniales", fontsize=2) +
+  geom_cladelabel(node=262, label="Bryales", fontsize=2) +
+  geom_cladelabel(node=231, label="Hookeriales", fontsize=2) +
+  geom_cladelabel(node=218, label="Hypnales", fontsize=2) +
+  geom_cladelabel(node=249, label="Hypnodendrales", fontsize=2, col = "steelblue") +
+  geom_cladelabel(node=239, label="Ptychomniales", fontsize=2) +
+  geom_cladelabel(node=261, label="Aulacomniales", fontsize=2) +
+  geom_cladelabel(node=268, label="Bartramiales", fontsize=2) +
+  geom_cladelabel(node=269, label="Hedwigiales", fontsize=2, col = "darkgreen") +
+  geom_cladelabel(node=200, label="Orthotrichales", fontsize=2) +
+  geom_nodelab(aes(image=images), geom="image", image_fun = function(.) magick::image_transparent(., "white")) 
+
+# this doesn't really work here
+tree <- ggtree(tree2, branch.length = "none") %<+% df + xlim(NA,38) + 
+  geom_nodelab(aes(image=images), geom="image", image_fun = function(.) magick::image_transparent(., "white"))
+
+for(i in 1:nrow(Tree20MRCA)){
+  loop_input = paste("geom_cladelabel(node=",Tree20MRCA$Node[i],", label =", Tree20MRCA$Order[i], ", fontsize = 1)", sep="")
+  tree <- tree + eval(parse(text=loop_input))
+}
+tree
+
+
+#Loop to add clade labels and highlight  
+Tree20ManualMRCA <- data.frame(df$node)
+Tree20ManualMRCA$node <- df$node
+Tree20ManualMRCA$df.node <- NULL
+Tree20ManualMRCA$order <- c("Splachnales", "Rhizogoniales", "Bryales", "Hookeriales", "Hypnales", "Hypnodendrales", "Ptychomniales", "Aulacomniales", "Bartramiales", "Hedwigiales", "Orthotrichales")
+Tree20ManualMRCA$hexcols <- brewer.pal(n=11, name = "Spectral")
+tree <- ggtree(tree2, branch.length = "none") %<+% df + xlim(NA,38) 
+for(i in 1:nrow(Tree20ManualMRCA)){
+  tree <- tree + geom_cladelabel(node= Tree20ManualMRCA$node[i], label=Tree20ManualMRCA$order[i], fontsize=2, col = Tree20ManualMRCA$hexcols[i]) + geom_hilight(Tree20ManualMRCA$node[i], fill=Tree20ManualMRCA$hexcols[i])
+}
+tree + geom_nodelab(aes(image=images), geom="image", image_fun = function(.) magick::image_transparent(., "white"))
+
+
+
+
+
+#manually assign order nodes
+nodes <- subset(FigS20_FOG, order == "Hypopterygiales")
+nodes <- nodes$node
+nodes
+
+p <- ggtree(tree20, branch.length = "none") + 
+  geom_tiplab(size = 0.7) + geom_text2(aes(subset=!isTip, label=node), hjust=-.3, size=2)
+for(i in 1:length(nodes)){
+  n <- nodes[i]
+  loop_input = paste("geom_point2(aes(subset=node==",n," ,size = 1))", sep="")
+  p <- p + eval(parse(text=loop_input))
+}
+p
+
+#Make highlighted and clade labeled tree
+OrderNodes20 <- read.csv("./Data/OrderNodesS20.csv")
+getPalette <- colorRampPalette(brewer.pal(8, "Dark2"))
+OrderNodes20$hexcols <- getPalette(nrow(OrderNodes20))
+tree <- ggtree(tree2, branch.length = "none") + xlim(NA,38) 
+for(i in 1:nrow(OrderNodes20)){
+  n <- OrderNodes20$Node[i]
+  o <- OrderNodes20$Order[i]
+  c <- OrderNodes20$hexcols[i]
+  tree <- tree + geom_cladelabel(node= n, label=o, fontsize=2, col = c) + geom_hilight(n, fill=c)
+}
+tree
+
+
+#Make new maps
+dir.create("Figures/TreeMaps/Tree20OrderMaps")
+#Find the index numbers for the orders in tree20
+tree20index <- match(OrderNodes20$Order, OrderNames)
+tree20index <- tree20index[complete.cases(tree20index)]
+tree20index <- data.frame(tree20index)
+names(tree20index)[1] <- "index"
+Order <- OrderNodes20$Order
+Order <- Order[complete.cases(Order)]
+tree20index$name <- Order
+tree20index$number <- c(1,2,3,4,5,6,7,8,9,10,11,21,20,18,13,14,12,15,16,17,19,22)
+
+for(i in 1:nrow(tree20index)){
+  index <- tree20index$index[which(tree20index$number == i)]
+  
+  TempOrderRichnessRaster <- setValues(BlankRas, OrderRichList[[index]])
+  TempOrderDF <- rasterToPoints(TempOrderRichnessRaster)
+  TempOrderDF <- data.frame(TempOrderDF)
+  colnames(TempOrderDF) <- c("Longitude", "Latitude", "Alpha")
+  
+  
+  Map <- ggplot() + geom_tile(data=TempOrderDF, aes(x=Longitude, y=Latitude, fill=Alpha)) +   
+    scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent", limits = c(0, 200)) +
+    coord_equal() +
+    geom_sf(data = nw_bound_sf, size = 1.0, fill=NA) + 
+    geom_sf(data = nw_mount_sf, size = 0.5, fill=NA) + theme_void() + 
+    labs(title = OrderNames[index]) + 
+    theme(legend.text=element_text(size=20), legend.title=element_text(size=32), plot.title = element_text(size = 40, hjust = 0.5))
+  filename <- paste("./Figures/TreeMaps/Tree20OrderMaps/treemap", i, ".png", sep="")
+  png(filename, width= 1000, height = 1000, pointsize = 30)
+  print({Map})
+  dev.off()
+}
+
+
+rl = lapply(sprintf("Figures/TreeMaps/Tree20OrderMaps/treemap%i.png", 1:22), png::readPNG)
+gl = lapply(rl, grid::rasterGrob)
+gridExtra::grid.arrange(grobs=gl)
+
+
+#####################
+
+
+#manually assign family nodes
+nodes <- subset(FigS20_FOG, family == "Hookeriaceae")
+nodes <- nodes$node
+nodes
+
+p <- ggtree(tree20, branch.length = "none") + 
+  geom_tiplab(size = 0.7) + geom_text2(aes(subset=!isTip, label=node), hjust=-.3, size=2)
+for(i in 1:length(nodes)){
+  n <- nodes[i]
+  loop_input = paste("geom_point2(aes(subset=node==",n," ,size = 1))", sep="")
+  p <- p + eval(parse(text=loop_input))
+}
+p
+
+#Make highlighted and clade labeled tree
+famnode <- FamilyNodes20$Node
+famnode
+
+FamilyNodes20 <- read.csv("./Data/FamilyNodesS20.csv")
+FamNoTips <- read.csv("./Data/FamNoTips.csv")
+
+getPalette <- colorRampPalette(brewer.pal(8, "Dark2"))
+FamilyNodes20$hexcols <- getPalette(nrow(FamilyNodes20))
+tree <- ggtree(tree20, branch.length = "none") + xlim(NA,38) 
+for(i in 1:nrow(FamilyNodes20)){
+  n <- FamilyNodes20$Node[i]
+  o <- FamilyNodes20$Family[i]
+  c <- FamilyNodes20$hexcols[i]
+  tree <- tree + geom_cladelabel(node= n, label=o, fontsize=1.5, col = c) + geom_hilight(n, fill=c)
+}
+tree
+
+#Make new maps
+dir.create("Figures/TreeMaps/Tree20FamMaps")
+#Find the index numbers for the orders in tree20
+tree20index <- match(FamilyNodes20$Family, FamilyNames)
+tree20index <- tree20index[complete.cases(tree20index)]
+tree20index <- data.frame(tree20index)
+names(tree20index)[1] <- "index"
+Family <- FamilyNodes20$Family
+Family <- Family[complete.cases(Family)]
+tree20index$name <- Family
+
+tree20index$number <- c(3,2,1,10,9,14,16,13,25,27,22,23,21,19,20,26,24,32,33,34,35,39,38,37,36,28,29,31,30,18,17,15,12,11,8,6,7,5,4)
+
+for(i in 1:nrow(tree20index)){
+  index <- tree20index$index[which(tree20index$number == i)]
+  
+  TempFamRichnessRaster <- setValues(BlankRas, FamRichList[[index]])
+  TempFamDF <- rasterToPoints(TempFamRichnessRaster)
+  TempFamDF <- data.frame(TempFamDF)
+  colnames(TempFamDF) <- c("Longitude", "Latitude", "Alpha")
+  
+  
+  Map <- ggplot() + geom_tile(data=TempFamDF, aes(x=Longitude, y=Latitude, fill=Alpha)) +   
+    scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent", limits = c(0, 100)) +
+    coord_equal() +
+    geom_sf(data = nw_bound_sf, size = 1.0, fill=NA) + 
+    geom_sf(data = nw_mount_sf, size = 0.5, fill=NA) + theme_void() + 
+    labs(title = FamilyNames[index]) + 
+    theme(legend.text=element_text(size=20), legend.title=element_text(size=32), plot.title = element_text(size = 40, hjust = 0.5))
+  filename <- paste("./Figures/TreeMaps/Tree20FamMaps/treemap", i, ".png", sep="")
+  png(filename, width= 1000, height = 1000, pointsize = 30)
+  print({Map})
+  dev.off()
+}
+
+
+rl = lapply(sprintf("Figures/TreeMaps/Tree20FamMaps/treemap%i.png", 1:nrow(tree20index)), png::readPNG)
+gl = lapply(rl, grid::rasterGrob)
+gridExtra::grid.arrange(grobs=gl)

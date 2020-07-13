@@ -22,8 +22,8 @@ for(i in 1:NumberOrders){
   Map <- ggplot() + geom_tile(data=TempOrderDF, aes(x=Longitude, y=Latitude, fill=Alpha)) +   
     scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent", limits = c(0, 200)) +
     coord_equal() +
-    geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
-    geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() + 
+    geom_sf(data = nw_bound_sf, size = 1.0, fill=NA) + 
+    geom_sf(data = nw_mount_sf, size = 0.5, fill=NA) + theme_void() + 
     theme(legend.text=element_text(size=20), legend.title=element_text(size=32)) + 
     theme(legend.position = "none")
   
@@ -32,7 +32,6 @@ for(i in 1:NumberOrders){
   print({Map})
   dev.off()
 }
-
 
 # 3.0 FAMILIES ----------------------
 for(i in 1:NumberFamilies){
@@ -45,8 +44,8 @@ for(i in 1:NumberFamilies){
   Map <- ggplot() + geom_tile(data=TempFamDF, aes(x=Longitude, y=Latitude, fill=Alpha)) +   
     scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent", limits = c(0, 100)) +
     coord_equal() +
-    geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
-    geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() + 
+    geom_sf(data = nw_bound_sf, size = 1.0, fill=NA) + 
+    geom_sf(data = nw_mount_sf, size = 0.5, fill=NA) + theme_void() + 
     theme(legend.text=element_text(size=20), legend.title=element_text(size=32)) + 
     theme(legend.position = "none")
   

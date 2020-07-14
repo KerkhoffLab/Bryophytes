@@ -41,6 +41,7 @@ BrySpecies <- merge(BrySpecies, ByGroup, by = "Family", all.x = TRUE)
 #Add group to presence data by species and remove duplicate entries and save
 BryophytePresence <- merge(BryophytePresence, BrySpecies, by = "Species", all.x= TRUE)
 BryophytePresence <- distinct(BryophytePresence)
+saveRDS(BryophytePresence, file = "Data/OLD_BryophytePresence.rds")
 
 
 ####Summer 2020 Additions####
@@ -102,7 +103,39 @@ row.names(BetaMat) <- CellID
 names(BetaMat) <- CellID
 
 saveRDS(BetaMat, file="Data/BetaMat.rds")
+saveRDS(bryneighbors, file = "Data/bryneighbors.rds")
 saveRDS(bryneighborvect, file="Data/bryneighborvect.rds")
+saveRDS(CellID, file="Data/CellID.rds")
+
+
+##SpeciesRanges.R##
+#Range by species 
+Range <- tally(group_by(BryophytePresence, Species))
+Range <- merge(Range, BryophytePresence, by = "Species")
+
+SpeciesRange <- subset(Range, select = c("n", "Species")) %>%
+  group_by(Species) %>%
+  summarize(Avg = median(n))
+colnames(SpeciesRange) <- c("Species", "RangeAvg")
+
+
+CellRange <- tally(group_by(BryophytePresence, Species))
+CellRange <- merge(CellRange, BryophytePresence, by = "Species")
+
+CellRange <- subset(CellRange, select = c("n", "CellID")) %>%
+  group_by(CellID) %>%
+  summarize(Avg = median(n))
+
+CellRangeVec <- CellRange$CellID
+
+BryophyteRange <- numeric(15038)
+BryophyteRange[CellRange$CellID] <- CellRange$Avg 
+BryophyteRange[which(BryophyteRange==0)]=NA
+RangeRaster <- setValues(BlankRas, BryophyteRange)
+
+saveRDS(SpeciesRange, file = "Data/SpeciesRange.rds")
+saveRDS(CellRange, file = "Data/CellRange.rds")
+saveRDS(RangeRaster, "Data/RangeRaster.rds")
 
 #Stop for NullModelWithWorldClimData.R & SpreadingDye.R-------------------------------
 

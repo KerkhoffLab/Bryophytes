@@ -172,15 +172,20 @@ NullScatterplot
 dev.off()
 
 
-#####Adding climate data to null model####
+#####Adding climate data to null model#####
 #Initial WorldClim Data Code - getting ALL the data from WorldClim, puts it into a brick, crops to only include the Americas 
 #and creates raster of the proper resolution that matches the RangeRaster with bryophyte range data 
+CellRange <- readRDS("Data/CellRange.rds")
+CellRangeVec <- CellRange$CellID
+
+RangeRaster <- readRDS("Data/RangeRaster.rds")
+Bryophytecrs <- crs(RangeRaster)
+
 worldclim <- getData('worldclim', var='bio', res=10) 
 WC_layers <- do.call(brick, lapply(list.files(path = "wc10/", pattern = "*.bil$", full.names = TRUE), raster)) 
 WorldClim <- do.call(crop, c(WC_layers,extent(-175,-22,-56,74)))
-Bryophytecrs <- crs(RangeRaster) #creates a raster with resolution of the bryophyte range map
 WorldClim <- projectRaster(WorldClim, crs = Bryophytecrs) 
-
+WorldClim <- resample(WorldClim, RangeRaster) #fits WorldClim data on the BIEN 100 km^2 map by averaging variables across each cell
 
 #Precipitation in driest quarter (bio17)
 QPrecipitationDF<- data.frame(bio=getValues(WorldClim$bio17), CellID = as.character(1:15038))
@@ -203,3 +208,9 @@ APrecipitationDF<- data.frame(bio=getValues(WorldClim$bio12), CellID = as.charac
 colnames(APrecipitationDF) <- c("AnnualPrecip", "CellID")
 APrecipitationDF <- APrecipitationDF[APrecipitationDF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
 ######
+
+#Save dataframes
+saveRDS(APrecipitationDF, file = "Data/APrecipitationDF.rds")
+saveRDS(SPrecipitationDF, file = "Data/SPrecipitationDF.rds")
+saveRDS(MPrecipitationDF, file = "Data/MPrecipitationDF.rds")
+saveRDS(QPrecipitationDF, file = "Data/QPrecipitationDF.rds")

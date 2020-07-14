@@ -17,6 +17,25 @@ require(sf)
 require(rgdal)
 ```
 
+#Load data
+```{r}
+BryophytePresence <- readRDS("~/Google Drive/Projects/HNBryophytes2020/Data/BryophytePresence.rds")
+
+bryneighbors <- readRDS("~/Google Drive/Projects/HNBryophytes2020/Data/bryneighbors.rds")
+
+bryneighborvect <- readRDS("~/Google Drive/Projects/HNBryophytes2020/Data/bryneighborvect.rds")
+
+CellID <- readRDS("~/Google Drive/Projects/HNBryophytes2020/Data/CellID.rds")
+
+SpeciesRange <- readRDS("~/Google Drive/Projects/HNBryophytes2020/Data/SpeciesRange.rds")
+
+#WorldClim dataframes
+APrecipitationDF <- readRDS("~/Google Drive/Projects/HNBryophytes2020/Data/APrecipitationDF.rds")
+SPrecipitationDF <- readRDS("~/Google Drive/Projects/HNBryophytes2020/Data/SPrecipitationDF.rds")
+MPrecipitationDF <- readRDS("~/Google Drive/Projects/HNBryophytes2020/Data/MPrecipitationDF.rds")
+QPrecipitationDF <- readRDS("~/Google Drive/Projects/HNBryophytes2020/Data/QPrecipitationDF.rds")
+```
+
 ##Null Model
 #Omit cells that have no neighbors
 ```{r}
@@ -34,7 +53,7 @@ ranges <- sort(ranges)
 
 #Spreading Dye Algorithm with Climate Data
 ```{r}
-linearRanges <- c(1:4802) #vector of all the ranges 1-4802 to use as an identifier because some ranges have the same size
+linearRanges <- c(1:length(ranges)) #vector of all the ranges to use as an identifier because some ranges have the same size
 
 NullBio12DF <- data.frame(linearRanges)
 names(NullBio12DF)[1] <- "RangeID"
@@ -63,7 +82,7 @@ for(i in 1:10){
   NullBio17DF$temp <- NA
   names(NullBio17DF)[i + 2] <- i
   
-  linearRanges <- c(1:4802) #vector of all the ranges 1-4802 to use as an identifier because some ranges have the same size
+  linearRanges <- c(1:length(ranges)) #vector of all the ranges 1-4802 to use as an identifier because some ranges have the same size
   
   #set everything at zero
   LandCells$Occupied <- 0

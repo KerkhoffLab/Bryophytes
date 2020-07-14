@@ -159,7 +159,12 @@ colnames(NullLongLat) <- c("Null", "Longitude", "Latitude")
 
 #Null richness by latitude
 theme_set(theme_gray())
-NullScatterplot <- ggplot(NullLongLat, aes(Latitude, Null)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "goldenrod1") + ylab("Null α diversity") + xlab("Latitude") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.text.y = element_text(size=20), axis.text.x = element_text(size=20), axis.title.x = element_text(size = 32))
+NullScatterplot <- ggplot(NullLongLat, aes(Latitude, Null)) + 
+  geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "goldenrod1") + 
+  ylab("Null α diversity") + 
+  xlab("Latitude") + 
+  theme_minimal() + 
+  theme(axis.title.y = element_text(size=32), axis.text.y = element_text(size=20), axis.text.x = element_text(size=20), axis.title.x = element_text(size = 32))
 NullScatterplot 
 
 png("Figures/NullScatter1.png", width = 1000, height = 1000, pointsize = 20)

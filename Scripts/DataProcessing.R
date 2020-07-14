@@ -42,6 +42,11 @@ BrySpecies <- merge(BrySpecies, ByGroup, by = "Family", all.x = TRUE)
 BryophytePresence <- merge(BryophytePresence, BrySpecies, by = "Species", all.x= TRUE)
 BryophytePresence <- distinct(BryophytePresence)
 
+
+####Summer 2020 Additions####
+####Updated BryophytePresence (7/2020)####
+BryophytePresence <- read.csv("Data/BryophytePresence_7.2.20(2).csv")
+
 #Tally richness by cell and create richness vector and save
 CellRichness <- tally(group_by(BryophytePresence, CellID))
 colnames(CellRichness)[2] <- "Richness"
@@ -51,14 +56,10 @@ RichnessVec[CellRichness$CellID] <- CellRichness$Richness
 #Save richness and presence data
 saveRDS(CellRichness, file = "Data/CellRichness.rds")
 saveRDS(RichnessVec, file = "Data/RichnessVec.rds")
-saveRDS(BryophytePresence, file = "Data/Old_BryophytePresence.rds")
+saveRDS(BryophytePresence, file = "Data/BryophytePresence.rds")
 
 
-####Summer 2020 Additions####
 ##BryophyteDiversity.R##
-#Load data
-#New updated BryophytePresence (as of June 18, 2020)
-BryophytePresence <- read.csv("Data/BryophytePresence6:8:20.csv")
 
 #Create occurrence by cell matrix by reshaping dataframe, then convert to presence-absence matrix
 SpeciesCellID <- BryophytePresence[,c(1,4)]
@@ -99,6 +100,9 @@ bryneighborvect <- unlist(lapply(bryneighbors, length))
 BetaMat<-as.matrix(BetaMat)
 row.names(BetaMat) <- CellID
 names(BetaMat) <- CellID
+
+saveRDS(BetaMat, file="Data/BetaMat.rds")
+saveRDS(bryneighborvect, file="Data/bryneighborvect.rds")
 
 #Stop for NullModelWithWorldClimData.R & SpreadingDye.R-------------------------------
 

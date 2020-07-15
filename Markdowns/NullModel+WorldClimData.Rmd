@@ -15,25 +15,15 @@ require(rasterVis)
 require(gridExtra)
 require(sf)
 require(rgdal)
+
+require(devtools)
+install_github("jasondubois/sportfish")
+require(sportfish)
 ```
 
 #Load data
 ```{r}
-BryophytePresence <- readRDS("~/Google Drive/Projects/HNBryophytes2020/Data/BryophytePresence.rds")
-
-bryneighbors <- readRDS("~/Google Drive/Projects/HNBryophytes2020/Data/bryneighbors.rds")
-
-bryneighborvect <- readRDS("~/Google Drive/Projects/HNBryophytes2020/Data/bryneighborvect.rds")
-
-CellID <- readRDS("~/Google Drive/Projects/HNBryophytes2020/Data/CellID.rds")
-
-SpeciesRange <- readRDS("~/Google Drive/Projects/HNBryophytes2020/Data/SpeciesRange.rds")
-
-#WorldClim dataframes
-APrecipitationDF <- readRDS("~/Google Drive/Projects/HNBryophytes2020/Data/APrecipitationDF.rds")
-SPrecipitationDF <- readRDS("~/Google Drive/Projects/HNBryophytes2020/Data/SPrecipitationDF.rds")
-MPrecipitationDF <- readRDS("~/Google Drive/Projects/HNBryophytes2020/Data/MPrecipitationDF.rds")
-QPrecipitationDF <- readRDS("~/Google Drive/Projects/HNBryophytes2020/Data/QPrecipitationDF.rds")
+ReadRDSFiles("~/Google Drive/Projects/HNBryophytes2020/Data/NullModelData", envir = .GlobalEnv)
 ```
 
 ##Null Model

@@ -5,7 +5,17 @@
 # 1.0 Plot species richness for each family (separate plot for each family)-----------------------------------
 
 # 1.1 Loop through family names and subset BryophtePresence for each family, store them in a list
+Families <- data.frame(table(BryophytePresence$Family))
+names(Families)[1] <- "Family"
+names(Families)[2] <- "Richness"
+Families <- left_join(Families, ByGroup, by = "Family")
+
+FamilyNames <- Families$Family
+NumberFamilies <- length(FamilyNames)
+
+
 FamList <- list()
+NumberFamilies <- length(FamilyNames)
 for(i in 1:NumberFamilies){
   fam <- FamilyNames[i]
   FamList[[i]] <- subset(BryophytePresence, Family == fam)

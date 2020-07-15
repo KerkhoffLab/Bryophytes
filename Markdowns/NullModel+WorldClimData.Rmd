@@ -1,7 +1,7 @@
 ---
 title: "Null Model with WorldClim Data"
 author: Hailey Napier
-date: Spring 2020
+date: Spring & Summer 2020
 output: html_notebook
 ---
 
@@ -55,9 +55,57 @@ ranges <- sort(ranges)
 ```{r}
 linearRanges <- c(1:length(ranges)) #vector of all the ranges to use as an identifier because some ranges have the same size
 
+NullBio1DF <- data.frame(linearRanges)
+names(NullBio1DF)[1] <- "RangeID"
+NullBio1DF$RangeSize <- ranges
+
+NullBio2DF <- data.frame(linearRanges)
+names(NullBio2DF)[1] <- "RangeID"
+NullBio2DF$RangeSize <- ranges
+
+NullBio3DF <- data.frame(linearRanges)
+names(NullBio3DF)[1] <- "RangeID"
+NullBio3DF$RangeSize <- ranges
+
+NullBio4DF <- data.frame(linearRanges)
+names(NullBio4DF)[1] <- "RangeID"
+NullBio4DF$RangeSize <- ranges
+
+NullBio5DF <- data.frame(linearRanges)
+names(NullBio5DF)[1] <- "RangeID"
+NullBio5DF$RangeSize <- ranges
+
+NullBio6DF <- data.frame(linearRanges)
+names(NullBio6DF)[1] <- "RangeID"
+NullBio6DF$RangeSize <- ranges
+
+NullBio7DF <- data.frame(linearRanges)
+names(NullBio7DF)[1] <- "RangeID"
+NullBio7DF$RangeSize <- ranges
+
+NullBio8DF <- data.frame(linearRanges)
+names(NullBio8DF)[1] <- "RangeID"
+NullBio8DF$RangeSize <- ranges
+
+NullBio9DF <- data.frame(linearRanges)
+names(NullBio9DF)[1] <- "RangeID"
+NullBio9DF$RangeSize <- ranges
+
+NullBio10DF <- data.frame(linearRanges)
+names(NullBio10DF)[1] <- "RangeID"
+NullBio10DF$RangeSize <- ranges
+
+NullBio11DF <- data.frame(linearRanges)
+names(NullBio11DF)[1] <- "RangeID"
+NullBio11DF$RangeSize <- ranges
+
 NullBio12DF <- data.frame(linearRanges)
 names(NullBio12DF)[1] <- "RangeID"
 NullBio12DF$RangeSize <- ranges
+
+NullBio13DF <- data.frame(linearRanges)
+names(NullBio13DF)[1] <- "RangeID"
+NullBio13DF$RangeSize <- ranges
 
 NullBio14DF <- data.frame(linearRanges)
 names(NullBio14DF)[1] <- "RangeID"
@@ -67,20 +115,62 @@ NullBio15DF <- data.frame(linearRanges)
 names(NullBio15DF)[1] <- "RangeID"
 NullBio15DF$RangeSize <- ranges
 
+NullBio16DF <- data.frame(linearRanges)
+names(NullBio16DF)[1] <- "RangeID"
+NullBio16DF$RangeSize <- ranges
+
 NullBio17DF <- data.frame(linearRanges)
 names(NullBio17DF)[1] <- "RangeID"
 NullBio17DF$RangeSize <- ranges
 
+NullBio18DF <- data.frame(linearRanges)
+names(NullBio18DF)[1] <- "RangeID"
+NullBio18DF$RangeSize <- ranges
+
+NullBio19DF <- data.frame(linearRanges)
+names(NullBio19DF)[1] <- "RangeID"
+NullBio19DF$RangeSize <- ranges
+
 for(i in 1:10){
   #Add a new column to each bioclim dataframe
-  NullBio12DF$temp <- NA
+  NullBio1DF$temp <- NA
+  names(NullBio1DF)[i + 2] <- i
+    NullBio2DF$temp <- NA
+  names(NullBio2DF)[i + 2] <- i
+    NullBio3DF$temp <- NA
+  names(NullBio3DF)[i + 2] <- i
+    NullBio4DF$temp <- NA
+  names(NullBio4DF)[i + 2] <- i
+    NullBio5DF$temp <- NA
+  names(NullBio5DF)[i + 2] <- i
+    NullBio6DF$temp <- NA
+  names(NullBio6DF)[i + 2] <- i
+    NullBio7DF$temp <- NA
+  names(NullBio7DF)[i + 2] <- i
+    NullBio8DF$temp <- NA
+  names(NullBio8DF)[i + 2] <- i
+    NullBio9DF$temp <- NA
+  names(NullBio9DF)[i + 2] <- i
+    NullBio10DF$temp <- NA
+  names(NullBio10DF)[i + 2] <- i
+    NullBio11DF$temp <- NA
+  names(NullBio11DF)[i + 2] <- i
+    NullBio12DF$temp <- NA
   names(NullBio12DF)[i + 2] <- i
-  NullBio14DF$temp <- NA
+    NullBio13DF$temp <- NA
+  names(NullBio13DF)[i + 2] <- i
+    NullBio14DF$temp <- NA
   names(NullBio14DF)[i + 2] <- i
-  NullBio15DF$temp <- NA
+    NullBio15DF$temp <- NA
   names(NullBio15DF)[i + 2] <- i
-  NullBio17DF$temp <- NA
+    NullBio16DF$temp <- NA
+  names(NullBio16DF)[i + 2] <- i
+    NullBio17DF$temp <- NA
   names(NullBio17DF)[i + 2] <- i
+    NullBio18DF$temp <- NA
+  names(NullBio18DF)[i + 2] <- i
+    NullBio19DF$temp <- NA
+  names(NullBio19DF)[i + 2] <- i
   
   linearRanges <- c(1:length(ranges)) #vector of all the ranges 1-4802 to use as an identifier because some ranges have the same size
   
@@ -97,10 +187,25 @@ for(i in 1:10){
     #occupancy reference for each cell in the range has to be set so all of the cells are empty when you start a new range
     LandCells$Occupied <- 0
     
+    Bio1_Null <- NULL
+    Bio2_Null <- NULL
+    Bio3_Null <- NULL
+    Bio4_Null <- NULL
+    Bio5_Null <- NULL
+    Bio6_Null <- NULL
+    Bio7_Null <- NULL
+    Bio8_Null <- NULL
+    Bio9_Null <- NULL
+    Bio10_Null <- NULL
+    Bio11_Null <- NULL
     Bio12_Null <- NULL
+    Bio13_Null <- NULL
     Bio14_Null <- NULL
     Bio15_Null <- NULL
+    Bio16_Null <- NULL
     Bio17_Null <- NULL
+    Bio18_Null <- NULL
+    Bio19_Null <- NULL
     
     if(length(linearRanges) > 1){
       
@@ -134,14 +239,44 @@ for(i in 1:10){
       total_neighbors <- append(total_neighbors, focal_neighbors)
       
       #extract bioclimatic variables for each cell
-      focal_bio14 <- MPrecipitationDF$Precipitation[MPrecipitationDF$CellID == focal_cell]
-      Bio14_Null <- append(Bio14_Null, focal_bio14)
-      focal_bio17 <- QPrecipitationDF$QuarterlyPrecip[QPrecipitationDF$CellID == focal_cell]
-      Bio17_Null <- append(Bio17_Null, focal_bio17)
-      focal_bio15 <- SPrecipitationDF$SeasonalPrecip[SPrecipitationDF$CellID == focal_cell]
-      Bio15_Null <- append(Bio15_Null, focal_bio15)
-      focal_bio12 <- APrecipitationDF$AnnualPrecip[APrecipitationDF$CellID == focal_cell]
-      Bio12_Null <- append(Bio12_Null, focal_bio12)
+      focal_bio1 <- Bio1DF$MeanAnnualTemp[Bio1DF$CellID == focal_cell]
+        Bio1_Null <- append(Bio1_Null, focal_bio1)
+      focal_bio2 <- Bio2DF$MedDiurnalRange[Bio2DF$CellID == focal_cell]
+        Bio2_Null <- append(Bio2_Null, focal_bio2)
+      focal_bio3 <- Bio3DF$Isothermality[Bio3DF$CellID == focal_cell]
+        Bio3_Null <- append(Bio3_Null, focal_bio3)
+      focal_bio4 <- Bio4DF$TempSeason[Bio4DF$CellID == focal_cell]
+        Bio4_Null <- append(Bio4_Null, focal_bio4)
+      focal_bio5 <- Bio5DF$MaxTempWarmM[Bio5DF$CellID == focal_cell]
+        Bio5_Null <- append(Bio5_Null, focal_bio5)
+      focal_bio6 <- Bio6DF$MinTempColdM[Bio6DF$CellID == focal_cell]
+        Bio6_Null <- append(Bio6_Null, focal_bio6)
+      focal_bio7 <- Bio7DF$TempAnnualRange[Bio7DF$CellID == focal_cell]
+        Bio7_Null <- append(Bio7_Null, focal_bio7)
+      focal_bio8 <- Bio8DF$MeanTempWetQ[Bio8DF$CellID == focal_cell]
+        Bio8_Null <- append(Bio8_Null, focal_bio8)
+      focal_bio9 <- Bio9DF$MeanTempDriestQ[Bio9DF$CellID == focal_cell]
+        Bio9_Null <- append(Bio9_Null, focal_bio9)
+      focal_bio10 <- Bio10DF$MeanTempWarmQ[Bio10DF$CellID == focal_cell]
+        Bio10_Null <- append(Bio10_Null, focal_bio10)
+      focal_bio11 <- Bio11DF$MTempColdQ[Bio11DF$CellID == focal_cell]
+        Bio11_Null <- append(Bio11_Null, focal_bio12)
+      focal_bio12 <- Bio12DF$AnnualPrecip[Bio12DF$CellID == focal_cell]
+        Bio12_Null <- append(Bio12_Null, focal_bio12)
+      focal_bio13 <- Bio13DF$AnnualPrecip[Bio13DF$CellID == focal_cell]
+        Bio13_Null <- append(Bio13_Null, focal_bio13)
+      focal_bio14 <- Bio14DF$DriestMPrecip[Bio14DF$CellID == focal_cell]
+        Bio14_Null <- append(Bio14_Null, focal_bio14)
+      focal_bio15 <- Bio15DF$PrecipSeason[Bio15DF$CellID == focal_cell]
+        Bio15_Null <- append(Bio15_Null, focal_bio15)
+      focal_bio16 <- Bio16DF$WettestQPrecip[Bio16DF$CellID == focal_cell]
+        Bio16_Null <- append(Bio16_Null, focal_bio16)
+      focal_bio17 <- Bio17DF$DriestQPrecip[Bio17DF$CellID == focal_cell]
+        Bio17_Null <- append(Bio17_Null, focal_bio17)
+      focal_bio18 <- Bio18DF$WarmestQPrecip[Bio18DF$CellID == focal_cell]
+        Bio18_Null <- append(Bio18_Null, focal_bio18)
+      focal_bio18 <- Bio18DF$ColdestQPrecip[Bio18DF$CellID == focal_cell]
+        Bio18_Null <- append(Bio18_Null, focal_bio18)
       
       repeat{
         #if the focal cell has more than one neighbor, choose a neighbor at random to be the next focal cell
@@ -177,10 +312,24 @@ for(i in 1:10){
       }
     }
     #Store bioclim data for each range in a dataframe
+     NullBio1DF[[i +2]][NullBio1DF$RangeID == linearID_test_range] <-     median(Bio1_Null, na.rm = T)
+    NullBio2DF[[i +2]][NullBio2DF$RangeID == linearID_test_range] <- median(Bio2_Null, na.rm = T)
+    NullBio3DF[[i +2]][NullBio3DF$RangeID == linearID_test_range] <- median(Bio3_Null, na.rm = T)
+    NullBio4DF[[i +2]][NullBio4DF$RangeID == linearID_test_range] <- median(Bio4_Null, na.rm = T)
+    NullBio5DF[[i +2]][NullBio5DF$RangeID == linearID_test_range] <- median(Bio5_Null, na.rm = T)
+    NullBio6DF[[i +2]][NullBio6DF$RangeID == linearID_test_range] <- median(Bio6_Null, na.rm = T)
+    NullBio7DF[[i +2]][NullBio7DF$RangeID == linearID_test_range] <- median(Bio7_Null, na.rm = T)
+    NullBio8DF[[i +2]][NullBio8DF$RangeID == linearID_test_range] <- median(Bio8_Null, na.rm = T)
+    NullBio9DF[[i +2]][NullBio9DF$RangeID == linearID_test_range] <- median(Bio9_Null, na.rm = T)
+    NullBio10DF[[i +2]][NullBio10DF$RangeID == linearID_test_range] <- median(Bio10_Null, na.rm = T)
+    NullBio11DF[[i +2]][NullBio11DF$RangeID == linearID_test_range] <- median(Bio11_Null, na.rm = T)
     NullBio12DF[[i +2]][NullBio12DF$RangeID == linearID_test_range] <- median(Bio12_Null, na.rm = T)
+    NullBio13DF[[i +2]][NullBio13DF$RangeID == linearID_test_range] <- median(Bio13_Null, na.rm = T)
     NullBio14DF[[i +2]][NullBio14DF$RangeID == linearID_test_range] <- median(Bio14_Null, na.rm = T)
     NullBio15DF[[i +2]][NullBio15DF$RangeID == linearID_test_range] <- median(Bio15_Null, na.rm = T)
+    NullBio16DF[[i +2]][NullBio16DF$RangeID == linearID_test_range] <- median(Bio16_Null, na.rm = T)
     NullBio17DF[[i +2]][NullBio17DF$RangeID == linearID_test_range] <- median(Bio17_Null, na.rm = T)
+    NullBio18DF[[i +2]][NullBio18DF$RangeID == linearID_test_range] <- median(Bio18_Null, na.rm = T)
   }
 }
 Sys.time()
@@ -189,26 +338,26 @@ Sys.time()
 ##Analysis
 #Find means
 ```{r}
-Practice <- NullBio14DF
+NullBio14 <- NullBio14DF
 
 linearRanges <- c(1:4802)
 
-Practice$RangeID <- NULL
-Practice$RangeSize<- NULL
-Practice$Mean <- rowMeans(Practice, na.rm=TRUE)
-Practice$RangeID <- linearRanges
-Practice$RangeSize <- ranges
+NullBio14$RangeID <- NULL
+NullBio14$RangeSize<- NULL
+NullBio14$Mean <- rowMeans(NullBio14, na.rm=TRUE)
+NullBio14$RangeID <- linearRanges
+NullBio14$RangeSize <- ranges
 
 ```
 
 #Plot means
 ```{r}
-PracticeScatterplot <- ggplot(Practice, aes(Mean, RangeSize)) + 
+NullScatterBio14 <- ggplot(NullBio14, aes(Mean, RangeSize)) + 
   geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + ylab("Null Species Median Range Size") + 
   xlab("Mean Null Precipitation in Driest Month") + theme_minimal() + ylim(0,1600) + geom_smooth(size = 2,color = "gray63") +
   theme(axis.title.y = element_text(size=28), axis.title.x = element_text(size=28), axis.text.x = element_text(size=20), axis.text.y = element_text(size = 20)) +
 
-  PracticeScatterplot
+  NullScatterBio14
 
 ```
 

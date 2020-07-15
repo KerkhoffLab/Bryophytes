@@ -139,8 +139,53 @@ saveRDS(RangeRaster, "Data/RangeRaster.rds")
 
 #Stop for NullModelWithWorldClimData.R & SpreadingDye.R-------------------------------
 
+##Bryophytes.Rmd##
+Cell8 <- CellID[which(bryneighborvect==8)]
+Neighbors8 <-Neighbors[Cell8]
+Neighbors8 <- data.frame(Neighbors8)
+names(Neighbors8) <- Cell8
+
+Cell7 <- CellID[which(bryneighborvect==7)]
+Neighbors7 <- Neighbors[Cell7]
+Neighbors7 <- data.frame(Neighbors7)
+names(Neighbors7) <- Cell7
+
+BetaMat<-as.matrix(BetaMat)
+row.names(BetaMat) <- CellID
+names(BetaMat) <- CellID
+
+BetaMat8<- BetaMat[!Cell8, !Cell8, drop=TRUE]
+inx8 <- match(as.character(Cell8), rownames(BetaMat8))
+BetaMat8 <- BetaMat8[inx8,inx8]
+
+BetaMat7 <- BetaMat[!Cell7, !Cell7, drop=TRUE]
+inx7 <- match(as.character(Cell7), rownames(BetaMat7))
+BetaMat7 <- BetaMat7[inx7,inx7]
+
+Cell8CH <- as.character(Cell8)
+Beta8 <- lapply(Cell8CH, function(x)mean(BetaMat[x, as.character(Neighbors8[,x])]))
+names(Beta8) <- Cell8CH
+
+Cell7CH <- as.character(Cell7)
+Beta7 <- lapply(Cell7CH, function(x)mean(BetaMat[x, as.character(Neighbors7[,x])]))
+names(Beta7) <- Cell7CH
+
+
+Beta7Vec<-unlist(Beta7)
+Beta8Vec<-unlist(Beta8)
+
+BetaVec <- rep(0, 15038)
+
+BetaVec[Cell8]<-Beta8Vec
+BetaVec[Cell7]<-Beta7Vec
+
+BetaVec[BetaVec==0]<-NA
+BetaVec <- 1-BetaVec
+
 
 LongLatBetaVec <- rep(0, 15038)
+LongLatBetaVec[Cell8]<-Beta8Vec
+LongLatBetaVec[Cell7]<-Beta7Vec
 LongLatBetaVec[LongLatBetaVec==0]<-NA
 LongLatBetaVec <- 1-LongLatBetaVec
 
@@ -162,4 +207,3 @@ colnames(BetaLongLat) <- c("Beta", "Longitude", "Latitude")
 saveRDS(LongLatBetaRaster, file="Data/LongLatBetaRaster.rds")
 
 #Stop for MontaneFamilies.R-------------------------------------------------------------
-

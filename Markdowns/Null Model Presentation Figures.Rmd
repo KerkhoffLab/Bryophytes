@@ -1,11 +1,13 @@
 ---
 title: "Null Modelling Figures"
 author: Hailey Napier
+date: Spring 2020
 output: html_notebook
 ---
 ```{r}
 library(dplyr)
 ```
+
 #All ranges
 ```{r}
 RangeScatter2 <- ggplot(data = FullRange, aes(Latitude, Avg)) + 

@@ -1,6 +1,7 @@
 ##Null Model to test the relationship between precipitation and range sizes
 #Hailey Napier 
 #Spring 2020 
+#updates added for data aggregation Summer 2020
 
 #Packages
 require(sp)
@@ -28,7 +29,7 @@ ranges <- sort(ranges)
 
 
 ####Spreading Dye Algorithm####
-linearRanges <- c(1:4802) #vector of all the ranges 1-4802 to use as an identifier because some ranges have the same size
+linearRanges <- c(1:length(ranges)) #vector of all the ranges 1-4802 to use as an identifier because some ranges have the same size
 
 #make a matrix to store which cells are in each range
 ranges.vector <- rep(0, length(ranges)) 
@@ -41,7 +42,7 @@ LandCells$Total_Overlap <- 0
 focal_neighbors <- NULL
 total_neighbors <- NULL
 
-for(i in 1:4802){
+for(i in 1:legnth(ranges)){
   #total_neighbors is a list of all of the neighbors of each of the cells in the range, so it resets with each new range
   total_neighbors <- NULL
   #occupancy reference for each cell in the range has to be set so all of the cells are empty when you start a new range
@@ -187,30 +188,125 @@ WorldClim <- do.call(crop, c(WC_layers,extent(-175,-22,-56,74)))
 WorldClim <- projectRaster(WorldClim, crs = Bryophytecrs) 
 WorldClim <- resample(WorldClim, RangeRaster) #fits WorldClim data on the BIEN 100 km^2 map by averaging variables across each cell
 
-#Precipitation in driest quarter (bio17)
-QPrecipitationDF<- data.frame(bio=getValues(WorldClim$bio17), CellID = as.character(1:15038))
-colnames(QPrecipitationDF) <- c("QuarterlyPrecip", "CellID")
-QPrecipitationDF <- QPrecipitationDF[QPrecipitationDF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
 
+#Make WorldClim dataframes
 
-#Precipitation in driest month (bio14)
-MPrecipitationDF<- data.frame(bio=getValues(WorldClim$bio14), CellID = as.character(1:15038))
-colnames(MPrecipitationDF) <- c("Precipitation", "CellID")
-MPrecipitationDF <- MPrecipitationDF[MPrecipitationDF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
+#Mean Annual Temperature (bio1)
+Bio1DF<- data.frame(bio=getValues(WorldClim$bio1), CellID = as.character(1:15038))
+colnames(Bio1DF) <- c("MeanAnnualTemp", "CellID")
+Bio1DF <- Bio1DF[Bio1DF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
 
-#Precipitation seasonality (bio15)
-SPrecipitationDF<- data.frame(bio=getValues(WorldClim$bio15), CellID = as.character(1:15038))
-colnames(SPrecipitationDF) <- c("SeasonalPrecip", "CellID")
-SPrecipitationDF <- SPrecipitationDF[SPrecipitationDF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
+#Mean diurnal range (mean of monthly(max temp - min temp)) (bio2)
+Bio2DF<- data.frame(bio=getValues(WorldClim$bio2), CellID = as.character(1:15038))
+colnames(Bio2DF) <- c("MedDiurnalRange", "CellID")
+Bio2DF <- Bio2DF[Bio2DF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
+
+#Isothermality (Bio2/Bio7)x100 (bio3)
+Bio3DF<- data.frame(bio=getValues(WorldClim$bio3), CellID = as.character(1:15038))
+colnames(Bio3DF) <- c("Isothermality", "CellID")
+Bio3DF <- Bio3DF[Bio2DF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
+
+#Temperature seasonality (sd x 100) (bio4)
+Bio4DF<- data.frame(bio=getValues(WorldClim$bio4), CellID = as.character(1:15038))
+colnames(Bio4DF) <- c("TempSeason", "CellID")
+Bio4DF <- Bio4DF[Bio4DF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
+
+#Max temperature of warmest month (bio5)
+Bio5DF<- data.frame(bio=getValues(WorldClim$bio5), CellID = as.character(1:15038))
+colnames(Bio5DF) <- c("MaxTempWarmM", "CellID")
+Bio5DF <- Bio5DF[Bio5DF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
+
+#Min temperature of coldest moonth (bio6)
+Bio6DF<- data.frame(bio=getValues(WorldClim$bio6), CellID = as.character(1:15038))
+colnames(Bio6DF) <- c("MinTempColdM", "CellID")
+Bio6DF <- Bio6DF[Bio6DF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
+
+#Temperature annual range (Bio5 - Bio6) (bio7)
+Bio7DF<- data.frame(bio=getValues(WorldClim$bio7), CellID = as.character(1:15038))
+colnames(Bio7DF) <- c("TempAnnualRange", "CellID")
+Bio2DF <- Bio7DF[Bio7DF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
+
+#Mean temperature of wettest quarter (bio8)
+Bio8DF<- data.frame(bio=getValues(WorldClim$bio8), CellID = as.character(1:15038))
+colnames(Bio8DF) <- c("MeanTempWetQ", "CellID")
+Bio8DF <- Bio8DF[Bio8DF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
+
+#Mean temperature of driest quarter (bio9)
+Bio9DF<- data.frame(bio=getValues(WorldClim$bio9), CellID = as.character(1:15038))
+colnames(Bio9DF) <- c("MeanTempDriestQ", "CellID")
+Bio9DF <- Bio9DF[Bio9DF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
+
+#Mean temperature of warmest quarter (bio 10)
+Bio10DF<- data.frame(bio=getValues(WorldClim$bio10), CellID = as.character(1:15038))
+colnames(Bio10DF) <- c("MeanTempWarmQ", "CellID")
+Bio10DF <- Bio10DF[Bio10DF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
+
+#Mean temperature of coldest quarter (bio 11)
+Bio11DF<- data.frame(bio=getValues(WorldClim$bio11), CellID = as.character(1:15038))
+colnames(Bio11DF) <- c("MTempColdQ", "CellID")
+Bio11DF <- Bio11DF[Bio11DF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
 
 #Annual precipitation (bio12)
-APrecipitationDF<- data.frame(bio=getValues(WorldClim$bio12), CellID = as.character(1:15038))
-colnames(APrecipitationDF) <- c("AnnualPrecip", "CellID")
-APrecipitationDF <- APrecipitationDF[APrecipitationDF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
-######
+Bio12DF<- data.frame(bio=getValues(WorldClim$bio12), CellID = as.character(1:15038))
+colnames(Bio12DF) <- c("AnnualPrecip", "CellID")
+Bio12DF <- Bio12DF[Bio12DF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
 
+#Precipitation of wettest month (bio13)
+Bio13DF<- data.frame(bio=getValues(WorldClim$bio13), CellID = as.character(1:15038))
+colnames(Bio13DF) <- c("WettestMPrecip", "CellID")
+Bio13DF <- Bio13DF[Bio13DF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
+
+#Precipitation in driest month (bio14)
+Bio14DF<- data.frame(bio=getValues(WorldClim$bio14), CellID = as.character(1:15038))
+colnames(Bio14DF) <- c("DriestMPrecip", "CellID")
+Bio14DF <- Bio14DF[Bio14DF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
+
+#Precipitation seasonality (coefficient of variation) (bio15)
+Bio15DF<- data.frame(bio=getValues(WorldClim$bio15), CellID = as.character(1:15038))
+colnames(Bio15DF) <- c("PrecipSeason", "CellID")
+Bio15DF <- Bio15DF[Bio15DF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
+
+#Precipitation of wettest quarter (bio16)
+Bio16DF<- data.frame(bio=getValues(WorldClim$bio16), CellID = as.character(1:15038))
+colnames(Bio16DF) <- c("WettestQPrecip", "CellID")
+Bio16DF <- Bio16DF[Bio16DF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
+
+#Precipitation in driest quarter (bio17)
+Bio17DF<- data.frame(bio=getValues(WorldClim$bio17), CellID = as.character(1:15038))
+colnames(Bio17DF) <- c("DriestQPrecip", "CellID")
+Bio17DF <- Bio17DF[Bio17DF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
+
+#Precipitation of warmest quarter (bio18)
+Bio18DF<- data.frame(bio=getValues(WorldClim$bio18), CellID = as.character(1:15038))
+colnames(Bio18DF) <- c("WarmestQPrecip", "CellID")
+Bio18DF <- Bio18DF[Bio18DF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
+
+#Precipitation of coldest quarter (bio19)
+Bio19DF<- data.frame(bio=getValues(WorldClim$bio19), CellID = as.character(1:15038))
+colnames(Bio19DF) <- c("ColdestQPrecip", "CellID")
+Bio19DF <- Bio19DF[Bio19DF$CellID %in% CellRangeVec, ] #subsets it to only include cells with bryophyte range data
+
+######
+#Create new folder
+dir.create("Data/NullModelData")
 #Save dataframes
-saveRDS(APrecipitationDF, file = "Data/APrecipitationDF.rds")
-saveRDS(SPrecipitationDF, file = "Data/SPrecipitationDF.rds")
-saveRDS(MPrecipitationDF, file = "Data/MPrecipitationDF.rds")
-saveRDS(QPrecipitationDF, file = "Data/QPrecipitationDF.rds")
+saveRDS(Bio1DF, file = "Data/NullModelData/Bio1DF.rds")
+saveRDS(Bio2DF, file = "Data/NullModelData/Bio2DF.rds")
+saveRDS(Bio3DF, file = "Data/NullModelData/Bio3DF.rds")
+saveRDS(Bio4DF, file = "Data/NullModelData/Bio4DF.rds")
+saveRDS(Bio5DF, file = "Data/NullModelData/Bio5DF.rds")
+saveRDS(Bio6DF, file = "Data/NullModelData/Bio6DF.rds")
+saveRDS(Bio7DF, file = "Data/NullModelData/Bio7DF.rds")
+saveRDS(Bio8DF, file = "Data/NullModelData/Bio8DF.rds")
+saveRDS(Bio9DF, file = "Data/NullModelData/Bio9DF.rds")
+saveRDS(Bio10DF, file = "Data/NullModelData/Bio10DF.rds")
+saveRDS(Bio11DF, file = "Data/NullModelData/Bio11DF.rds")
+saveRDS(Bio12DF, file = "Data/NullModelData/Bio12DF.rds")
+saveRDS(Bio13DF, file = "Data/NullModelData/Bio13DF.rds")
+saveRDS(Bio14DF, file = "Data/NullModelData/Bio14DF.rds")
+saveRDS(Bio15DF, file = "Data/NullModelData/Bio15DF.rds")
+saveRDS(Bio16DF, file = "Data/NullModelData/Bio16DF.rds")
+saveRDS(Bio17DF, file = "Data/NullModelData/Bio17DF.rds")
+saveRDS(Bio18DF, file = "Data/NullModelData/Bio18DF.rds")
+saveRDS(Bio19DF, file = "Data/NullModelData/Bio19DF.rds")
+

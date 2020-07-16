@@ -11,6 +11,7 @@ names(Families)[2] <- "Richness"
 Families <- left_join(Families, ByGroup, by = "Family")
 
 FamilyNames <- Families$Family
+saveRDS(FamilyNames, file = "Data/FamilyNames.rds")
 NumberFamilies <- length(FamilyNames)
 
 
@@ -83,6 +84,7 @@ for(i in 1:NumberFamilies){
 # 2.1 Loop through order names and subset BryophtePresence for each order, store them in a list
 OrderNames <- unique(BryophytePresence$Order)
 OrderNames <- OrderNames[!is.na(OrderNames)]
+saveRDS(OrderNames, file = "Data/OrderNames.rds")
 NumberOrders <- length(OrderNames)
 OrderList <- list()
 for(i in 1:NumberOrders){

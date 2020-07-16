@@ -48,6 +48,19 @@ saveRDS(BryophytePresence, file = "Data/OLD_BryophytePresence.rds")
 ####Updated BryophytePresence (7/2020)####
 BryophytePresence <- read.csv("Data/BryophytePresence_7.2.20(2).csv")
 
+#Family & order names
+OrderNames <- unique(BryophytePresence$Order)
+OrderNames <- OrderNames[!is.na(OrderNames)]
+NumberOrders <- length(OrderNames)
+saveRDS(NumberOrders, file = "Data/NumberOrders.rds")
+saveRDS(OrderNames, file = "Data/OrderNames.rds")
+
+FamilyNames <- Families$Family
+FamilyNames <- FamilyNames[!is.na(FamilyNames)]
+NumberFamilies <- length(FamilyNames)
+saveRDS(NumberFamilies, file = "Data/NumberFamilies.rds")
+saveRDS(FamilyNames, file = "Data/FamilyNames.rds")
+
 #Tally richness by cell and create richness vector and save
 CellRichness <- tally(group_by(BryophytePresence, CellID))
 colnames(CellRichness)[2] <- "Richness"
@@ -170,18 +183,13 @@ Cell7CH <- as.character(Cell7)
 Beta7 <- lapply(Cell7CH, function(x)mean(BetaMat[x, as.character(Neighbors7[,x])]))
 names(Beta7) <- Cell7CH
 
-
 Beta7Vec<-unlist(Beta7)
 Beta8Vec<-unlist(Beta8)
-
 BetaVec <- rep(0, 15038)
-
 BetaVec[Cell8]<-Beta8Vec
 BetaVec[Cell7]<-Beta7Vec
-
-BetaVec[BetaVec==0]<-NA
+Betavec[BetaVec==0]<-NA
 BetaVec <- 1-BetaVec
-
 
 LongLatBetaVec <- rep(0, 15038)
 LongLatBetaVec[Cell8]<-Beta8Vec
@@ -207,3 +215,44 @@ colnames(BetaLongLat) <- c("Beta", "Longitude", "Latitude")
 saveRDS(LongLatBetaRaster, file="Data/LongLatBetaRaster.rds")
 
 #Stop for MontaneFamilies.R-------------------------------------------------------------
+
+##OneScaleFamRichMaps.R##
+#Loop through families and tally richness for each family, store in a list
+FamList <- list()
+NumberFamilies <- length(FamilyNames)
+for(i in 1:NumberFamilies){
+  fam <- FamilyNames[i]
+  FamList[[i]] <- subset(BryophytePresence, Family == fam)
+}
+
+FamRichList <- list()
+FamPresList <- list()
+for(i in 1:NumberFamilies){
+  FamPresList[[i]] <- tally(group_by(FamList[[i]], CellID))
+  names(FamPresList[[i]])[2] <- "Richness"
+  FamRichList[[i]] <- numeric(15038)
+  FamRichList[[i]][FamPresList[[i]]$CellID] <- FamPresList[[i]]$Richness
+  FamRichList[[i]][which(FamRichList[[i]]==0)] = NA
+}
+
+#Loop through orders and tally richness for each order, store in a list
+OrderList <- list()
+for(i in 1:NumberOrders){
+  ord <- OrderNames[i]
+  OrderList[[i]] <- subset(BryophytePresence, Order == ord)
+}
+
+OrderRichList <- list()
+OrderPresList <- list()
+for(i in 1:NumberOrders){
+  OrderPresList[[i]] <- tally(group_by(OrderList[[i]], CellID))
+  names(OrderPresList[[i]])[2] <- "Richness"
+  OrderRichList[[i]] <- numeric(15038)
+  OrderRichList[[i]][OrderPresList[[i]]$CellID] <- OrderPresList[[i]]$Richness
+  OrderRichList[[i]][which(OrderRichList[[i]]==0)] = NA
+}
+
+saveRDS(OrderRichList, file = "Data/OrderRichList.rds")
+saveRDS(FamRichList, file = "Data/FamRichList.rds")
+
+

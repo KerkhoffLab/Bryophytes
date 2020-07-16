@@ -1,7 +1,7 @@
 #Quantitative alpha diversity comparison for families
-  ##Input: order1 = first order name; order2 = second order name
-  ##Output: 1) ratio of smaller order alpha div/larger order alpha div
-  ##Output: 2) order1: order1sum; order2: order2sum 
+  ##Input: fam1 = first family name; fam2 = second family name
+  ##Output: 1) ratio of (smaller family alpha div/larger family alpha div)
+  ##Output: 2) data.frame displaying family name and total alpha diversity for each family
 #Hailey Napier
 #July 16, 2020
 
@@ -24,7 +24,8 @@ fam.alpha.comp <- function(fam1,fam2,...){
     dif <- ("The families have the same total alpha diversity.")
   }
   
-  line2 <- paste(fam1, ":  ", fam1sum, sep = "")
-  line3 <- paste(fam2, ": ", fam2sum, sep = "")
-  writeLines(c(dif,line2,line3))
+  df <- data.frame(Family = c(fam1, fam2), TotalAlpha = c(fam1sum, fam2sum))
+  
+  print(dif)
+  df
 }

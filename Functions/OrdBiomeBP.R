@@ -9,6 +9,9 @@ OrdBiomeBP <- function(order,...){
   BiomeNames <- readRDS("Data/BiomeNames.rds")
   NumberBiomes <- length(BiomeNames)
   
+  #source functions
+  source("Functions/ORange.R")
+  
   #set up dataframe to add to 
   df <- data.frame(ORange(order, BiomeNames[1]))
   names(df)[1] <- "Alpha"

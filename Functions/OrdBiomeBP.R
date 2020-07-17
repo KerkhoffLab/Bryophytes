@@ -32,17 +32,19 @@ OrdBiomeBP <- function(order, type,...){
     plot <- ggplot(df, aes(x = Biome, y = Alpha)) + 
       geom_violin(fill = "cyan4", alpha = 0.8, color = "cyan4") + 
       theme_minimal() + 
+      ggtitle(order) + 
       ylab("α diversity") + 
       xlab(" ") + 
       theme(axis.title.y = element_text(size=24), axis.text.y = element_text(size=20), axis.text.x = element_text(angle = 45, hjust = 1, size = 16))
   }else if(type == "box"){
     plot <- ggplot(df, aes(x = Biome, y = Alpha)) + 
       geom_boxplot() + 
+      ggtitle(order) +
       theme_minimal() + 
       geom_jitter(alpha = 0.5, width = 0.2, color = "cyan4") +
       ylab("α diversity") + 
       xlab(" ") + 
-      theme(axis.title.y = element_text(size=24), axis.text.y = element_text(size=20), axis.text.x = element_text(angle = 45, hjust = 1, size = 16))
+      theme(axis.title.y = element_text(size=24), axis.text.y = element_text(size=20), axis.text.x = element_text(angle = 45, hjust = 1, size = 20), plot.title = element_text(size = 28, hjust = 0.5))
   }
   
    plot

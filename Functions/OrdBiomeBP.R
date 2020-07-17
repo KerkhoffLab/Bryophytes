@@ -29,22 +29,31 @@ OrdBiomeBP <- function(order, type,...){
   }
   
   if(type == "violin"){
-    plot <- ggplot(df, aes(x = Biome, y = Alpha)) + 
-      geom_violin(fill = "cyan4", alpha = 0.8, color = "cyan4", scale = "count") + 
+    plot <- ggplot(df, aes(x = Biome, y = Alpha, fill = Biome)) + 
+      geom_violin(scale = "count", show.legend = FALSE, fill = cols1) + 
       theme_minimal() + 
       ggtitle(order) + 
-      ylab("α diversity") + 
-      xlab(" ") + 
-      theme(axis.title.y = element_text(size=24), axis.text.y = element_text(size=20), axis.text.x = element_text(angle = 45, hjust = 1, size = 16), plot.title = element_text(size = 28, hjust = 0.5))
+      ylab("Richness") + 
+      xlab("Biome") + 
+      theme(axis.title.y = element_text(size=32), 
+            axis.title.x = element_text(size=32),
+            axis.text.y = element_text(size=20), 
+            axis.text.x = element_text(angle = 30, hjust = 1, size = 12), 
+            plot.title = element_text(size = 28, hjust = 0.5))
   }else if(type == "box"){
-    plot <- ggplot(df, aes(x = Biome, y = Alpha)) + 
-      geom_boxplot() + 
+    plot <- ggplot(df, aes(x = Biome, y = Alpha, fill = Biome)) + 
+      geom_boxplot(show.legend=FALSE, fill=cols4) + 
       ggtitle(order) +
       theme_minimal() + 
-      geom_jitter(alpha = 0.5, width = 0.2, color = "cyan4") +
-      ylab("α diversity") + 
-      xlab(" ") + 
-      theme(axis.title.y = element_text(size=24), axis.text.y = element_text(size=20), axis.text.x = element_text(angle = 45, hjust = 1, size = 20), plot.title = element_text(size = 28, hjust = 0.5))
+      #geom_jitter(alpha = 0.5, width = 0.2, color = "cyan4") +
+      #geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.5) +
+      ylab("Richness") + 
+      xlab("Biome") + 
+      theme(axis.title.y = element_text(size=32), 
+            axis.title.x = element_text(size=32),
+            axis.text.y = element_text(size=20), 
+            axis.text.x = element_text(angle = 30, hjust = 1, size = 12),
+            plot.title = element_text(size = 28, hjust = 0.5))
   }
   
    plot

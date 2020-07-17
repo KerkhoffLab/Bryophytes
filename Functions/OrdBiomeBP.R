@@ -6,7 +6,7 @@
 
 OrdBiomeBP <- function(order,...){
   #load data
-  readRDS("Data/BiomeNames.rds")
+  BiomeNames <- readRDS("Data/BiomeNames.rds")
   NumberBiomes <- length(BiomeNames)
   
   #set up dataframe to add to 
@@ -21,7 +21,7 @@ OrdBiomeBP <- function(order,...){
     names(temp)[1] <- "Alpha"
     temp$CellID <- c(1:15038)
     temp$Biome <- BiomeNames[i] 
-    df <- row_bind(df, temp)
+    df <- bind_rows(df, temp)
   }
   
   plot <- ggplot(df, aes(x = Biome, y = Alpha)) + 

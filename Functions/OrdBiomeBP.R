@@ -1,6 +1,6 @@
 #Function to make boxplot of alpha diversity for a specified order in a specified biome/mountain range
-#Input: str, name of order
-#Ouput: boxplot
+#Input: str, name of order (ex. "Hypnales")
+#Ouput: set of boxplots (one for each order)
 #Hailey Napier
 #July 16, 2020
 

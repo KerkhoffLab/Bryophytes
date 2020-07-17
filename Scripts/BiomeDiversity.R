@@ -30,6 +30,10 @@ require(filesstrings)
 
 require(forcats)
 
+require(tidyverse)
+require(tmap)
+
+
 ##Load blank raster and richness/presence data -----------------------------
 BlankRas <-raster("Data/blank_100km_raster.tif")
 RichnessVec <- readRDS("Data/RichnessVec.rds")
@@ -58,6 +62,20 @@ unlink("./Data/Biomes/BIEN_FEE_paper-Trait_phylo.zip")
 #Set theme and colors for gplots -------------------------------------------
 cols <- (wes_palette("Zissou1", 500, type = "continuous"))
 theme_set(theme_void())
+
+cols1 <- (wes_palette("Zissou1", 5632, type = "continuous"))
+cols2 <- (wes_palette("Zissou1", 11, type="continuous"))
+
+cols3 <- (wes_palette("Cavalcanti1", 11, type = "continuous"))
+
+cols_wes=c(wes_palette("Darjeeling1",6,type="continuous"),
+           wes_palette("Cavalcanti1",5,type="continuous"))
+rev_cols_wes <- rev(cols_wes)
+
+cols4 <- c(wes_palette("Cavalcanti1",4,type="continuous"),
+           wes_palette("Chevalier1",5,type="continuous"),
+           "slateblue1", "orangered3")
+cols4
 
 #Create bryophyte richness dataframe ---------------------------------------
 RichnessVec[which(RichnessVec==0)]=NA
@@ -98,7 +116,7 @@ biomes_shp <- shapefile("Data/Biomes/Biomes_olson_projected.shp")
 biomes_sf <- st_as_sf(biomes_shp)
 
 #Create map
-BiomeRichnessMap <- ggplot() +
+BiomeRichnessMap <- ggplot(fill=biomes_shp$biomes) +
   geom_tile(data=RichnessDF, aes(x=Longitude, y=Latitude, fill=Alpha)) + 
   scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent") + 
   scale_fill_gradientn(colours=cols, na.value="transparent") +
@@ -277,7 +295,9 @@ View(BiomeRichness)
 saveRDS(BiomeRichness, file = "Data/BiomeRichness.rds")
 
 
-#Biome richness scatterplot
+#MAKE PLOTS ----------------------------------------------------------------
+
+#Biome richness scatterplot ------------------------------------------------
 BiomeRichness <- readRDS("Data/BiomeRichness.rds")
 #BiomeRichnessScatter <- ggplot() + 
   #geom_point(data = BiomeRichness, 
@@ -298,9 +318,85 @@ BiomeRichness <- readRDS("Data/BiomeRichness.rds")
 #BiomeRichnessScatter
 
 BiomeRichScatter <- ggplot(BiomeRichness, aes(Latitude, Alpha, color=Type)) +
-  geom_point() +
+  geom_smooth() +
+  geom_point(shape=16, size=1, alpha=0.5) +
   xlab("Latitude") +
-  ylab("α div in biomes") +
-  ylim(0,1000) +
-  labs(color="Biome")
+  ylab("Biome Alpha Diversity") +
+  labs(color="Biome") +
+  theme_minimal() +
+  theme(axis.title.y = element_text(size=32),
+        axis.title.x = element_text(size=32),
+        axis.text = element_text(size=20))
 BiomeRichScatter
+
+
+#Biome richness boxplot ----------------------------------------------------
+BiomeRichBox <- ggplot(BiomeRichness, aes(x=Type, y=Alpha, fill=Type)) + 
+  geom_boxplot(show.legend = FALSE, fill=cols4) +
+  guides(x = guide_axis(angle=30)) +
+  theme_minimal() +
+  xlab("Biome") +
+  ylab("Richness") +  
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),
+        axis.text.y = element_text(size=20), 
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 12))
+BiomeRichBox
+
+#Biome richness boxplot with violins ---------------------------------------
+BiomeRichBV <- ggplot(BiomeRichness, aes(x=Type, y=Alpha, fill=Type)) + 
+  geom_boxplot(show.legend = FALSE, fill=cols4) +
+  guides(x = guide_axis(angle=30)) +
+  theme_minimal() +
+  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.5) +
+  xlab("Biome") +
+  ylab("Richness") +  
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),
+        axis.text.y = element_text(size=20), 
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 12))
+BiomeRichBV
+
+#Biome richness violin plot ------------------------------------------------
+BiomeRichViolin <- ggplot(BiomeRichness, 
+                          aes(x=Type, y=Alpha, fill=Type)) +
+  geom_violin(scale="area", show.legend = FALSE, fill=cols1) +  #change fill colors
+  guides(x = guide_axis(angle=30)) +
+  xlab("Biome") +
+  ylab("Richness") +
+  theme_minimal() +  
+  theme(axis.title.y = element_text(size=32),
+        axis.title.x = element_text(size=32),
+        axis.text.y = element_text(size=20))
+BiomeRichViolin
+
+
+#Biomes Map ----------------------------------------------------------------
+BiomeMap <- ggplot(fill=biomes_shp$biomes, color=biomes_shp$biomes) +
+  coord_equal() +
+  #geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) +           #remove continental outlines for visual clarity
+  #geom_sf(data = nw_mount_sf, size = 0.5, fill=NA) +           #remove mountain outlines for visual clarity
+  geom_sf(data = biomes_sf, size = 0.5, fill=cols4, color="black") +
+  geom_sf_label(data = biomes_sf, 
+                aes(alpha=0.5, label = biomes_shp$biomes, size=.01), 
+                show.legend = FALSE) +
+  theme_void()
+BiomeMap
+
+
+#Biome map with legend
+BiomeMapLegend <-qtm(biomes_shp, fill="biomes", fill.style="fixed",
+                   fill.labels=biomes_shp$biomes,
+                   fill.palette=cols4, 
+                   fill.title="Biomes",
+                   layout.legend.outside=TRUE)
+BiomeMapLegend
+
+
+
+#Hailey's function:
+source("Functions/OrdBiomeBP.R")
+#First run BiomeProcessing.R, ORange.R, and Data.Processing
+
+OrdBiomeBP("Hypnales", "box")
+OrdBiomeBP("Hypnales", "violin")

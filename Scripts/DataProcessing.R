@@ -55,7 +55,8 @@ NumberOrders <- length(OrderNames)
 saveRDS(NumberOrders, file = "Data/NumberOrders.rds")
 saveRDS(OrderNames, file = "Data/OrderNames.rds")
 
-FamilyNames <- Families$Family
+FamilyNames <- unique(BryophytePresence$Family)
+FamilyNames <- as.vector(FamilyNames)
 FamilyNames <- FamilyNames[!is.na(FamilyNames)]
 NumberFamilies <- length(FamilyNames)
 saveRDS(NumberFamilies, file = "Data/NumberFamilies.rds")
@@ -188,7 +189,7 @@ Beta8Vec<-unlist(Beta8)
 BetaVec <- rep(0, 15038)
 BetaVec[Cell8]<-Beta8Vec
 BetaVec[Cell7]<-Beta7Vec
-Betavec[BetaVec==0]<-NA
+BetaVec[BetaVec==0]<-NA
 BetaVec <- 1-BetaVec
 
 LongLatBetaVec <- rep(0, 15038)

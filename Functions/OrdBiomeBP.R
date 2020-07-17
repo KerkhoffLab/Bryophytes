@@ -30,12 +30,12 @@ OrdBiomeBP <- function(order, type,...){
   
   if(type == "violin"){
     plot <- ggplot(df, aes(x = Biome, y = Alpha)) + 
-      geom_violin(fill = "cyan4", alpha = 0.8, color = "cyan4") + 
+      geom_violin(fill = "cyan4", alpha = 0.8, color = "cyan4", scale = "count") + 
       theme_minimal() + 
       ggtitle(order) + 
       ylab("α diversity") + 
       xlab(" ") + 
-      theme(axis.title.y = element_text(size=24), axis.text.y = element_text(size=20), axis.text.x = element_text(angle = 45, hjust = 1, size = 16))
+      theme(axis.title.y = element_text(size=24), axis.text.y = element_text(size=20), axis.text.x = element_text(angle = 45, hjust = 1, size = 16), plot.title = element_text(size = 28, hjust = 0.5))
   }else if(type == "box"){
     plot <- ggplot(df, aes(x = Biome, y = Alpha)) + 
       geom_boxplot() + 

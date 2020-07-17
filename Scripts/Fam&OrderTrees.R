@@ -437,7 +437,7 @@ tree
 
 #Make new maps
 dir.create("Figures/TreeMaps/Tree20FamMaps")
-#Find the index numbers for the orders in tree20
+#Find the index numbers for the families in tree20
 tree20index <- match(FamilyNodes20$Family, FamilyNames)
 tree20index <- tree20index[complete.cases(tree20index)]
 tree20index <- data.frame(tree20index)

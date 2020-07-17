@@ -50,7 +50,7 @@ file.move("./Data/Biomes/BIEN_FEE_paper-Trait_phylo/data/processed/Olson_process
 file.move("./Data/Biomes/BIEN_FEE_paper-Trait_phylo/data/processed/Olson_processed/Biomes_olson_projected.shp", "./Data/Biomes/")
 file.move("./Data/Biomes/BIEN_FEE_paper-Trait_phylo/data/processed/Olson_processed/Biomes_olson_projected.shx", "./Data/Biomes/")
 
-##Delete the repository folder and zip file
+##Delete the repository folder and .zip file
 unlink("./Data/Biomes/BIEN_FEE_paper-Trait_phylo", recursive=TRUE)
 unlink("./Data/Biomes/BIEN_FEE_paper-Trait_phylo.zip")
 
@@ -58,8 +58,6 @@ unlink("./Data/Biomes/BIEN_FEE_paper-Trait_phylo.zip")
 #Set theme and colors for gplots -------------------------------------------
 cols <- (wes_palette("Zissou1", 500, type = "continuous"))
 theme_set(theme_void())
-
-cols2 <- (wes_palette("Zissou1", 11, type = "continuous"))
 
 #Create bryophyte richness dataframe ---------------------------------------
 RichnessVec[which(RichnessVec==0)]=NA
@@ -107,7 +105,7 @@ BiomeRichnessMap <- ggplot() +
   coord_equal() +
   #geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) +           #remove continental outlines for visual clarity
   #geom_sf(data = nw_mount_sf, size = 0.5, fill=NA) +           #remove mountain outlines for visual clarity
-  geom_sf(data = biomes_sf, size = 0.5, aes(fill=biomes)) +
+  geom_sf(data = biomes_sf, size = 0.5, fill=NA) +
   theme_void() +
   theme(legend.text=element_text(size=20), 
         legend.title=element_text(size=32), 
@@ -271,10 +269,38 @@ AlphaXericWood <- merge(AlphaXericWood, LongLatDF)
 #saveRDS(AlphaXericWood, file = "Data/AlphaXericWood.rds")
 
 
-#Bind biome dataframes
-BiomesRichness <- bind_rows(AlphaConFor, AlphaDryFor, AlphaMedWood, AlphaMoistFor, 
+#Bind biome dataframes -----------------------------------------------------
+BiomeRichness <- bind_rows(AlphaConFor, AlphaDryFor, AlphaMedWood, AlphaMoistFor, 
                       AlphaSavanna, AlphaTaiga, AlphaTempGrass, AlphaTempMix,
                       AlphaTropGrass, AlphaTundra, AlphaXericWood)
-View(BiomesRichness)
-saveRDS(BiomesRichness, file = "Data/BiomesRichness.rds")
-BiomesRichness <- readRDS("Data/BiomesRichness.rds")
+View(BiomeRichness)
+saveRDS(BiomeRichness, file = "Data/BiomeRichness.rds")
+
+
+#Biome richness scatterplot
+BiomeRichness <- readRDS("Data/BiomeRichness.rds")
+#BiomeRichnessScatter <- ggplot() + 
+  #geom_point(data = BiomeRichness, 
+             #aes(Latitude, Alpha), 
+             #shape = 16, size = 5, 
+             #show.legend = FALSE, 
+             #alpha=0.5, 
+             #color = Type
+             #) + 
+  #ylab("α div in biomes") + 
+  #ylim(0, 500) + 
+  #xlab("Latitude") +
+  #labs(color="Biome")
+  #theme_minimal() +  
+  #theme(axis.title.y = element_text(size=32), 
+        #axis.title.x = element_text(size=32),  
+        #axis.text = element_text(size=20))
+#BiomeRichnessScatter
+
+BiomeRichScatter <- ggplot(BiomeRichness, aes(Latitude, Alpha, color=Type)) +
+  geom_point() +
+  xlab("Latitude") +
+  ylab("α div in biomes") +
+  ylim(0,1000) +
+  labs(color="Biome")
+BiomeRichScatter

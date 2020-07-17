@@ -1,4 +1,6 @@
 #Map by species
+#Julia Eckberg and Jackie O'Malley
+#Summer 2019
 
 species.map <- function(x, ...){
   k <- subset(BryophytePresence, BryophytePresence$Species== x)

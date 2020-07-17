@@ -156,17 +156,40 @@ AndesBeta$Range <- "Andes"
 AndesVec <- AndesBeta$CellID
 AndesBeta <- merge(AndesBeta, LongLatDF)
 
+NotAndesCells <- c(1:15038)
+NotAndesCells[AndesVec] <- NA
+NotAndesCells <- complete.cases(NotAndesCells)
+
+
 AppalachianBeta <- extract(LongLatBetaRaster, appalachian_range, df = TRUE, cellnumbers = TRUE, weight = TRUE)
 colnames(AppalachianBeta) <- c("Range", "CellID", "Beta", "Weight")
 AppalachianBeta$Range <- "Appalachians"
 AppVec <- AppalachianBeta$CellID
 AppalachianBeta <- merge(AppalachianBeta, LongLatDF)
 
+NotAppCells <- c(1:15038)
+NotAppCells[AppVec] <- NA
+NotAppCells <- complete.cases(NotAppCells)
+
+
 RockyBeta <- extract(LongLatBetaRaster, rocky_range, df = TRUE, cellnumbers = TRUE, weight = TRUE)
 colnames(RockyBeta) <- c("Range", "CellID", "Beta", "Weight")
 RockyBeta$Range <- "Rockies"
 RockyVec <- RockyBeta$CellID
 RockyBeta <- merge(RockyBeta, LongLatDF)
+
+NotRockyCells <- c(1:15038)
+NotRockyCells[RockyVec] <- NA
+NotRockyCells <- complete.cases(NotRockyCells)
+
+
+saveRDS(AndesVec, "Data/AndesVec.rds")
+saveRDS(AppVec, "Data/AppVec.rds")
+saveRDS(RockyVec, "Data/RockyVec.rds")
+
+saveRDS(NotAndesCells, "Data/NotAndesCells.rds")
+saveRDS(NotAppCells, "Data/NotAppalachianCells.rds")
+saveRDS(NotRockyCells, "Data/NotRockyCells.rds")
 
 
 # 9. Creates a DF w/alpha&beta diversity grouped by montane region--------------

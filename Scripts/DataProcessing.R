@@ -255,4 +255,6 @@ for(i in 1:NumberOrders){
 saveRDS(OrderRichList, file = "Data/OrderRichList.rds")
 saveRDS(FamRichList, file = "Data/FamRichList.rds")
 
+#Stop for order.alpha.comp.R and fam.alpha.com.R----------------------------------------
+
 

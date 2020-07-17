@@ -1,4 +1,6 @@
 #Map by family
+#Julia Eckberg and Jackie O'Malley
+#Summer 2019
 
 family.map <- function(x, ...){
   k <- subset(BryophytePresence, BryophytePresence$Family== x)

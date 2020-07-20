@@ -3,22 +3,20 @@
 #Hailey Napier
 #July 17, 2020
 
-#Load packages
+#Load packages ------------------------------------------------------------------------
 library(gridExtra)
 library(grid)
 
-#Source functions
+#Source functions ---------------------------------------------------------------------
 source("Functions/ORange.R")
 source("OrdBiomeBP.R")
 
-#Load data
+#Load data ----------------------------------------------------------------------------
 OrderNodes20 <- read.csv("./Data/OrderNodesS20.csv")
 
-#############################################################
 
 #Make a new folder for plots
 dir.create("Figures/OrderBiomePlots")
-
 
 #Arrange plots in order of appearance on phylogeny 
 tree20index <- match(OrderNodes20$Order, OrderNames)
@@ -28,6 +26,7 @@ names(tree20index)[1] <- "index"
 Order <- OrderNodes20$Order
 Order <- Order[complete.cases(Order)]
 tree20index$name <- Order
+#Index numbers of orders in tree in order of appearance
 tree20index$number <- c(1,2,3,4,5,6,7,8,9,10,11,21,20,18,13,14,12,15,16,17,19,22)
 
 
@@ -41,6 +40,7 @@ for(i in 1:nrow(tree20index)){
   dev.off()
 }
 
+#Arrange plots
 rl = lapply(sprintf("Figures/OrderBiomePlots/plot%i.png", 1:nrow(tree20index)), png::readPNG)
 gl = lapply(rl, grid::rasterGrob)
 gridExtra::grid.arrange(grobs=gl, ncol = 2)

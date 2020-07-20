@@ -1,6 +1,6 @@
 ---
 title: "Null Model with WorldClim Data"
-author: Hailey Napier
+author: Hailey Napier '22
 date: Spring & Summer 2020
 output: html_notebook
 ---

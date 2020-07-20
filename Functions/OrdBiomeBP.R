@@ -1,7 +1,7 @@
 #Function to make boxplot of alpha diversity for a specified order in a specified biome/mountain range
 #Input: str, name of order (ex. "Hypnales")
 #Input: str, type of plot: "box" or "violin"
-#Ouput: set of boxplots (one for each order)
+#Ouput: set of boxplots for alpha diversity in each biome for the specified order -- in either type violin or box
 #Hailey Napier
 #July 16, 2020
 
@@ -28,6 +28,8 @@ OrdBiomeBP <- function(order, type,...){
     df <- bind_rows(df, temp)
   }
   
+  #plot
+  #violin
   if(type == "violin"){
     plot <- ggplot(df, aes(x = Biome, y = Alpha, fill = Biome)) + 
       geom_violin(scale = "count", show.legend = FALSE, fill = cols1) + 
@@ -40,6 +42,7 @@ OrdBiomeBP <- function(order, type,...){
             axis.text.y = element_text(size=20), 
             axis.text.x = element_text(angle = 30, hjust = 1, size = 12), 
             plot.title = element_text(size = 28, hjust = 0.5))
+  #box
   }else if(type == "box"){
     plot <- ggplot(df, aes(x = Biome, y = Alpha, fill = Biome)) + 
       geom_boxplot(show.legend=FALSE, fill=cols4) + 

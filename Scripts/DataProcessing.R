@@ -52,14 +52,12 @@ BryophytePresence <- read.csv("Data/BryophytePresence_7.2.20(2).csv")
 OrderNames <- unique(BryophytePresence$Order)
 OrderNames <- OrderNames[!is.na(OrderNames)]
 NumberOrders <- length(OrderNames)
-saveRDS(NumberOrders, file = "Data/NumberOrders.rds")
 saveRDS(OrderNames, file = "Data/OrderNames.rds")
 
 FamilyNames <- unique(BryophytePresence$Family)
 FamilyNames <- as.vector(FamilyNames)
 FamilyNames <- FamilyNames[!is.na(FamilyNames)]
 NumberFamilies <- length(FamilyNames)
-saveRDS(NumberFamilies, file = "Data/NumberFamilies.rds")
 saveRDS(FamilyNames, file = "Data/FamilyNames.rds")
 
 #Tally richness by cell and create richness vector and save
@@ -153,6 +151,9 @@ saveRDS(RangeRaster, "Data/RangeRaster.rds")
 
 #Stop for NullModelWithWorldClimData.R & SpreadingDye.R-------------------------------
 
+
+#ONLY NEEDED FOR MAPPING & SHAPEFILE EXTRACTION
+
 ##Bryophytes.Rmd##
 Cell8 <- CellID[which(bryneighborvect==8)]
 Neighbors8 <-Neighbors[Cell8]
@@ -217,6 +218,7 @@ saveRDS(LongLatBetaRaster, file="Data/LongLatBetaRaster.rds")
 
 #Stop for MontaneFamilies.R-------------------------------------------------------------
 
+
 ##OneScaleFamRichMaps.R##
 #Loop through families and tally richness for each family, store in a list
 FamList <- list()
@@ -256,6 +258,7 @@ for(i in 1:NumberOrders){
 saveRDS(OrderRichList, file = "Data/OrderRichList.rds")
 saveRDS(FamRichList, file = "Data/FamRichList.rds")
 
-#Stop for order.alpha.comp.R and fam.alpha.com.R----------------------------------------
+#Stop for order.alpha.comp.R, fam.alpha.com.R, ORange.R, OrdBiomeBP.R, 
+    ##TreeMaps.R, and OrderBiomePlots.R------------------------------------------------
 
 

@@ -1,9 +1,31 @@
 #Tree Maps
-  #family maps in one folder, with just the family/order name as the title 
-#Hailey  Napier
-#July 7, 2020
+  #family maps all in one folder, with just the family/order name as the map title 
+#Hailey Napier, July 7, 2020
 
-#may have to run OneScaleFamRichMaps for prerequisite code
+##Run DataProcessing.R first##
+
+
+#Load packages --------------------
+library(dplyr)
+library(ggplot2)
+library(raster)
+library(rasterVis)
+library(maps)
+library(maptools)
+library(mapdata)
+library(mapproj)
+library(sp)
+library(rgdal)
+library(wesanderson)
+
+#Load data ------------------------
+OrderNames <- ("Data/OrderNames.rds")
+FamilyNames <- ("Data/FamilyNames.rds")
+FamRichList <- readRDS("Data/FamRichList.rds")
+OrderRichList <- readRDS("Data/OrderRichList.rds")
+
+BlankRas <- "Data/blank_100km_raster.tif"
+
 
 # 1.0 Make TreeMaps folder --------
 setwd("./Figures")
@@ -12,6 +34,8 @@ dir.create("./TreeMaps")
 
 
 # 2.0 ORDERS ----------------------
+NumberOrders <- length(OrderNames)
+
 for(i in 1:NumberOrders){
   TempOrderRichnessRaster <- setValues(BlankRas, OrderRichList[[i]])
   TempOrderDF <- rasterToPoints(TempOrderRichnessRaster)
@@ -34,6 +58,8 @@ for(i in 1:NumberOrders){
 }
 
 # 3.0 FAMILIES ----------------------
+NumberFamilies <- length(FamilyNames)
+
 for(i in 1:NumberFamilies){
   TempFamRichnessRaster <- setValues(BlankRas, FamRichList[[i]])
   TempFamDF <- rasterToPoints(TempFamRichnessRaster)

@@ -1,15 +1,26 @@
 #Order Biome Plots
-#Make and save boxplots for every biome for each order
+#Make and save boxplots for every biome for each order in a folder
 #Hailey Napier
 #July 17, 2020
+
+#Load packages
+library(gridExtra)
+library(grid)
+
+#Source functions
+source("Functions/ORange.R")
+source("OrdBiomeBP.R")
+
+#Load data
+OrderNodes20 <- read.csv("./Data/OrderNodesS20.csv")
+
+#############################################################
 
 #Make a new folder for plots
 dir.create("Figures/OrderBiomePlots")
 
 
 #Arrange plots in order of appearance on phylogeny 
-OrderNodes20 <- read.csv("./Data/OrderNodesS20.csv")
-
 tree20index <- match(OrderNodes20$Order, OrderNames)
 tree20index <- tree20index[complete.cases(tree20index)]
 tree20index <- data.frame(tree20index)
@@ -32,7 +43,7 @@ for(i in 1:nrow(tree20index)){
 
 rl = lapply(sprintf("Figures/OrderBiomePlots/plot%i.png", 1:nrow(tree20index)), png::readPNG)
 gl = lapply(rl, grid::rasterGrob)
-gridExtra::grid.arrange(grobs=gl, ncol = 1)
+gridExtra::grid.arrange(grobs=gl, ncol = 2)
 
 
 

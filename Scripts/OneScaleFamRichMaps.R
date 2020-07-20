@@ -2,6 +2,22 @@
 #Hailey Napier and Kathryn Dawdy
 #July 2, 2020
 
+#Load packages -----------------------------------------------------------------------------------------------
+library(dplyr)
+library(ggplot2)
+library(raster)
+library(rasterVis)
+library(maps)
+library(maptools)
+library(mapdata)
+library(mapproj)
+library(sp)
+library(rgdal)
+library(wesanderson)
+
+#Load data ---------------------------------------------------------------------------------------------------
+BryophytePresence <- readRDS("Data/BryophytePresence.rds")
+
 # 1.0 Plot species richness for each family (separate plot for each family)-----------------------------------
 
 # 1.1 Loop through family names and subset BryophtePresence for each family, store them in a list
@@ -33,6 +49,8 @@ for(i in 1:NumberFamilies){
   FamRichList[[i]][FamPresList[[i]]$CellID] <- FamPresList[[i]]$Richness
   FamRichList[[i]][which(FamRichList[[i]]==0)] = NA
 }
+
+saveRDS(FamRichList, "Data/FamRichList.rds")
 
 # 1.3 Mapping details
 # 1.31 Find the highest richness value in the data for an individual cell

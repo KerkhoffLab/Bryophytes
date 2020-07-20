@@ -105,7 +105,7 @@ ggtree(test) %<+% newlabs +
 #then type that into the top line of code
 #TO DO
 #1 make a program that assigns a family to each species in the data --- DONE
-#2 add maps to tree
+#2 add maps to tree -- DONE
 #3 make tree work for multiple families --- DONE
 
 Pterobryaceae <- c("Jaegerina_solitaria", "Calyptothecium_pinnatum_3742")

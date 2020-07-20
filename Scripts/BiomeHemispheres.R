@@ -43,6 +43,12 @@ for(i in 2:length(BiomeNames)){
 }
 
 table(BinnedBiomeRichness$BinHem)
+
+
+# 2.0 Bin all observations by hemisphere, regardless of biome type
+BinnedBiomeRichness$AllObsHem = cut(BinnedBiomeRichness$Latitude, c(-70,0,70), labels = c("Southern", "Northern"))
+table(BinnedBiomeRichness$AllObsHem)
+
 saveRDS(BinnedBiomeRichness, "Data/BinnedBiomeRichness.rds")
 
 

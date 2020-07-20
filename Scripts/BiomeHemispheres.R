@@ -2,16 +2,12 @@
 #Hailey Napier
 #July 20, 2020
 
+#Load packages -------------------------------------
+library(dplyr)
+
 #Load data ------------------------------------------
-nw_mount <- shapefile("Data/MapOutlines/Mountains/Koeppen-Geiger_biomes.shp")
-nw_bound <- shapefile("Data/MapOutlines/Global_bound/Koeppen-Geiger_biomes.shp")
-
-LongLatBetaRaster <- readRDS("Data/LongLatBetaRaster.rds")
-RichnessRaster <- readRDS("Data/RichnessRaster.rds")
-BlankRas <-raster("Data/blank_100km_raster.tif")
-CellVec <- c(1:15038)
-
 BiomeRichness <- readRDS("Data/BiomeRichness.rds")
+
 
 
 # 1.0 Loop to bin biomes by hemisphere --------------
@@ -33,13 +29,16 @@ table(BinnedBiomeRichness$BinHem)
 # 1.3 Loop through names and cut by hemisphere
 for(i in 2:length(BiomeNames)){
   biome <- BiomeNames[i]
+  #make labels
   s <- paste("Southern", biome, sep = "_")
   n <- paste("Northern", biome, sep = "_")
   
+  #subset BiomeRichness and add bins
   tempdf <- BiomeRichness %>%
     filter(BiomeRichness$Type == biome)
   tempdf$BinHem = cut(tempdf$Latitude, c(-70,0,70), labels = c(s, n))
   
+  #add biome to larger binned biome dataframe
   BinnedBiomeRichness <- bind_rows(BinnedBiomeRichness, tempdf)
 }
 

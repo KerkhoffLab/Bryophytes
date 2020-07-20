@@ -53,7 +53,7 @@ saveRDS(LongLatDF, "Data/LongLatDF.rds")
 #Scatterplot of beta diversity values of cells whose centers are within mountainous regions 
 ```{r, warning = FALSE}
 LongLatDF <- readRDS("Data/LongLatDF.rds")
-BetaMount <- extract(LongLatBetaRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
+BetaMount <- raster::extract(LongLatBetaRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
 
 colnames(BetaMount) <- c("Type", "CellID", "Beta")
 BetaMount$Type <- "Mountain"
@@ -89,7 +89,7 @@ table(BetaMount$Bin5)
 ```{r, warning = FALSE}
 LongLatDF <- readRDS("Data/LongLatDF.rds")
 
-BetaBound <- extract(LongLatBetaRaster, nw_bound, df = TRUE, cellnumbers = TRUE)
+BetaBound <- raster::extract(LongLatBetaRaster, nw_bound, df = TRUE, cellnumbers = TRUE)
 colnames(BetaBound) <- c("Type", "CellID", "Beta")
 
 BetaMatch <- BetaBound[BetaBound$CellID %in% BetaMountVec, ]
@@ -189,7 +189,7 @@ BetaScatter
 ```{r, warning = FALSE}
 LongLatDF <- readRDS("Data/LongLatDF.rds")
 
-AlphaMount <- extract(RichnessRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
+AlphaMount <- raster::extract(RichnessRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
 
 colnames(AlphaMount) <- c("Type", "CellID", "Alpha")
 AlphaMount$Type <- "Mountain"
@@ -223,7 +223,7 @@ table(AlphaMount$Bin5)
 ```{r, warning = FALSE}
 LongLatDF <- readRDS("Data/LongLatDF.rds")
 
-AlphaBound <- extract(RichnessRaster, nw_bound, df = TRUE, cellnumbers = TRUE)
+AlphaBound <- raster::extract(RichnessRaster, nw_bound, df = TRUE, cellnumbers = TRUE)
 colnames(AlphaBound) <- c("Type", "CellID", "Alpha")
 
 AlphaMatch <- AlphaBound[AlphaBound$CellID %in% AlphaBoundVec, ]

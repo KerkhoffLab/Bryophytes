@@ -46,7 +46,7 @@ OrdBiomeBP <- function(order, type, hem = "both"){
   #violin
   if(type == "violin"){
     plot <- ggplot(df, aes(x = Biome, y = Alpha, fill = Biome)) + 
-      geom_violin(scale = "count", show.legend = FALSE, fill = biomecols) + 
+      geom_violin(scale = "count", show.legend = FALSE, fill = cols1) + 
       theme_minimal() + 
       ggtitle(order, subtitle = hem) + 
       ylab("Richness") + 
@@ -56,7 +56,7 @@ OrdBiomeBP <- function(order, type, hem = "both"){
             axis.text.y = element_text(size=20), 
             axis.text.x = element_text(angle = 30, hjust = 1, size = 12), 
             plot.title = element_text(size = 28, hjust = 0.5),  
-            plot.subtitle = element_test(size = 20, hjust = 0.5))
+            plot.subtitle = element_text(size = 20, hjust = 0.5))
   #box
   }else if(type == "box"){
     plot <- ggplot(df, aes(x = Biome, y = Alpha, fill = Biome)) + 

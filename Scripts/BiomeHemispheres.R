@@ -68,7 +68,7 @@ for(i in 1:length(BiomeNames)){
 saveRDS(NorthBiomeRichList, "Data/NorthBiomeRichList.rds")
 
 # 3.2 Southern hemisphere
-BiomeRichList <- list()
+SouthBiomeRichList <- list()
 for(i in 1:length(BiomeNames)){
   biome  <- BiomeNames[i]
   cellvec <- BinnedBiomeRichness %>%

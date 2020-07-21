@@ -1,27 +1,35 @@
 #Function to make boxplot of alpha diversity for a specified order in a specified biome/mountain range
-#Input: str, name of order (ex. "Hypnales")
-#Input: str, type of plot: "box" or "violin"
+#Input: order = str, name of order (ex. "Hypnales")
+#Input: type = str, type of plot: "box", "violin", "boxyviolin"
+#Input: hem = str, hemisphere: "both", "Northern", "Southern"; default = "both"
 #Ouput: set of boxplots for alpha diversity in each biome for the specified order -- in either type violin or box
-#Hailey Napier
+#Hailey Napier and Kathryn Dawdy
 #July 16, 2020
 
-OrdBiomeBP <- function(order, type,...){
+OrdBiomeBP <- function(order, type, hem = "both"){
   #load data
   BiomeNames <- readRDS("Data/BiomeNames.rds")
   NumberBiomes <- length(BiomeNames)
+  cols7 <- c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
+             "#446455", "#FDD262", "#D3DDDC", "#C7B19C",
+             "#798E87", "#C27D38")
   
   #source functions
   source("Functions/ORange.R")
   
-  #set up dataframe to add to 
-  df <- data.frame(ORange(order, BiomeNames[1]))
+  #set up dataframe to add to
+  df <- data.frame(ORange(order, BiomeNames[1], hem))
   names(df)[1] <- "Alpha"
   df$CellID <- c(1:15038)
   df$Biome <- BiomeNames[1]
+  if(sum(df$Alpha, na.rm = T) > 0){
+    biomecols[1] <- cols7[1]
+  }
+
   
   #loop through biomes and add to the dataframe
   for(i in 2:NumberBiomes){
-    temp <- data.frame(ORange(order, BiomeNames[i]))
+    temp <- data.frame(ORange(order, BiomeNames[i], hem))
     names(temp)[1] <- "Alpha"
     temp$CellID <- c(1:15038)
     temp$Biome <- BiomeNames[i] 
@@ -34,44 +42,48 @@ OrdBiomeBP <- function(order, type,...){
     plot <- ggplot(df, aes(x = Biome, y = Alpha, fill = Biome)) + 
       geom_violin(scale = "count", show.legend = FALSE, fill = cols1) + 
       theme_minimal() + 
-      ggtitle(order) + 
+      ggtitle(order, subtitle = hem) + 
       ylab("Richness") + 
       xlab("Biome") + 
       theme(axis.title.y = element_text(size=32), 
             axis.title.x = element_text(size=32),
             axis.text.y = element_text(size=20), 
             axis.text.x = element_text(angle = 30, hjust = 1, size = 12), 
-            plot.title = element_text(size = 28, hjust = 0.5))
+            plot.title = element_text(size = 28, hjust = 0.5),  
+            plot.subtitle = element_test(size = 20, hjust = 0.5))
   #box
   }else if(type == "box"){
     plot <- ggplot(df, aes(x = Biome, y = Alpha, fill = Biome)) + 
       geom_boxplot(show.legend=FALSE, fill=cols7) + 
-      ggtitle(order) +
+      ggtitle(order, subtitle = hem) +
       theme_minimal() + 
-      #geom_jitter(alpha = 0.5, width = 0.2, color = "cyan4") +
-      #geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.5) +
+      geom_jitter(alpha = 0.5, width = 0.2, color = "gray") +
       ylab("Richness") + 
       xlab("Biome") + 
       theme(axis.title.y = element_text(size=32), 
             axis.title.x = element_text(size=32),
             axis.text.y = element_text(size=20), 
             axis.text.x = element_text(angle = 30, hjust = 1, size = 12),
-            plot.title = element_text(size = 28, hjust = 0.5))
+            plot.title = element_text(size = 28, hjust = 0.5), 
+            plot.subtitle = element_text(size = 20, hjust = 0.5)) + 
+      theme(legend.position = "none")
   #box + transparent violin layered
   }else if(type == "boxyviolin"){
     plot <- ggplot(df, aes(x = Biome, y = Alpha, fill = Biome)) + 
       geom_boxplot(show.legend = FALSE, fill=cols7) +
-      ggtitle(order) +
+      ggtitle(order, subtitle = hem) +
       theme_minimal() +
-      geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35) +
+      geom_violin(scale="count", show.legend=FALSE, fill="gray50", alpha=0.35) +
       xlab("Biome") +
       ylab("Richness") +  
       theme(axis.title.y = element_text(size=32), 
             axis.title.x = element_text(size=32),
             axis.text.y = element_text(size=20), 
             axis.text.x = element_text(angle = 30, hjust = 1, size = 12),
-            plot.title = element_text(size = 28, hjust = 0.5))
+            plot.title = element_text(size = 28, hjust = 0.5),
+            plot.subtitle = element_text(size = 20, hjust = 0.5)) +
+      theme(legend.position = "none")
   }
   
-   plot
+   return(plot)
 }

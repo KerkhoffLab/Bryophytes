@@ -2,15 +2,14 @@
 #Hailey Napier
 #July 20, 2020
 
-#Load packages -------------------------------------
+#Load packages -----------------------------------------------------------------------------
 library(dplyr)
 
-#Load data ------------------------------------------
+#Load data ---------------------------------------------------------------------------------
 BiomeRichness <- readRDS("Data/BiomeRichness.rds")
 
 
-
-# 1.0 Loop to bin biomes by hemisphere --------------
+# 1.0 Loop to bin biomes by hemisphere -----------------------------------------------------
  
 # 1.1 Make a vector of biome names
 BiomeNames <- unique(BiomeRichness$Type)
@@ -45,10 +44,40 @@ for(i in 2:length(BiomeNames)){
 table(BinnedBiomeRichness$BinHem)
 
 
-# 2.0 Bin all observations by hemisphere, regardless of biome type
+# 2.0 Bin all observations by hemisphere, regardless of biome type ------------------------
 BinnedBiomeRichness$AllObsHem = cut(BinnedBiomeRichness$Latitude, c(-70,0,70), labels = c("Southern", "Northern"))
 table(BinnedBiomeRichness$AllObsHem)
 
 saveRDS(BinnedBiomeRichness, "Data/BinnedBiomeRichness.rds")
 
+
+# 3.0 Create lists of richness vectors for the individual biomes in each hemisphere -------
+
+# 3.1 Northern hemisphere
+NorthBiomeRichList <- list()
+for(i in 1:length(BiomeNames)){
+  biome  <- BiomeNames[i]
+  vec <- BinnedBiomeRichness %>%
+    filter(BinnedBiomeRichness$AllObsHem == "Northern") %>%
+    filter(Type == biome) %>%
+    select(Alpha)
+  vec <- as.vector(vec)
+  NorthBiomeRichList[i] <- vec
+}
+
+saveRDS(NorthBiomeRichList, "Data/NorthBiomeRichList.rds")
+
+# 3.2 Southern hemisphere
+SouthBiomeRichList <- list()
+for(i in 1:length(BiomeNames)){
+  biome  <- BiomeNames[i]
+  vec <- BinnedBiomeRichness %>%
+    filter(BinnedBiomeRichness$AllObsHem == "Southern") %>%
+    filter(Type == biome) %>%
+    select(Alpha)
+  vec <- as.vector(vec)
+  SouthBiomeRichList[i] <- vec
+}
+
+saveRDS(SouthBiomeRichList, "Data/SouthBiomeRichList.rds")
 

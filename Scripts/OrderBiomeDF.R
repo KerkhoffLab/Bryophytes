@@ -28,3 +28,5 @@ for(i in 2:length(NumberOrders)){
     OrderBiomeDF <- bind_rows(OrderBiomeDF, tempdf)
   }
 }
+
+saveRDS(OrderBiomeDF, file = "Data/OrderBiomeDF.rds")

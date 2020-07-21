@@ -59,11 +59,12 @@ OrdBiomeBP <- function(order, type,...){
             plot.title = element_text(size = 28, hjust = 0.5))
   #box + transparent violin layered
   }else if(type == "boxyviolin"){
-    plot <- ggplot(df, aes(x = Biome, y = Alpha, fill = Biome)) + 
-      geom_boxplot(show.legend = FALSE, fill=cols7) +
+    plot <- ggplot(df, aes(x = Biome, y = Alpha, fill = Biome, color = Biome)) + 
+      geom_boxplot(show.legend = FALSE, fill=cols7, color = "black") +
       ggtitle(order) +
       theme_minimal() +
-      geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35) +
+      geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35,
+                  color = "gray25") +
       xlab("Biome") +
       ylab("Richness") +  
       theme(axis.title.y = element_text(size=32), 

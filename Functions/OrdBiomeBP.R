@@ -22,6 +22,9 @@ OrdBiomeBP <- function(order, type, hem = "both"){
   names(df)[1] <- "Alpha"
   df$CellID <- c(1:15038)
   df$Biome <- BiomeNames[1]
+  
+  #make a vector of colors that match the biome map
+  biomecols <- vector()
   if(sum(df$Alpha, na.rm = T) > 0){
     biomecols[1] <- cols7[1]
   }
@@ -33,6 +36,9 @@ OrdBiomeBP <- function(order, type, hem = "both"){
     names(temp)[1] <- "Alpha"
     temp$CellID <- c(1:15038)
     temp$Biome <- BiomeNames[i] 
+    if(sum(temp$Alpha, na.rm = T) > 0){
+      biomecols <- append(biomecols, cols7[i])
+    }
     df <- bind_rows(df, temp)
   }
   
@@ -40,7 +46,7 @@ OrdBiomeBP <- function(order, type, hem = "both"){
   #violin
   if(type == "violin"){
     plot <- ggplot(df, aes(x = Biome, y = Alpha, fill = Biome)) + 
-      geom_violin(scale = "count", show.legend = FALSE, fill = cols1) + 
+      geom_violin(scale = "count", show.legend = FALSE, fill = biomecols) + 
       theme_minimal() + 
       ggtitle(order, subtitle = hem) + 
       ylab("Richness") + 
@@ -54,7 +60,7 @@ OrdBiomeBP <- function(order, type, hem = "both"){
   #box
   }else if(type == "box"){
     plot <- ggplot(df, aes(x = Biome, y = Alpha, fill = Biome)) + 
-      geom_boxplot(show.legend=FALSE, fill=cols7) + 
+      geom_boxplot(show.legend=FALSE, fill = biomecols) + 
       ggtitle(order, subtitle = hem) +
       theme_minimal() + 
       geom_jitter(alpha = 0.5, width = 0.2, color = "gray") +
@@ -70,7 +76,7 @@ OrdBiomeBP <- function(order, type, hem = "both"){
   #box + transparent violin layered
   }else if(type == "boxyviolin"){
     plot <- ggplot(df, aes(x = Biome, y = Alpha, fill = Biome, color = Biome)) + 
-      geom_boxplot(show.legend = FALSE, fill=cols7, color = "black") +
+      geom_boxplot(show.legend = FALSE, fill = biomecols, color = "black") +
       ggtitle(order, subtitle = hem) +
       theme_minimal() +
       geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35,

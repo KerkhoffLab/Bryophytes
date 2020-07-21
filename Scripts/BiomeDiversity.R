@@ -143,7 +143,7 @@ biomes_shp <- shapefile("Data/Biomes/Biomes_olson_projected.shp")
 biomes_sf <- st_as_sf(biomes_shp)
 
 #Create map
-BiomeRichnessMap <- ggplot(fill=biomes_shp$biomes) +
+BiomeRichnessMap <- ggplot(fill=biomes_shp$biomes) +            #delete "fill=biomes_shp$biomes if not coloring the biomes
   geom_tile(data=RichnessDF, aes(x=Longitude, y=Latitude, fill=Alpha)) + 
   scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent") + 
   scale_fill_gradientn(colours=cols, na.value="transparent") +
@@ -360,11 +360,12 @@ BiomeRichBox <- ggplot(BiomeRichness, aes(x=Type, y=Alpha, fill=Type)) +
 BiomeRichBox
 
 #Biome richness boxplot with violins ---------------------------------------
-BiomeRichBV <- ggplot(BiomeRichness, aes(x=Type, y=Alpha, fill=Type)) + 
-  geom_boxplot(show.legend = FALSE, fill=cols7) +
+BiomeRichBV <- ggplot(BiomeRichness, aes(x=Type, y=Alpha, fill=Type, color=Type)) + 
+  geom_boxplot(show.legend = FALSE, fill=cols7, color="black") +
   guides(x = guide_axis(angle=30)) +
   theme_minimal() +
-  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35) +
+  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35,
+              color="gray25") +
   xlab("Biome") +
   ylab("Richness") +  
   theme(axis.title.y = element_text(size=32), 

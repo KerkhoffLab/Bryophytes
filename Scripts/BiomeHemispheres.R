@@ -57,26 +57,26 @@ saveRDS(BinnedBiomeRichness, "Data/BinnedBiomeRichness.rds")
 NorthBiomeRichList <- list()
 for(i in 1:length(BiomeNames)){
   biome  <- BiomeNames[i]
-  vec <- BinnedBiomeRichness %>%
+  cellvec <- BinnedBiomeRichness %>%
     filter(BinnedBiomeRichness$AllObsHem == "Northern") %>%
     filter(Type == biome) %>%
-    select(Alpha)
-  vec <- as.vector(vec)
-  NorthBiomeRichList[i] <- vec
+    select(CellID)
+  cellvec <- as.vector(cellvec)
+  NorthBiomeRichList[i] <- cellvec
 }
 
 saveRDS(NorthBiomeRichList, "Data/NorthBiomeRichList.rds")
 
 # 3.2 Southern hemisphere
-SouthBiomeRichList <- list()
+BiomeRichList <- list()
 for(i in 1:length(BiomeNames)){
   biome  <- BiomeNames[i]
-  vec <- BinnedBiomeRichness %>%
+  cellvec <- BinnedBiomeRichness %>%
     filter(BinnedBiomeRichness$AllObsHem == "Southern") %>%
     filter(Type == biome) %>%
-    select(Alpha)
-  vec <- as.vector(vec)
-  SouthBiomeRichList[i] <- vec
+    select(CellID)
+  cellvec <- as.vector(cellvec)
+  SouthBiomeRichList[i] <- cellvec
 }
 
 saveRDS(SouthBiomeRichList, "Data/SouthBiomeRichList.rds")

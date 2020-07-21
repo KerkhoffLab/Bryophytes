@@ -44,6 +44,7 @@ BryophytePresence <- readRDS("Data/BryophytePresence.rds")
 ##Load entire BIEN_FEE_paper repository (branch: Trait_phylo)
 download.file(url = "https://github.com/susyelo/BIEN_FEE_paper/archive/Trait_phylo.zip", 
               destfile = "./Data/Biomes/BIEN_FEE_paper-Trait_phylo.zip")
+dir.create("./Data/Biomes/")
 setwd("./Data/Biomes/")
 unzip("BIEN_FEE_paper-Trait_phylo.zip")
 setwd("../../")
@@ -218,7 +219,7 @@ AlphaBiomesScatterplot
 
 #INDIVIDUAL BIOMES ---------------------------------------------------------
 #Coniferous Forests --------------------------------------------------------
-AlphaConFor <- extract(RichnessRaster, Coniferous_Forests, df = TRUE, cellnumbers = TRUE)
+AlphaConFor <- raster::extract(RichnessRaster, Coniferous_Forests, df = TRUE, cellnumbers = TRUE)
 colnames(AlphaConFor) <- c("Type", "CellID", "Alpha")
 AlphaConFor$Type <- "Coniferous_Forests"
 AlphaConForVec <- AlphaConFor$CellID
@@ -233,70 +234,70 @@ theme_set(theme_grey())
 ggplot(AlphaConFor, aes(x=Type, y=Alpha)) + geom_boxplot()
 
 #Dry Forest ----------------------------------------------------------------
-AlphaDryFor <- extract(RichnessRaster, Dry_Forest, df = TRUE, cellnumbers = TRUE)
+AlphaDryFor <- raster::extract(RichnessRaster, Dry_Forest, df = TRUE, cellnumbers = TRUE)
 colnames(AlphaDryFor) <- c("Type", "CellID", "Alpha")
 AlphaDryFor$Type <- "Dry_Forest"
 AlphaDryForVec <- AlphaDryFor$CellID
 AlphaDryFor <- merge(AlphaDryFor, LongLatDF)
 
 #Mediterranean Woodlands ---------------------------------------------------
-AlphaMedWood <- extract(RichnessRaster, Mediterranean_Woodlands, df = TRUE, cellnumbers = TRUE)
+AlphaMedWood <- raster::extract(RichnessRaster, Mediterranean_Woodlands, df = TRUE, cellnumbers = TRUE)
 colnames(AlphaMedWood) <- c("Type", "CellID", "Alpha")
 AlphaMedWood$Type <- "Mediterranean_Woodlands"
 AlphaMedWoodVec <- AlphaMedWood$CellID
 AlphaMedWood <- merge(AlphaMedWood, LongLatDF)
 
 #Moist Forest --------------------------------------------------------------
-AlphaMoistFor <- extract(RichnessRaster, Moist_Forest, df = TRUE, cellnumbers = TRUE)
+AlphaMoistFor <- raster::extract(RichnessRaster, Moist_Forest, df = TRUE, cellnumbers = TRUE)
 colnames(AlphaMoistFor) <- c("Type", "CellID", "Alpha")
 AlphaMoistFor$Type <- "Moist_Forest"
 AlphaMoistForVec <- AlphaMoistFor$CellID
 AlphaMoistFor <- merge(AlphaMoistFor, LongLatDF)
 
 #Savannas ------------------------------------------------------------------
-AlphaSavanna <- extract(RichnessRaster, Savannas, df = TRUE, cellnumbers = TRUE)
+AlphaSavanna <- raster::extract(RichnessRaster, Savannas, df = TRUE, cellnumbers = TRUE)
 colnames(AlphaSavanna) <- c("Type", "CellID", "Alpha")
 AlphaSavanna$Type <- "Savannas"
 AlphaSavannaVec <- AlphaSavanna$CellID
 AlphaSavanna <- merge(AlphaSavanna, LongLatDF)
 
 #Taiga ---------------------------------------------------------------------
-AlphaTaiga <- extract(RichnessRaster, Taiga, df = TRUE, cellnumbers = TRUE)
+AlphaTaiga <- raster::extract(RichnessRaster, Taiga, df = TRUE, cellnumbers = TRUE)
 colnames(AlphaTaiga) <- c("Type", "CellID", "Alpha")
 AlphaTaiga$Type <- "Taiga"
 AlphaTaigaVec <- AlphaTaiga$CellID
 AlphaTaiga <- merge(AlphaTaiga, LongLatDF)
 
 #Temperate Grasslands ------------------------------------------------------
-AlphaTempGrass <- extract(RichnessRaster, Temperate_Grasslands, df = TRUE, cellnumbers = TRUE)
+AlphaTempGrass <- raster::extract(RichnessRaster, Temperate_Grasslands, df = TRUE, cellnumbers = TRUE)
 colnames(AlphaTempGrass) <- c("Type", "CellID", "Alpha")
 AlphaTempGrass$Type <- "Temperate_Grasslands"
 AlphaTempGrassVec <- AlphaTempGrass$CellID
 AlphaTempGrass <- merge(AlphaTempGrass, LongLatDF)
 
 #Temperate Mixed -----------------------------------------------------------
-AlphaTempMix <- extract(RichnessRaster, Temperate_Mixed, df = TRUE, cellnumbers = TRUE)
+AlphaTempMix <- raster::extract(RichnessRaster, Temperate_Mixed, df = TRUE, cellnumbers = TRUE)
 colnames(AlphaTempMix) <- c("Type", "CellID", "Alpha")
 AlphaTempMix$Type <- "Temperate_Mixed"
 AlphaTempMixVec <- AlphaTempMix$CellID
 AlphaTempMix <- merge(AlphaTempMix, LongLatDF)
 
 #Tropical Grasslands -------------------------------------------------------
-AlphaTropGrass <- extract(RichnessRaster, Tropical_Grasslands, df = TRUE, cellnumbers = TRUE)
+AlphaTropGrass <- raster::extract(RichnessRaster, Tropical_Grasslands, df = TRUE, cellnumbers = TRUE)
 colnames(AlphaTropGrass) <- c("Type", "CellID", "Alpha")
 AlphaTropGrass$Type <- "Tropical_Grasslands"
 AlphaTropGrassVec <- AlphaTropGrass$CellID
 AlphaTropGrass <- merge(AlphaTropGrass, LongLatDF)
 
 #Tundra --------------------------------------------------------------------
-AlphaTundra <- extract(RichnessRaster, Tundra, df = TRUE, cellnumbers = TRUE)
+AlphaTundra <- raster::extract(RichnessRaster, Tundra, df = TRUE, cellnumbers = TRUE)
 colnames(AlphaTundra) <- c("Type", "CellID", "Alpha")
 AlphaTundra$Type <- "Tundra"
 AlphaTundraVec <- AlphaTundra$CellID
 AlphaTundra <- merge(AlphaTundra, LongLatDF)
 
 #Xeric Woodlands -----------------------------------------------------------
-AlphaXericWood <- extract(RichnessRaster, Xeric_Woodlands, df = TRUE, cellnumbers = TRUE)
+AlphaXericWood <- raster::extract(RichnessRaster, Xeric_Woodlands, df = TRUE, cellnumbers = TRUE)
 colnames(AlphaXericWood) <- c("Type", "CellID", "Alpha")
 AlphaXericWood$Type <- "Xeric_Woodlands"
 AlphaXericWoodVec <- AlphaXericWood$CellID

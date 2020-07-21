@@ -17,7 +17,7 @@ for(i in 2:NumberBiomes){
   OrderBiomeDF <- bind_rows(OrderBiomeDF, tempdf)
 }
 
-for(i in 2:length(NumberOrders)){
+for(i in 2:NumberOrders){
   o <- OrderNames[i]
   for(i in 1:NumberBiomes){
     b <- BiomeNames[i]
@@ -28,5 +28,5 @@ for(i in 2:length(NumberOrders)){
     OrderBiomeDF <- bind_rows(OrderBiomeDF, tempdf)
   }
 }
-
+names(OrderBiomeDF)[1] <- "Alpha"
 saveRDS(OrderBiomeDF, file = "Data/OrderBiomeDF.rds")

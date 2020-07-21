@@ -13,9 +13,11 @@ ggplot(orderrichdf, aes(x = OrderNames, y = totalalpha)) +
 
 OrdRichAbove100k <- c("Hypnales","Dicranales","Bryales")
 OrdRichAbove100k
+saveRDS(OrdRichAbove100k, "Data/OrdRichAbove100k.rds")
 
 OrderNames <- readRDS("Data/OrderNames.rds")
 NoHyp <- OrderNames[OrderNames!="Hypnales"]
 NoHypNoDic <- NoHyp[NoHyp!="Dicranales"]
 OrdRichBelow100k <- NoHypNoDic[NoHypNoDic!="Bryales"]
 OrdRichBelow100k
+saveRDS(OrdRichBelow100k, "Data/OrdRichBelow100k.rds")

@@ -38,3 +38,7 @@ for(i in 1:length(Names)){
     OrdRichBelow25 <- c(OrdRichBelow25, name)
   }
 }
+
+saveRDS(OrdRichAbove100, "OrdRichAbove100.rds")
+saveRDS(OrdRich25to100, "Data/OrdRich25to100.rds")
+saveRDS(OrdRichBelow25, "Data/OrdRichBelow25.rds")

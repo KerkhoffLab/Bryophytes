@@ -33,9 +33,9 @@ for(i in 1:length(Names)){
   name <- Names[i]
   if(OrderMaxAlpha$MaxAlpha[i] > 100){
     OrdRichAbove100 <- c(OrdRichAbove100, name)
-  }else if(OrderMaxAlpha$MaxAlpha[i] > 25){
+  }else if(OrderMaxAlpha$MaxAlpha[i] >= 25){
     OrdRich25to100 <- c(OrdRich25to100, name)
-  }else if(OrderMaxAlpha$MaxAlpha[i] > 10){
+  }else if(OrderMaxAlpha$MaxAlpha[i] >= 10){
     OrdRich10to25 <- c(OrdRich10to25, name)
   }else if(OrderMaxAlpha$MaxAlpha[i] < 10){
     OrdRichBelow10 <- c(OrdRichBelow10, name)

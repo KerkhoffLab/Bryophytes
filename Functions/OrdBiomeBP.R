@@ -51,6 +51,15 @@ OrdBiomeBP <- function(order, type, hem = "both"){
     plot_scale = 25
   }
   
+  #set subtitle
+  if(hem == "both"){
+    sub <- "Both Hemispheres"
+  }else if(hem == "Northern"){
+    sub <- "Northern Hemisphere"
+  }else if(hem == "Southern"){
+    sub <- "Southern Hemisphere"
+  }
+  
   
   #plot
   #violin
@@ -59,7 +68,7 @@ OrdBiomeBP <- function(order, type, hem = "both"){
       geom_violin(scale = "count", show.legend = FALSE, fill = cols1) + 
       theme_minimal() + 
       ylim(0,plot_scale) +
-      ggtitle(order, subtitle = hem) + 
+      ggtitle(order, subtitle = sub) + 
       ylab("Richness") + 
       xlab("Biome") + 
       theme(axis.title.y = element_text(size=32), 
@@ -72,7 +81,7 @@ OrdBiomeBP <- function(order, type, hem = "both"){
   }else if(type == "box"){
     plot <- ggplot(df, aes(x = Biome, y = Alpha, fill = Biome)) + 
       geom_boxplot(show.legend=FALSE, fill = biomecols) + 
-      ggtitle(order, subtitle = hem) +
+      ggtitle(order, subtitle = sub) +
       theme_minimal() + 
       ylim(0, plot_scale) + 
       geom_jitter(alpha = 0.5, width = 0.2, color = "gray") +
@@ -89,7 +98,7 @@ OrdBiomeBP <- function(order, type, hem = "both"){
   }else if(type == "boxyviolin"){
     plot <- ggplot(df, aes(x = Biome, y = Alpha, fill = Biome, color = Biome)) + 
       geom_boxplot(show.legend = FALSE, fill = biomecols, color = "black") +
-      ggtitle(order, subtitle = hem) +
+      ggtitle(order, subtitle = sub) +
       theme_minimal() +
       ylim(0,plot_scale) + 
       geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35,

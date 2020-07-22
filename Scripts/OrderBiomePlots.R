@@ -34,7 +34,7 @@ tree20index$number <- c(1,2,3,4,5,6,7,8,9,10,11,21,20,18,13,14,12,15,16,17,19,22
 for(i in 1:nrow(tree20index)){
   order <- tree20index$name[i]
   filename <- paste("Figures/OrderBiomePlots/plot", i, ".png", sep = "")
-  p <- OrdBiomeBP(order, "box")
+  p <- OrdBiomeBP(order, "boxyviolin")
   png(filename, width= 2000, height = 1000, pointsize = 30)
   print({p})
   dev.off()
@@ -43,7 +43,7 @@ for(i in 1:nrow(tree20index)){
 #Arrange plots
 rl = lapply(sprintf("Figures/OrderBiomePlots/plot%i.png", 1:nrow(tree20index)), png::readPNG)
 gl = lapply(rl, grid::rasterGrob)
-gridExtra::grid.arrange(grobs=gl, ncol = 2)
+gridExtra::grid.arrange(grobs=gl, ncol = 5)
 
 
 

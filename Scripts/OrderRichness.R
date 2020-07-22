@@ -27,18 +27,22 @@ OrderMaxAlpha$Names <- Names
 # 2.2 Put order names into vectors based on max alpha diversity 
 OrdRichAbove100 <- vector()
 OrdRich25to100 <- vector()
-OrdRichBelow25 <- vector()
+OrdRich10to25 <- vector()
+OrdRichBelow10 <- vector()
 for(i in 1:length(Names)){
   name <- Names[i]
   if(OrderMaxAlpha$MaxAlpha[i] > 100){
     OrdRichAbove100 <- c(OrdRichAbove100, name)
   }else if(OrderMaxAlpha$MaxAlpha[i] > 25){
     OrdRich25to100 <- c(OrdRich25to100, name)
-  }else{
-    OrdRichBelow25 <- c(OrdRichBelow25, name)
+  }else if(OrderMaxAlpha$MaxAlpha[i] > 10){
+    OrdRich10to25 <- c(OrdRich10to25, name)
+  }else if(OrderMaxAlpha$MaxAlpha[i] < 10){
+    OrdRichBelow10 <- c(OrdRichBelow10, name)
   }
 }
 
 saveRDS(OrdRichAbove100, "Data/OrdRichAbove100.rds")
 saveRDS(OrdRich25to100, "Data/OrdRich25to100.rds")
-saveRDS(OrdRichBelow25, "Data/OrdRichBelow25.rds")
+saveRDS(OrdRich10to25, "Data/OrdRich10to25.rds")
+saveRDS(OrdRichBelow25, "Data/OrdRichBelow10.rds")

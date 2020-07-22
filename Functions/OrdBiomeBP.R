@@ -51,8 +51,10 @@ OrdBiomeBP <- function(order, type, hem = "both"){
     plot_scale = 200
   }else if(order %in% OrdRich25to100){
     plot_scale = 100
-  }else if(order %in% OrdRichBelow25){
+  }else if(order %in% OrdRich10to25){
     plot_scale = 25
+  }else if(order %in% OrdRichBelow10){
+    plot_scale = 10
   }
   
   #set subtitle

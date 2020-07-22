@@ -64,6 +64,7 @@ unlink("./Data/Biomes/BIEN_FEE_paper-Trait_phylo.zip")
 cols <- (wes_palette("Zissou1", 500, type = "continuous"))
 theme_set(theme_void())
 
+#testing color schemes
 cols1 <- (wes_palette("Zissou1", 5632, type = "continuous"))
 cols2 <- (wes_palette("Zissou1", 11, type="continuous"))
 cols3 <- (wes_palette("Cavalcanti1", 11, type = "continuous"))
@@ -75,9 +76,69 @@ cols5 <- c("#D8B70A", "#81A88D", "#A2A475", "#02401B", "#972D15",
            "#798E87", "#C27D38")
 cols6 <- c("#0B775E", "#C93312", "#FAEFD1", "#00A08A", "#7294D4",
            "#446455", "#FDD262", "#D3DDDC", "#D8B70A", "#02401B", "#A2A475")
+
+#Color scheme for biomes (in order of BiomeNames (BiomeProcessing.R))
 cols7 <- c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
            "#446455", "#FDD262", "#D3DDDC", "#C7B19C",
            "#798E87", "#C27D38")
+
+#Colors used for plots (# corresponds to # of boxplots/length of data)
+biome_cols_11 <- c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
+                   "#446455", "#FDD262", "#D3DDDC", "#C7B19C", "#798E87", 
+                   "#C27D38")
+
+biome_cols_22 <- c(biome_cols_11, biome_cols_11)
+
+biome_cols_87 <- c(biome_cols_22, biome_cols_11,
+                   "#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
+                   "#446455", "#FDD262", "#D3DDDC", "#C7B19C", 
+                   "#C27D38",
+                   biome_cols_22, biome_cols_22)
+
+biome_cols_232 <- c(biome_cols_22,
+                    c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
+                      "#FDD262", "#D3DDDC", "#C7B19C", 
+                      "#C27D38"),
+                    biome_cols_11,
+                    c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
+                      "#446455", "#FDD262", "#D3DDDC", 
+                      "#C27D38"),
+                    c("#D8B70A", "#972D15", "#81A88D", "#02401B",
+                      "#446455", "#FDD262", "#D3DDDC", "#C7B19C", "#798E87", 
+                      "#C27D38"),
+                    c("#81A88D",
+                      "#FDD262", "#D3DDDC"),
+                    c("#D8B70A", "#972D15", "#81A88D",
+                      "#446455", "#D3DDDC", "#C7B19C", "#798E87"),
+                    biome_cols_11,
+                    c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
+                      "#FDD262", "#D3DDDC", "#C7B19C", 
+                      "#C27D38"),
+                    "#81A88D",
+                    biome_cols_11,
+                    c("#972D15", "#A2A475", "#81A88D", "#02401B",
+                      "#FDD262", "#D3DDDC", "#C7B19C", 
+                      "#C27D38"),
+                    biome_cols_22,
+                    c("#D8B70A",
+                      "#446455", "#FDD262", "#D3DDDC"),
+                    biome_cols_22,
+                    c("#D8B70A", "#972D15", "#81A88D",
+                      "#D3DDDC", "#C7B19C", 
+                      "#C27D38"),
+                    biome_cols_11,
+                    c("#D8B70A",
+                      "#446455", "#FDD262", "#D3DDDC", "#798E87", 
+                      "#C27D38"),
+                    c("#A2A475", "#81A88D", "#02401B",
+                      "#FDD262", "#D3DDDC", "#C7B19C"),
+                    c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
+                      "#FDD262", "#D3DDDC", "#C7B19C", 
+                      "#C27D38"),
+                    biome_cols_11,
+                    c("#D8B70A", 
+                      "#C27D38"),
+                    biome_cols_22)
 
 
 #wes_palette() hex numbers for reference
@@ -360,6 +421,19 @@ BiomeRichBox <- ggplot(BiomeRichness, aes(x=Type, y=Alpha, fill=Type)) +
         axis.text.x = element_text(angle = 30, hjust = 1, size = 12))
 BiomeRichBox
 
+#Biome richness violin plot ------------------------------------------------
+BiomeRichViolin <- ggplot(BiomeRichness, 
+                          aes(x=Type, y=Alpha, fill=Type)) +
+  geom_violin(scale="area", show.legend = FALSE, fill=cols1) +  #change fill colors
+  guides(x = guide_axis(angle=30)) +
+  xlab("Biome") +
+  ylab("Richness") +
+  theme_minimal() +  
+  theme(axis.title.y = element_text(size=32),
+        axis.title.x = element_text(size=32),
+        axis.text.y = element_text(size=20))
+BiomeRichViolin
+
 #Biome richness boxplot with violins ---------------------------------------
 BiomeRichBV <- ggplot(BiomeRichness, aes(x=Type, y=Alpha, fill=Type, color=Type)) + 
   geom_boxplot(show.legend = FALSE, fill=cols7, color="black") +
@@ -374,19 +448,6 @@ BiomeRichBV <- ggplot(BiomeRichness, aes(x=Type, y=Alpha, fill=Type, color=Type)
         axis.text.y = element_text(size=20), 
         axis.text.x = element_text(angle = 30, hjust = 1, size = 12))
 BiomeRichBV
-
-#Biome richness violin plot ------------------------------------------------
-BiomeRichViolin <- ggplot(BiomeRichness, 
-                          aes(x=Type, y=Alpha, fill=Type)) +
-  geom_violin(scale="area", show.legend = FALSE, fill=cols1) +  #change fill colors
-  guides(x = guide_axis(angle=30)) +
-  xlab("Biome") +
-  ylab("Richness") +
-  theme_minimal() +  
-  theme(axis.title.y = element_text(size=32),
-        axis.title.x = element_text(size=32),
-        axis.text.y = element_text(size=20))
-BiomeRichViolin
 
 
 #Biomes Map ----------------------------------------------------------------
@@ -424,11 +485,117 @@ BiomeMapLegendIN <- qtm(biomes_shp,
 BiomeMapLegendIN
 
 
-
+#Biome Richness by Order ---------------------------------------------------
 #Hailey's function:
 source("Functions/OrdBiomeBP.R")
-#First run BiomeProcessing.R, ORange.R, and Data.Processing
+###First run BiomeProcessing.R, ORange.R, and Data.Processing
 
+#Enter any order for box, violin, or boxyviolin plots, "Southern" or "Northern" or "both" hem
 OrdBiomeBP("Hypnales", "box")
 OrdBiomeBP("Hypnales", "violin")
 OrdBiomeBP("Hypnales", "boxyviolin")
+OrdBiomeBP("Hypnales", "boxyviolin", hem="Southern")
+
+
+###Run OrderBiomeDF.R
+OrderBiomeDF <- readRDS("Data/OrderBiomeDF.rds")
+View(OrderBiomeDF)
+
+#Facet wrap of richness in biomes by order ---------------------------------
+FacetOrdBiomeRich <- ggplot(OrderBiomeDF, 
+                      aes(x=Biome, y=Alpha,)) + 
+  geom_boxplot(show.legend = FALSE) +
+  guides(x = guide_axis(angle=30)) +
+  theme_minimal() +
+  xlab("Biome") +
+  ylab("Richness") +  
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),
+        axis.text.y = element_text(size=20), 
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 12))+
+  facet_wrap(~Order)
+FacetOrdBiomeRich
+
+#way too many plots in this^ facet, so subset order by max alpha value
+###Run OrderRichness.R
+#>100
+OrdRichAbove100
+OBRAbove100DF <- subset(OrderBiomeDF, 
+                        OrderBiomeDF$Order=="Hypnales"|
+                          OrderBiomeDF$Order=="Dicranales")
+
+#25-100
+OrdRich25to100
+OBR25to100DF <- subset(OrderBiomeDF,
+                       OrderBiomeDF$Order=="Bartramiales"|
+                         OrderBiomeDF$Order=="Bryales"|
+                         OrderBiomeDF$Order=="Grimmiales"|
+                         OrderBiomeDF$Order=="Hookeriales"|
+                         OrderBiomeDF$Order=="Jungermanniales"|
+                         OrderBiomeDF$Order=="Orthotrichales"|
+                         OrderBiomeDF$Order=="Porellales"|
+                         OrderBiomeDF$Order=="Pottiales")
+
+#<25
+OrdRichBelow25
+OBRBelow25DF <- subset(OrderBiomeDF,
+                     OrderBiomeDF$Order!="Hypnales"&
+                       OrderBiomeDF$Order!="Dicranales"&
+                       OrderBiomeDF$Order!="Bartramiales"&
+                       OrderBiomeDF$Order!="Bryales"&
+                       OrderBiomeDF$Order!="Grimmiales"&
+                       OrderBiomeDF$Order!="Hookeriales"&
+                       OrderBiomeDF$Order!="Jungermanniales"&
+                       OrderBiomeDF$Order!="Orthotrichales"&
+                       OrderBiomeDF$Order!="Porellales"&
+                       OrderBiomeDF$Order!="Pottiales")
+
+#Facet wrap of richness in biomes by order with >100 max richness ----------
+FacetOBRAbove100 <- ggplot(OBRAbove100DF, 
+                            aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
+  geom_boxplot(show.legend = FALSE, fill=biome_cols_22, color="black",
+               outlier.size=1) +
+  theme_gray() +
+  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35,
+              color="gray25") +
+  xlab("Biome") +
+  ylab("Richness") +  
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),
+        axis.text.y = element_text(size=15), 
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 8))+
+  facet_wrap(~Order, ncol=1)
+FacetOBRAbove100
+
+#Facet wrap of richness in biomes by order with 25-100 max richness --------
+FacetOBR25to100 <- ggplot(OBR25to100DF, 
+                           aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
+  geom_boxplot(show.legend = FALSE, fill=biome_cols_87, color="black",
+               outlier.size=0.7) +
+  theme_gray() +
+  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35,
+              color="gray25") +
+  xlab("Biome") +
+  ylab("Richness") +  
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),
+        axis.text.y = element_text(size=15), 
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 8))+
+  facet_wrap(~Order, ncol=2)
+FacetOBR25to100
+
+#Facet wrap of richness in biomes by order with <25 max richness -----------
+FacetOBRBelow25 <- ggplot(OBRBelow25DF, 
+                          aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
+  geom_boxplot(show.legend = FALSE, fill=biome_cols_232, color="black",
+               outlier.size=0.5) +
+  theme_gray() +
+  #geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35, color="gray25") +       #un-comment for transparent violins
+  xlab("Biome") +
+  ylab("Richness") +  
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),
+        axis.text.y = element_text(size=15), 
+        axis.text.x = element_text(angle = 90, hjust = 1, size = 8))+
+  facet_wrap(~Order, ncol=7)
+FacetOBRBelow25

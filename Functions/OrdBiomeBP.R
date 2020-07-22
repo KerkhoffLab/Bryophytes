@@ -42,12 +42,23 @@ OrdBiomeBP <- function(order, type, hem = "both"){
     df <- bind_rows(df, temp)
   }
   
+  #set scale
+  if(order %in% OrdRichAbove100){
+    plot_scale = 200
+  }else if(order %in% OrdRich25to100){
+    plot_scale = 100
+  }else if(order %in% OrdRichBelow25){
+    plot_scale = 25
+  }
+  
+  
   #plot
   #violin
   if(type == "violin"){
     plot <- ggplot(df, aes(x = Biome, y = Alpha, fill = Biome)) + 
       geom_violin(scale = "count", show.legend = FALSE, fill = cols1) + 
       theme_minimal() + 
+      ylim(0,plot_scale) +
       ggtitle(order, subtitle = hem) + 
       ylab("Richness") + 
       xlab("Biome") + 
@@ -63,6 +74,7 @@ OrdBiomeBP <- function(order, type, hem = "both"){
       geom_boxplot(show.legend=FALSE, fill = biomecols) + 
       ggtitle(order, subtitle = hem) +
       theme_minimal() + 
+      ylim(0, plot_scale) + 
       geom_jitter(alpha = 0.5, width = 0.2, color = "gray") +
       ylab("Richness") + 
       xlab("Biome") + 
@@ -79,6 +91,7 @@ OrdBiomeBP <- function(order, type, hem = "both"){
       geom_boxplot(show.legend = FALSE, fill = biomecols, color = "black") +
       ggtitle(order, subtitle = hem) +
       theme_minimal() +
+      ylim(0,plot_scale) + 
       geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35,
                   color = "gray25") +
       xlab("Biome") +

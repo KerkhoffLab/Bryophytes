@@ -1,3 +1,9 @@
+#Order Richness
+#Grouping orders based on alpha diversity in order to determine y axis in plots
+#Hailey Napier and Kathryn Dawdy
+#July 22, 2020
+
+# 1.0 Make a new dataframe for faceted plots --------------------------------
 orderrichdf <- data.frame(OrderNames)
 orderrichdf$totalalpha <- NA
 for(i in 1:length(OrderNames)){
@@ -5,19 +11,30 @@ for(i in 1:length(OrderNames)){
   orderrichdf$totalalpha[i] <- TotalAlpha(o)
 }
 
-theme_set(theme_gray())
 
+# 2.0 Make a bar chart to look at max alpha diversity -----------------------
+theme_set(theme_gray())
 ggplot(orderrichdf, aes(x = OrderNames, y = totalalpha)) + 
   geom_bar(stat = "identity") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
-OrdRichAbove100k <- c("Hypnales","Dicranales","Bryales")
-OrdRichAbove100k
-saveRDS(OrdRichAbove100k, "Data/OrdRichAbove100k.rds")
+# 2.1 Make a dataframe to look at numbers for max alpha diversity 
+OrderMaxAlpha <- data.frame(tapply(OrderBiomeDF$Alpha, OrderBiomeDF$Order, max, na.rm = T))
+names(OrderMaxAlpha)[1]  <- "MaxAlpha"
+Names <- sort(unique(OrderBiomeDF$Order))
+OrderMaxAlpha$Names <- Names
 
-OrderNames <- readRDS("Data/OrderNames.rds")
-NoHyp <- OrderNames[OrderNames!="Hypnales"]
-NoHypNoDic <- NoHyp[NoHyp!="Dicranales"]
-OrdRichBelow100k <- NoHypNoDic[NoHypNoDic!="Bryales"]
-OrdRichBelow100k
-saveRDS(OrdRichBelow100k, "Data/OrdRichBelow100k.rds")
+# 2.2 Put order names into vectors based on max alpha diversity 
+OrdRichAbove100 <- vector()
+OrdRich25to100 <- vector()
+OrdRichBelow25 <- vector()
+for(i in 1:length(Names)){
+  name <- Names[i]
+  if(OrderMaxAlpha$MaxAlpha[i] > 100){
+    OrdRichAbove100 <- c(OrdRichAbove100, name)
+  }else if(OrderMaxAlpha$MaxAlpha[i] > 25){
+    OrdRich25to100 <- c(OrdRich25to100, name)
+  }else{
+    OrdRichBelow25 <- c(OrdRichBelow25, name)
+  }
+}

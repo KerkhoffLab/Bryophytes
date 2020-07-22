@@ -39,6 +39,6 @@ for(i in 1:length(Names)){
   }
 }
 
-saveRDS(OrdRichAbove100, "OrdRichAbove100.rds")
+saveRDS(OrdRichAbove100, "Data/OrdRichAbove100.rds")
 saveRDS(OrdRich25to100, "Data/OrdRich25to100.rds")
 saveRDS(OrdRichBelow25, "Data/OrdRichBelow25.rds")

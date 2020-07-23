@@ -1,8 +1,11 @@
-#Mapping bryophyte alpha diversity with biomes
+#Load biome shapefiles
+#Map bryophyte alpha diversity with biomes
+#Plot bryophyte richness by biome
 #Code adapted from MappingRichness.R, Bryophytes.Rmd, TreeMaps.R, MountainRanges.R, and MountainLowland.Rmd
 #Kathryn Dawdy, July 2020
 
-#Load packages -------------------------------------------------------------
+
+# 0.0 Load packages --------------------------------------------------------
 require(BIEN)
 require(maps) 
 require(dplyr)
@@ -34,14 +37,18 @@ require(tidyverse)
 require(tmap)
 
 
-##Load blank raster and richness/presence data -----------------------------
+# 0.0 Load blank raster and richness/presence data -------------------------
 BlankRas <-raster("Data/blank_100km_raster.tif")
 RichnessVec <- readRDS("Data/RichnessVec.rds")
 BryophytePresence <- readRDS("Data/BryophytePresence.rds")
 
+LongLatBetaRaster <- readRDS("Data/LongLatBetaRaster.rds")
+RichnessRaster <- readRDS("Data/RichnessRaster.rds")
+CellVec <- c(1:15038)
 
-#Load biome shapefiles -----------------------------------------------------
-##Load entire BIEN_FEE_paper repository (branch: Trait_phylo)
+
+# 1.0 Load biome shapefiles ------------------------------------------------
+# 1.1 Load entire BIEN_FEE_paper repository (branch: Trait_phylo)
 download.file(url = "https://github.com/susyelo/BIEN_FEE_paper/archive/Trait_phylo.zip", 
               destfile = "./Data/Biomes/BIEN_FEE_paper-Trait_phylo.zip")
 dir.create("./Data/Biomes/")
@@ -49,40 +56,32 @@ setwd("./Data/Biomes/")
 unzip("BIEN_FEE_paper-Trait_phylo.zip")
 setwd("../../")
 
-##Move the shapefiles
+# 1.2 Move the shapefiles
 file.move("./Data/Biomes/BIEN_FEE_paper-Trait_phylo/data/processed/Olson_processed/Biomes_olson_projected.dbf", "./Data/Biomes/")
 file.move("./Data/Biomes/BIEN_FEE_paper-Trait_phylo/data/processed/Olson_processed/Biomes_olson_projected.prj", "./Data/Biomes/")
 file.move("./Data/Biomes/BIEN_FEE_paper-Trait_phylo/data/processed/Olson_processed/Biomes_olson_projected.shp", "./Data/Biomes/")
 file.move("./Data/Biomes/BIEN_FEE_paper-Trait_phylo/data/processed/Olson_processed/Biomes_olson_projected.shx", "./Data/Biomes/")
 
-##Delete the repository folder and .zip file
+# 1.3 Delete the repository folder and .zip file
 unlink("./Data/Biomes/BIEN_FEE_paper-Trait_phylo", recursive=TRUE)
 unlink("./Data/Biomes/BIEN_FEE_paper-Trait_phylo.zip")
 
 
-#Set theme and colors for gplots -------------------------------------------
+# 2.0 Set theme and colors -------------------------------------------------
+# 2.1 Richness map colors
 cols <- (wes_palette("Zissou1", 500, type = "continuous"))
 theme_set(theme_void())
 
-#testing color schemes
+# 2.2 Violin plot colors
 cols1 <- (wes_palette("Zissou1", 5632, type = "continuous"))
-cols2 <- (wes_palette("Zissou1", 11, type="continuous"))
-cols3 <- (wes_palette("Cavalcanti1", 11, type = "continuous"))
-cols4 <- c(wes_palette("Cavalcanti1",4,type="continuous"),
-           wes_palette("Chevalier1",5,type="continuous"),
-           "slateblue1", "orangered3")
-cols5 <- c("#D8B70A", "#81A88D", "#A2A475", "#02401B", "#972D15",
-           "#446455", "#FDD262", "#D3DDDC", "#C7B19C",
-           "#798E87", "#C27D38")
-cols6 <- c("#0B775E", "#C93312", "#FAEFD1", "#00A08A", "#7294D4",
-           "#446455", "#FDD262", "#D3DDDC", "#D8B70A", "#02401B", "#A2A475")
 
-#Color scheme for biomes (in order of BiomeNames (BiomeProcessing.R))
+# 2.3 Color scheme for biomes (in order of BiomeNames (BiomeProcessing.R))
+#wes_palette() hex numbers on GitHub: karthik/wesanderson
 cols7 <- c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
            "#446455", "#FDD262", "#D3DDDC", "#C7B19C",
            "#798E87", "#C27D38")
 
-#Colors used for plots (# corresponds to # of boxplots/length of data)
+# 2.4 Colors used for plots (# corresponds to # of boxplots/length of data)
 biome_cols_11 <- c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
                    "#446455", "#FDD262", "#D3DDDC", "#C7B19C", "#798E87", 
                    "#C27D38")
@@ -138,6 +137,14 @@ biome_cols_166 <- c(biome_cols_22,
                       "#C27D38"),
                     biome_cols_11)
 
+biome_cols_29 <- c(biome_cols_11,
+                   c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
+                     "#446455", "#FDD262", "#D3DDDC", "#798E87", 
+                     "#C27D38"),
+                   c("#972D15", "#A2A475", "#81A88D", "#02401B",
+                     "#FDD262", "#D3DDDC", "#C7B19C", 
+                     "#C27D38"))
+
 #We ended up not using the <25 grouping, but keeping this just in case...
 biome_cols_232 <- c(biome_cols_22,
                     c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
@@ -185,32 +192,7 @@ biome_cols_232 <- c(biome_cols_22,
                     biome_cols_22)
 
 
-#wes_palette() hex numbers for reference
-#from GitHub: karthik/wesanderson
-#wes_palettes <- list(
-#  BottleRocket1 = c("#A42820", "#5F5647", "#9B110E", "#3F5151", "#4E2A1E", "#550307", "#0C1707"),
-#  BottleRocket2 = c("#FAD510", "#CB2314", "#273046", "#354823", "#1E1E1E"),
-#  Rushmore1 = c("#E1BD6D", "#EABE94", "#0B775E", "#35274A" ,"#F2300F"),
-#  Rushmore = c("#E1BD6D", "#EABE94", "#0B775E", "#35274A" ,"#F2300F"),
-#  Royal1 = c("#899DA4", "#C93312", "#FAEFD1", "#DC863B"),
-#  Royal2 = c("#9A8822", "#F5CDB4", "#F8AFA8", "#FDDDA0", "#74A089"),
-#  Zissou1 = c("#3B9AB2", "#78B7C5", "#EBCC2A", "#E1AF00", "#F21A00"),
-#  Darjeeling1 = c("#FF0000", "#00A08A", "#F2AD00", "#F98400", "#5BBCD6"),
-#  Darjeeling2 = c("#ECCBAE", "#046C9A", "#D69C4E", "#ABDDDE", "#000000"),
-#  Chevalier1 = c("#446455", "#FDD262", "#D3DDDC", "#C7B19C"),
-#  FantasticFox1 = c("#DD8D29", "#E2D200", "#46ACC8", "#E58601", "#B40F20"),
-#  Moonrise1 = c("#F3DF6C", "#CEAB07", "#D5D5D3", "#24281A"),
-#  Moonrise2 = c("#798E87", "#C27D38", "#CCC591", "#29211F"),
-#  Moonrise3 = c("#85D4E3", "#F4B5BD", "#9C964A", "#CDC08C", "#FAD77B"),
-#  Cavalcanti1 = c("#D8B70A", "#02401B", "#A2A475", "#81A88D", "#972D15"),
-#  GrandBudapest1 = c("#F1BB7B", "#FD6467", "#5B1A18", "#D67236"),
-#  GrandBudapest2 = c("#E6A0C4", "#C6CDF7", "#D8A499", "#7294D4"),
-#  IsleofDogs1 = c("#9986A5", "#79402E", "#CCBA72", "#0F0D0E", "#D9D0D3", "#8D8680"),
-#  IsleofDogs2 = c("#EAD3BF", "#AA9486", "#B6854D", "#39312F", "#1C1718")
-#)
-
-
-#Create bryophyte richness dataframe ---------------------------------------
+# 3.0 Create bryophyte richness dataframe ----------------------------------
 RichnessVec[which(RichnessVec==0)]=NA
 RichnessRaster <- setValues(BlankRas, RichnessVec)
 RichnessDF <- rasterToPoints(RichnessRaster)
@@ -219,36 +201,37 @@ colnames(RichnessDF) <- c("Longitude", "Latitude", "Alpha")
 
 
 
-#BRYOPHYTE RICHNESS - continental and mountainous outlines -----------------
-#Add continental and mountainous outlines
+# 4.0 BRYOPHYTE RICHNESS - continental and mountainous outlines ------------
+# 4.1 Add continental and mountainous outlines
 nw_mount <- shapefile("Data/MapOutlines/Mountains/Koeppen-Geiger_biomes.shp")
 nw_bound <- shapefile("Data/MapOutlines/Global_bound/Koeppen-Geiger_biomes.shp")
 
 nw_mount_sf <- st_as_sf(nw_mount)
 nw_bound_sf <- st_as_sf(nw_bound)
 
-#Create map
-#RichnessMap <- ggplot() +          #un-comment this section to make bryophyte richness map with continental/mountain outlines
-  #geom_tile(data=RichnessDF, aes(x=Longitude, y=Latitude, fill=Alpha)) + 
-  #scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent") + 
-  #scale_fill_gradientn(colours=cols, na.value="transparent") +
-  #coord_equal() +
-  #geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
-  #geom_sf(data = nw_mount_sf, size = 0.5, fill=NA) + 
-  #theme_void() +
-  #theme(legend.text=element_text(size=20), 
+# 4.2 Create map
+RichnessMap <- ggplot() +          #un-comment this section to make bryophyte richness map with continental/mountain outlines
+  geom_tile(data=RichnessDF, aes(x=Longitude, y=Latitude, fill=Alpha)) + 
+  scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent") + 
+  scale_fill_gradientn(colours=cols, na.value="transparent") +
+  coord_equal() +
+  geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
+  geom_sf(data = nw_mount_sf, size = 0.5, fill=NA) + 
+  theme_void() +
+  theme(legend.text=element_text(size=20), 
         #legend.title=element_text(size=32), 
-        #axis.title = element_blank())
-#RichnessMap
+        #axis.title = element_blank()
+        )
+RichnessMap
 
 
 
-#BRYOPHYTE RICHNESS - biomes -----------------------------------------------
-#Add biomes outlines
+# 5.0 BRYOPHYTE RICHNESS - biomes ------------------------------------------
+# 5.1 Add biomes outlines
 biomes_shp <- shapefile("Data/Biomes/Biomes_olson_projected.shp")
 biomes_sf <- st_as_sf(biomes_shp)
 
-#Create map
+# 5.2 Create map
 BiomeRichnessMap <- ggplot(fill=biomes_shp$biomes) +            #delete "fill=biomes_shp$biomes if not coloring the biomes
   geom_tile(data=RichnessDF, aes(x=Longitude, y=Latitude, fill=Alpha)) + 
   scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent") + 
@@ -264,11 +247,7 @@ BiomeRichnessMap <- ggplot(fill=biomes_shp$biomes) +            #delete "fill=bi
 BiomeRichnessMap
 
 
-#SUBSETTING BIOMES ---------------------------------------------------------
-#biome_names=biomes_shp$biomes
-#View(biome_names)
-#View(biomes_shp)
-
+# 6.0 SUBSETTING BIOMES ----------------------------------------------------
 sort(biomes_shp@data[["biomes"]])
 
 Coniferous_Forests <- subset(biomes_shp, biomes == "Coniferous_Forests")
@@ -284,13 +263,16 @@ Tundra <- subset(biomes_shp, biomes == "Tundra")
 Xeric_Woodlands <- subset(biomes_shp, biomes == "Xeric_Woodlands")
 
 
-#load data etc.
-LongLatBetaRaster <- readRDS("Data/LongLatBetaRaster.rds")
-RichnessRaster <- readRDS("Data/RichnessRaster.rds")
-BlankRas <-raster("Data/blank_100km_raster.tif")
-CellVec <- c(1:15038)
 
-#Creates dataframe including coordinates for each cell
+#should have loaded this already...will test...
+
+#load data etc.
+#LongLatBetaRaster <- readRDS("Data/LongLatBetaRaster.rds")
+#RichnessRaster <- readRDS("Data/RichnessRaster.rds")
+#BlankRas <-raster("Data/blank_100km_raster.tif")
+#CellVec <- c(1:15038)
+
+# Create dataframe including coordinates for each cell ---------------------
 LongLatRaster <- setValues(BlankRas, CellVec)
 LongLatPoints<-rasterToPoints(LongLatRaster)
 LongLatDF <- data.frame(LongLatPoints)
@@ -311,6 +293,7 @@ LongLatDF <- readRDS("Data/LongLatDF.rds")
 
 #All Biomes ----------------------------------------------------------------
 #Doesn't really tell us much...
+#Also not working right now. Come back to this........................
 LongLatDF <- readRDS("Data/LongLatDF.rds")
 AlphaBiomes <- extract(RichnessRaster, biomes_shp, df = TRUE, cellnumbers = TRUE)
 colnames(AlphaBiomes) <- c("Type", "CellID", "Alpha")
@@ -498,29 +481,8 @@ BiomeRichBV
 
 
 #Biomes Map ----------------------------------------------------------------
-#BiomeMap <- ggplot(fill=biomes_shp$biomes, color=biomes_shp$biomes) +
-#  coord_equal() +
-  #geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) +           #remove continental outlines for visual clarity
-  #geom_sf(data = nw_mount_sf, size = 0.5, fill=NA) +           #remove mountain outlines for visual clarity
-#  geom_sf(data = biomes_sf, size = 0.5, fill=cols4, color="black") +
-#  geom_sf_label(data = biomes_sf, 
-#                aes(alpha=0.5, label = biomes_shp$biomes, size=.01), 
-#                show.legend = FALSE) +
-#  theme_void()
-#BiomeMap
-
-
-#Biome map with legend outside frame
-#BiomeMapLegendOUT <-qtm(biomes_shp, fill="biomes", fill.style="fixed",
-#                   fill.labels=biomes_shp$biomes,
-#                   fill.palette=cols4, 
-#                   fill.title="Biomes",
-#                   layout.legend.outside=TRUE,
-#                   layout.legend.width)
-#BiomeMapLegendOUT
-
 #Biome map wih legend inside frame
-BiomeMapLegendIN <- qtm(biomes_shp,
+BiomeMap <- qtm(biomes_shp,
                         fill="biomes", 
                         fill.style="fixed",
                         fill.labels=biomes_shp$biomes,
@@ -529,229 +491,16 @@ BiomeMapLegendIN <- qtm(biomes_shp,
                         layout.legend.position=c("left","bottom"),
                         layout.legend.width=1.5,
                         layout.frame=FALSE)
-BiomeMapLegendIN
+BiomeMap
 
-
-#Biome Richness by Order ---------------------------------------------------
-#Hailey's function:
-source("Functions/OrdBiomeBP.R")
-###First run BiomeProcessing.R, ORange.R, and Data.Processing
-
-#Enter any order for box, violin, or boxyviolin plots, "Southern" or "Northern" or "both" hem
-OrdBiomeBP("Hypnales", "box")
-OrdBiomeBP("Hypnales", "violin")
-OrdBiomeBP("Hypnales", "boxyviolin")
-OrdBiomeBP("Hypnales", "boxyviolin", hem="Southern")
-
-
-###Run OrderBiomeDF.R
-OrderBiomeDF <- readRDS("Data/OrderBiomeDF.rds")
-View(OrderBiomeDF)
-
-#Facet wrap of richness in biomes by order ---------------------------------
-FacetOrdBiomeRich <- ggplot(OrderBiomeDF, 
-                      aes(x=Biome, y=Alpha,)) + 
-  geom_boxplot(show.legend = FALSE) +
-  guides(x = guide_axis(angle=30)) +
-  theme_minimal() +
-  xlab("Biome") +
-  ylab("Richness") +  
-  theme(axis.title.y = element_text(size=32), 
-        axis.title.x = element_text(size=32),
-        axis.text.y = element_text(size=20), 
-        axis.text.x = element_text(angle = 30, hjust = 1, size = 12))+
-  facet_wrap(~Order)
-FacetOrdBiomeRich
-
-#way too many plots in this^ facet, so subset order by max alpha value
-###Run OrderRichness.R
-#>100
-OrdRichAbove100 <- readRDS("Data/OrdRichAbove100.rds")
-OrdRichAbove100
-OBRAbove100DF <- subset(OrderBiomeDF, 
-                        OrderBiomeDF$Order=="Hypnales"|
-                          OrderBiomeDF$Order=="Dicranales")
-
-#25-100
-OrdRich25to100 <- readRDS("Data/OrdRich25to100.rds")
-OrdRich25to100
-OBR25to100DF <- subset(OrderBiomeDF,
-                       OrderBiomeDF$Order=="Bartramiales"|
-                         OrderBiomeDF$Order=="Bryales"|
-                         OrderBiomeDF$Order=="Grimmiales"|
-                         OrderBiomeDF$Order=="Hookeriales"|
-                         OrderBiomeDF$Order=="Jungermanniales"|
-                         OrderBiomeDF$Order=="Orthotrichales"|
-                         OrderBiomeDF$Order=="Porellales"|
-                         OrderBiomeDF$Order=="Pottiales")
-
-#<25
-#We ended up not using the <25 grouping, but keeping this just in case...
-#OrdRichBelow25
-#OBRBelow25DF <- subset(OrderBiomeDF,
-                       #OrderBiomeDF$Order!="Hypnales"&
-                       #OrderBiomeDF$Order!="Dicranales"&
-                       #OrderBiomeDF$Order!="Bartramiales"&
-                       #OrderBiomeDF$Order!="Bryales"&
-                       #OrderBiomeDF$Order!="Grimmiales"&
-                       #OrderBiomeDF$Order!="Hookeriales"&
-                       #OrderBiomeDF$Order!="Jungermanniales"&
-                       #OrderBiomeDF$Order!="Orthotrichales"&
-                       #OrderBiomeDF$Order!="Porellales"&
-                       #OrderBiomeDF$Order!="Pottiales")
-
-#10-25
-OrdRich10to25 <- readRDS("Data/OrdRich10to25.rds")
-OrdRich10to25
-OBR10to25DF <- subset(OrderBiomeDF,
-                      OrderBiomeDF$Order=="Funariales"|
-                      OrderBiomeDF$Order=="Hedwigiales"|
-                      OrderBiomeDF$Order=="Marchantiales"|
-                      OrderBiomeDF$Order=="Metzgeriales"|
-                      OrderBiomeDF$Order=="Polytrichales"|
-                      OrderBiomeDF$Order=="Sphagnales")
-
-#<10
-OrdRichBelow10 <-readRDS("Data/OrdRichBelow10.rds")
-OrdRichBelow10
-OBRBelow10DF <- subset(OrderBiomeDF,
-                       OrderBiomeDF$Order!="Hypnales"&
-                         OrderBiomeDF$Order!="Dicranales"&
-                         OrderBiomeDF$Order!="Bartramiales"&
-                         OrderBiomeDF$Order!="Bryales"&
-                         OrderBiomeDF$Order!="Grimmiales"&
-                         OrderBiomeDF$Order!="Hookeriales"&
-                         OrderBiomeDF$Order!="Jungermanniales"&
-                         OrderBiomeDF$Order!="Orthotrichales"&
-                         OrderBiomeDF$Order!="Porellales"&
-                         OrderBiomeDF$Order!="Pottiales"&
-                         OrderBiomeDF$Order!="Funariales"&
-                         OrderBiomeDF$Order!="Hedwigiales"&
-                         OrderBiomeDF$Order!="Marchantiales"&
-                         OrderBiomeDF$Order!="Metzgeriales"&
-                         OrderBiomeDF$Order!="Polytrichales"&
-                         OrderBiomeDF$Order!="Sphagnales")
-
-
-
-#Facet wrap of richness in biomes by order with >100 max richness ----------
-FacetOBRAbove100 <- ggplot(OBRAbove100DF, 
-                            aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
-  geom_boxplot(show.legend = FALSE, fill=biome_cols_22, color="black",
-               outlier.size=1) +
-  #theme_minimal() +     #un-comment whichever theme you want
-  theme_gray() +
-  #theme_light() +
-  #theme_bw() +
-  #theme_dark() +
-  #theme_linedraw() +
-  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35,
-              color="gray25") +
-  xlab("Biome") +
-  ylab("Richness") +  
-  theme(axis.title.y = element_text(size=32), 
-        axis.title.x = element_text(size=32),
-        axis.text.y = element_text(size=15), 
-        axis.text.x = element_text(angle = 30, hjust = 1, size = 8))+
-  facet_wrap(~Order
-             , 
-             #ncol=1        #un-comment # of rows you want
-             ncol=2
-             )
-FacetOBRAbove100
-
-#Facet wrap of richness in biomes by order with 25-100 max richness --------
-FacetOBR25to100 <- ggplot(OBR25to100DF, 
-                           aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
-  geom_boxplot(show.legend = FALSE, fill=biome_cols_87, color="black",
-               outlier.size=0.7) +
-  #theme_minimal() +     #un-comment whichever theme you want
-  theme_gray() +
-  #theme_light() +
-  #theme_bw() +
-  #theme_dark() +
-  #theme_linedraw() +
-  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35,
-              color="gray25") +
-  xlab("Biome") +
-  ylab("Richness") +  
-  theme(axis.title.y = element_text(size=32), 
-        axis.title.x = element_text(size=32),
-        axis.text.y = element_text(size=15), 
-        axis.text.x = element_text(angle = 30, hjust = 1, size = 8))+
-  facet_wrap(~Order
-             , 
-             #ncol=2        #un-comment # of rows you want
-             ncol=4
-             )
-FacetOBR25to100
-
-#Facet wrap of richness in biomes by order with 10-25 max richness ---------
-FacetOBR10to25 <- ggplot(OBR10to25DF, 
-                          aes(x=Biome, y=Alpha, fill=Biome, color=Biome
-                              )) + 
-  geom_boxplot(show.legend = FALSE, fill=biome_cols_66, color="black",
-               outlier.size=0.7) +
-  #theme_minimal() +     #un-comment whichever theme you want
-  theme_gray() +
-  #theme_light() +
-  #theme_bw() +
-  #theme_dark() +
-  #theme_linedraw() +
-  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35, 
-              color="gray25") +
-  xlab("Biome") +
-  ylab("Richness") +  
-  theme(axis.title.y = element_text(size=32), 
-        axis.title.x = element_text(size=32),
-        axis.text.y = element_text(size=15), 
-        axis.text.x = element_text(angle = 30, hjust = 1, size = 8))+
-  facet_wrap(~Order
-             , 
-             ncol=3        #un-comment # of rows you want
-             #ncol=2
-             )
-FacetOBR10to25
-
-#Facet wrap of richness in biomes by order with <10 max richness -----------
-FacetOBRBelow10 <- ggplot(OBRBelow10DF, 
-                         aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
-  geom_boxplot(show.legend = FALSE, fill=biome_cols_166, color="black",
-               outlier.size=0.7) +
-  #theme_minimal() +     #un-comment whichever theme you want
-  theme_gray() +
-  #theme_light() +
-  #theme_bw() +
-  #theme_dark() +
-  #theme_linedraw() +
-  #geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35, color="gray25") +
-  xlab("Biome") +
-  ylab("Richness") +  
-  theme(axis.title.y = element_text(size=32), 
-        axis.title.x = element_text(size=32),
-        axis.text.y = element_text(size=15), 
-        axis.text.x = element_text(angle = 90, hjust = 1, size = 8))+
-  facet_wrap(~Order
-             ,
-             ncol=6        #un-comment # of rows you want
-             #ncol=5
-             )
-FacetOBRBelow10
-
-#Facet wrap of richness in biomes by order with <25 max richness -----------
-#We ended up not using the <25 grouping, but keeping this just in case...
-#FacetOBRBelow25 <- ggplot(OBRBelow25DF,aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
-  #geom_boxplot(show.legend = FALSE, fill=biome_cols_232, color="black", outlier.size=0.5) +
-  #theme_minimal() +     #un-comment whichever theme you want
-  #theme_gray() +
-  #theme_light() +
-  #theme_bw() +
-  #geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35, color="gray25") +       #un-comment for transparent violins
-  #xlab("Biome") +
-  #ylab("Richness") +  
-  #theme(axis.title.y = element_text(size=32), 
-        #axis.title.x = element_text(size=32),
-        #axis.text.y = element_text(size=15), 
-        #axis.text.x = element_text(angle = 90, hjust = 1, size = 8))+
-  #facet_wrap(~Order, ncol=7)
-#FacetOBRBelow25
+#Biome map with ggplot (labels are weird)
+#BiomeMapLabel <- ggplot(fill=biomes_shp$biomes, color=biomes_shp$biomes) +
+#  coord_equal() +
+  #geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) +           #remove continental outlines for visual clarity
+  #geom_sf(data = nw_mount_sf, size = 0.5, fill=NA) +           #remove mountain outlines for visual clarity
+#  geom_sf(data = biomes_sf, size = 0.5, fill=cols7, color="black") +
+#  geom_sf_label(data = biomes_sf, 
+#                aes(alpha=0.5, label = biomes_shp$biomes, size=.01), 
+#                show.legend = FALSE) +
+#  theme_void()
+#BiomeMapLabel

@@ -91,7 +91,7 @@ OrdBiomeBP <- function(order, type, hem = "both"){
       ggtitle(order, subtitle = sub) +
       theme_minimal() + 
       ylim(0, plot_scale) + 
-      geom_jitter(alpha = 0.5, width = 0.2, color = "gray") +
+      #geom_jitter(alpha = 0.5, width = 0.2, color = "gray") +
       ylab("Richness") + 
       xlab("Biome") + 
       theme(axis.title.y = element_text(size=32), 

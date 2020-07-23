@@ -95,6 +95,50 @@ biome_cols_87 <- c(biome_cols_22, biome_cols_11,
                    "#C27D38",
                    biome_cols_22, biome_cols_22)
 
+biome_cols_66 <- c(biome_cols_22, biome_cols_22, biome_cols_22)
+
+biome_cols_166 <- c(biome_cols_22,
+                    c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
+                      "#FDD262", "#D3DDDC", "#C7B19C", 
+                      "#C27D38"),
+                    biome_cols_11,
+                    c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
+                    "#446455", "#FDD262", "#D3DDDC",
+                    "#C27D38"),
+                    c("#D8B70A", "#972D15", "#81A88D", "#02401B",
+                      "#446455", "#FDD262", "#D3DDDC", "#C7B19C", "#798E87", 
+                      "#C27D38"),
+                    c("#81A88D",
+                      "#FDD262", "#D3DDDC"),
+                    c("#D8B70A", "#972D15", "#81A88D",
+                      "#446455", "#D3DDDC", "#C7B19C", "#798E87"),
+                    c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
+                      "#FDD262", "#D3DDDC", "#C7B19C", 
+                      "#C27D38"),
+                    "#81A88D",
+                    c("#972D15", "#A2A475", "#81A88D", "#02401B",
+                      "#FDD262", "#D3DDDC", "#C7B19C", 
+                      "#C27D38"),
+                    c("#D8B70A",
+                      "#446455", "#FDD262", "#D3DDDC"),
+                    biome_cols_22,
+                    c("#D8B70A", "#972D15", "#81A88D",
+                      "#D3DDDC", "#C7B19C", 
+                      "#C27D38"),
+                    c("#D8B70A",
+                      "#446455", "#FDD262", "#D3DDDC", "#798E87", 
+                      "#C27D38"),
+                    c("#A2A475", "#81A88D", "#02401B",
+                      "#FDD262", "#D3DDDC", "#C7B19C"),
+                    c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
+                      "#FDD262", "#D3DDDC", "#C7B19C", 
+                      "#C27D38"),
+                    biome_cols_11,
+                    c("#D8B70A",
+                      "#C27D38"),
+                    biome_cols_11)
+
+#We ended up not using the <25 grouping, but keeping this just in case...
 biome_cols_232 <- c(biome_cols_22,
                     c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
                       "#FDD262", "#D3DDDC", "#C7B19C", 
@@ -438,7 +482,10 @@ BiomeRichViolin
 BiomeRichBV <- ggplot(BiomeRichness, aes(x=Type, y=Alpha, fill=Type, color=Type)) + 
   geom_boxplot(show.legend = FALSE, fill=cols7, color="black") +
   guides(x = guide_axis(angle=30)) +
-  theme_minimal() +
+  theme_minimal() +        #un-comment whichever theme you want
+  #theme_gray() +
+  #theme_light() +
+  #theme_bw() +
   geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35,
               color="gray25") +
   xlab("Biome") +
@@ -519,12 +566,14 @@ FacetOrdBiomeRich
 #way too many plots in this^ facet, so subset order by max alpha value
 ###Run OrderRichness.R
 #>100
+OrdRichAbove100 <- readRDS("Data/OrdRichAbove100.rds")
 OrdRichAbove100
 OBRAbove100DF <- subset(OrderBiomeDF, 
                         OrderBiomeDF$Order=="Hypnales"|
                           OrderBiomeDF$Order=="Dicranales")
 
 #25-100
+OrdRich25to100 <- readRDS("Data/OrdRich25to100.rds")
 OrdRich25to100
 OBR25to100DF <- subset(OrderBiomeDF,
                        OrderBiomeDF$Order=="Bartramiales"|
@@ -537,25 +586,65 @@ OBR25to100DF <- subset(OrderBiomeDF,
                          OrderBiomeDF$Order=="Pottiales")
 
 #<25
-OrdRichBelow25
-OBRBelow25DF <- subset(OrderBiomeDF,
-                     OrderBiomeDF$Order!="Hypnales"&
-                       OrderBiomeDF$Order!="Dicranales"&
-                       OrderBiomeDF$Order!="Bartramiales"&
-                       OrderBiomeDF$Order!="Bryales"&
-                       OrderBiomeDF$Order!="Grimmiales"&
-                       OrderBiomeDF$Order!="Hookeriales"&
-                       OrderBiomeDF$Order!="Jungermanniales"&
-                       OrderBiomeDF$Order!="Orthotrichales"&
-                       OrderBiomeDF$Order!="Porellales"&
-                       OrderBiomeDF$Order!="Pottiales")
+#We ended up not using the <25 grouping, but keeping this just in case...
+#OrdRichBelow25
+#OBRBelow25DF <- subset(OrderBiomeDF,
+                       #OrderBiomeDF$Order!="Hypnales"&
+                       #OrderBiomeDF$Order!="Dicranales"&
+                       #OrderBiomeDF$Order!="Bartramiales"&
+                       #OrderBiomeDF$Order!="Bryales"&
+                       #OrderBiomeDF$Order!="Grimmiales"&
+                       #OrderBiomeDF$Order!="Hookeriales"&
+                       #OrderBiomeDF$Order!="Jungermanniales"&
+                       #OrderBiomeDF$Order!="Orthotrichales"&
+                       #OrderBiomeDF$Order!="Porellales"&
+                       #OrderBiomeDF$Order!="Pottiales")
+
+#10-25
+OrdRich10to25 <- readRDS("Data/OrdRich10to25.rds")
+OrdRich10to25
+OBR10to25DF <- subset(OrderBiomeDF,
+                      OrderBiomeDF$Order=="Funariales"|
+                      OrderBiomeDF$Order=="Hedwigiales"|
+                      OrderBiomeDF$Order=="Marchantiales"|
+                      OrderBiomeDF$Order=="Metzgeriales"|
+                      OrderBiomeDF$Order=="Polytrichales"|
+                      OrderBiomeDF$Order=="Sphagnales")
+
+#<10
+OrdRichBelow10 <-readRDS("Data/OrdRichBelow10.rds")
+OrdRichBelow10
+OBRBelow10DF <- subset(OrderBiomeDF,
+                       OrderBiomeDF$Order!="Hypnales"&
+                         OrderBiomeDF$Order!="Dicranales"&
+                         OrderBiomeDF$Order!="Bartramiales"&
+                         OrderBiomeDF$Order!="Bryales"&
+                         OrderBiomeDF$Order!="Grimmiales"&
+                         OrderBiomeDF$Order!="Hookeriales"&
+                         OrderBiomeDF$Order!="Jungermanniales"&
+                         OrderBiomeDF$Order!="Orthotrichales"&
+                         OrderBiomeDF$Order!="Porellales"&
+                         OrderBiomeDF$Order!="Pottiales"&
+                         OrderBiomeDF$Order!="Funariales"&
+                         OrderBiomeDF$Order!="Hedwigiales"&
+                         OrderBiomeDF$Order!="Marchantiales"&
+                         OrderBiomeDF$Order!="Metzgeriales"&
+                         OrderBiomeDF$Order!="Polytrichales"&
+                         OrderBiomeDF$Order!="Sphagnales")
+
+
 
 #Facet wrap of richness in biomes by order with >100 max richness ----------
 FacetOBRAbove100 <- ggplot(OBRAbove100DF, 
                             aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
   geom_boxplot(show.legend = FALSE, fill=biome_cols_22, color="black",
                outlier.size=1) +
+  #theme_minimal() +     #un-comment whichever theme you want
   theme_gray() +
+  #theme_light() +
+  #theme_bw() +
+  #theme_dark() +
+  #theme_linedraw() +
   geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35,
               color="gray25") +
   xlab("Biome") +
@@ -564,7 +653,11 @@ FacetOBRAbove100 <- ggplot(OBRAbove100DF,
         axis.title.x = element_text(size=32),
         axis.text.y = element_text(size=15), 
         axis.text.x = element_text(angle = 30, hjust = 1, size = 8))+
-  facet_wrap(~Order, ncol=1)
+  facet_wrap(~Order
+             , 
+             #ncol=1        #un-comment # of rows you want
+             ncol=2
+             )
 FacetOBRAbove100
 
 #Facet wrap of richness in biomes by order with 25-100 max richness --------
@@ -572,7 +665,12 @@ FacetOBR25to100 <- ggplot(OBR25to100DF,
                            aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
   geom_boxplot(show.legend = FALSE, fill=biome_cols_87, color="black",
                outlier.size=0.7) +
+  #theme_minimal() +     #un-comment whichever theme you want
   theme_gray() +
+  #theme_light() +
+  #theme_bw() +
+  #theme_dark() +
+  #theme_linedraw() +
   geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35,
               color="gray25") +
   xlab("Biome") +
@@ -581,21 +679,79 @@ FacetOBR25to100 <- ggplot(OBR25to100DF,
         axis.title.x = element_text(size=32),
         axis.text.y = element_text(size=15), 
         axis.text.x = element_text(angle = 30, hjust = 1, size = 8))+
-  facet_wrap(~Order, ncol=2)
+  facet_wrap(~Order
+             , 
+             #ncol=2        #un-comment # of rows you want
+             ncol=4
+             )
 FacetOBR25to100
 
-#Facet wrap of richness in biomes by order with <25 max richness -----------
-FacetOBRBelow25 <- ggplot(OBRBelow25DF, 
-                          aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
-  geom_boxplot(show.legend = FALSE, fill=biome_cols_232, color="black",
-               outlier.size=0.5) +
+#Facet wrap of richness in biomes by order with 10-25 max richness ---------
+FacetOBR10to25 <- ggplot(OBR10to25DF, 
+                          aes(x=Biome, y=Alpha, fill=Biome, color=Biome
+                              )) + 
+  geom_boxplot(show.legend = FALSE, fill=biome_cols_66, color="black",
+               outlier.size=0.7) +
+  #theme_minimal() +     #un-comment whichever theme you want
   theme_gray() +
-  #geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35, color="gray25") +       #un-comment for transparent violins
+  #theme_light() +
+  #theme_bw() +
+  #theme_dark() +
+  #theme_linedraw() +
+  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35, 
+              color="gray25") +
+  xlab("Biome") +
+  ylab("Richness") +  
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),
+        axis.text.y = element_text(size=15), 
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 8))+
+  facet_wrap(~Order
+             , 
+             ncol=3        #un-comment # of rows you want
+             #ncol=2
+             )
+FacetOBR10to25
+
+#Facet wrap of richness in biomes by order with <10 max richness -----------
+FacetOBRBelow10 <- ggplot(OBRBelow10DF, 
+                         aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
+  geom_boxplot(show.legend = FALSE, fill=biome_cols_166, color="black",
+               outlier.size=0.7) +
+  #theme_minimal() +     #un-comment whichever theme you want
+  theme_gray() +
+  #theme_light() +
+  #theme_bw() +
+  #theme_dark() +
+  #theme_linedraw() +
+  #geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35, color="gray25") +
   xlab("Biome") +
   ylab("Richness") +  
   theme(axis.title.y = element_text(size=32), 
         axis.title.x = element_text(size=32),
         axis.text.y = element_text(size=15), 
         axis.text.x = element_text(angle = 90, hjust = 1, size = 8))+
-  facet_wrap(~Order, ncol=7)
-FacetOBRBelow25
+  facet_wrap(~Order
+             ,
+             ncol=6        #un-comment # of rows you want
+             #ncol=5
+             )
+FacetOBRBelow10
+
+#Facet wrap of richness in biomes by order with <25 max richness -----------
+#We ended up not using the <25 grouping, but keeping this just in case...
+#FacetOBRBelow25 <- ggplot(OBRBelow25DF,aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
+  #geom_boxplot(show.legend = FALSE, fill=biome_cols_232, color="black", outlier.size=0.5) +
+  #theme_minimal() +     #un-comment whichever theme you want
+  #theme_gray() +
+  #theme_light() +
+  #theme_bw() +
+  #geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35, color="gray25") +       #un-comment for transparent violins
+  #xlab("Biome") +
+  #ylab("Richness") +  
+  #theme(axis.title.y = element_text(size=32), 
+        #axis.title.x = element_text(size=32),
+        #axis.text.y = element_text(size=15), 
+        #axis.text.x = element_text(angle = 90, hjust = 1, size = 8))+
+  #facet_wrap(~Order, ncol=7)
+#FacetOBRBelow25

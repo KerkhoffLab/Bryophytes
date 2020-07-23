@@ -26,7 +26,7 @@ for(i in 1:NumberBiomes){
   
   x <- BiomeRichness %>%
     filter(BiomeRichness$Type == biome) %>%
-    select(CellID)
+    dplyr::select(CellID)
   
   x <- as.vector(x$CellID)
   

@@ -12,7 +12,8 @@ OrdBiomeBP <- function(order, type, hem = "both"){
   BiomeNames <- readRDS("Data/BiomeNames.rds")
   OrdRichAbove100 <- readRDS("Data/OrdRichAbove100.rds")
   OrdRich25to100 <- readRDS("Data/OrdRich25to100.rds")
-  OrdRichBelow25 <- readRDS("Data/OrdRichBelow25.rds")
+  OrdRich10to25 <- readRDS("Data/OrdRich10to25.rds")
+  OrdRichBelow10 <- readRDS("Data/OrdRichBelow10.rds")
   NumberBiomes <- length(BiomeNames)
   cols7 <- c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
              "#446455", "#FDD262", "#D3DDDC", "#C7B19C",
@@ -90,7 +91,7 @@ OrdBiomeBP <- function(order, type, hem = "both"){
       ggtitle(order, subtitle = sub) +
       theme_minimal() + 
       ylim(0, plot_scale) + 
-      geom_jitter(alpha = 0.5, width = 0.2, color = "gray") +
+      #geom_jitter(alpha = 0.5, width = 0.2, color = "gray") +
       ylab("Richness") + 
       xlab("Biome") + 
       theme(axis.title.y = element_text(size=32), 

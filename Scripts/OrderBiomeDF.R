@@ -51,3 +51,72 @@ for(i in 2:NumberOrders){
 }
 names(OrderBiomeDF)[1] <- "Alpha"
 saveRDS(OrderBiomeDF, file = "Data/OrderBiomeDF.rds")
+
+
+#This way is maybe slightly faster ----------------------------------
+#Rewrote to replace append function and tempdf
+
+nrows <- 18857652
+OrderBiomeHemDF <- data.frame(rep(NA,nrows))
+names(OrderBiomeHemDF)[1] <- "alpha"
+OrderBiomeHemDF$Alpha <- NA
+OrderBiomeHemDF$CellID <- NA
+OrderBiomeHemDF$Order <- NA
+OrderBiomeHemDF$Hem <- NA
+OrderBiomeHemDF$Biome <- NA
+
+o <- OrderNames[1]
+b <- BiomeNames[1]
+h <- HemisphereNames[1]
+start <- 1
+end <- 15038
+OrderBiomeHemDF$Alpha[start:end] <- ORange(o,b,h)
+OrderBiomeHemDF$CellID[start:end] <- c(1:15038)
+OrderBiomeHemDF$Biome[start:end] <- b
+OrderBiomeHemDF$Order[start:end] <- o
+OrderBiomeHemDF$Hem[start:end] <- h
+
+for(i in 2:NumberHems){
+  start <- end + 1
+  end <- start + 15037
+  h <- HemisphereNames[i]
+  OrderBiomeHemDF$Alpha[start:end] <- (ORange(o, b, h))
+  OrderBiomeHemDF$CellID[start:end]<- c(1:15038)
+  OrderBiomeHemDF$Biome[start:end] <- b
+  OrderBiomeHemDF$Order[start:end] <- o
+  OrderBiomeHemDF$Hem[start:end] <- h
+}
+
+for(j in 2:NumberBiomes){
+  b <- BiomeNames[j]
+  for(k in 1:NumberHems){
+    start <- end + 1
+    end <- start + 15037
+    h <- HemisphereNames[k]
+    OrderBiomeHemDF$Alpha[start:end] <- (ORange(o, b, h))
+    OrderBiomeHemDF$CellID[start:end]<- c(1:15038)
+    OrderBiomeHemDF$Biome[start:end] <- b
+    OrderBiomeHemDF$Order[start:end] <- o
+    OrderBiomeHemDF$Hem[start:end] <- h
+  }
+}
+
+for(m in 2:NumberOrders){
+  o <- OrderNames[m]
+  for(n in 1:NumberBiomes){
+    b <- BiomeNames[n]
+    for(p in 1:NumberHems){
+      start <- end + 1
+      end <- start + 15037
+      h <- HemisphereNames[p]
+      OrderBiomeHemDF$Alpha[start:end] <- (ORange(o, b, h))
+      OrderBiomeHemDF$CellID[start:end]<- c(1:15038)
+      OrderBiomeHemDF$Biome[start:end] <- b
+      OrderBiomeHemDF$Order[start:end] <- o
+      OrderBiomeHemDF$Hem[start:end] <- h
+    }
+  }
+  print(o)
+}
+
+saveRDS(OrderBiomeHemDF, file = "Data/OrderBiomeHemDF.rds")

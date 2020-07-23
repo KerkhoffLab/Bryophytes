@@ -13,6 +13,7 @@ ORange <- function(order, range, hem = "both"){
   BiomeNames <- readRDS("Data/BiomeNames.rds")
   
   #load file containing CellIDs in the range/biome of interest
+  RangeVec <- vector()
   if(hem == "both"){
     file <- paste("Data/", range, "Vec.rds", sep = "")
     RangeVec <- readRDS(file)

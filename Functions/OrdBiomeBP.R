@@ -1,7 +1,7 @@
 #Function to make boxplot of alpha diversity for a specified order in a specified biome/mountain range
 #Input: order = str, name of order (ex. "Hypnales")
 #Input: type = str, type of plot: "box", "violin", "boxyviolin"
-#Input: hem = str, hemisphere: "both", "Northern", "Southern"; default = "both"
+#Input: cont = str, continent: "both", "North America", "South America"; default = "both"
 #Ouput: set of boxplots for alpha diversity in each biome for the specified order -- in either type violin or box
 #Hailey Napier and Kathryn Dawdy
 #July 16, 2020

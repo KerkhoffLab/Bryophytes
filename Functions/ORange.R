@@ -1,13 +1,13 @@
 #Function to make a vector of alpha diversity values for cellIDs only contained in a specific shapefile (biome/mountain range)
 #Input: order =  str, order name
 #Input: range = str,  biome/mountain range
-#Input: hem =  str, hemisphere ("both", "Northern", "Southern")
+#Input: cont =  str, continent ("both", "North America", "South America")
 #Output: vector of length 15038 containing only alpha diversity values for cells inside specified biome/mountain range area, else NA
 #Hailey Napier
 #July 16, 2020
 
 ORange <- function(order, range, cont = "both"){
-  #load data
+  #load data (comment out load data commands and add necessary data at top of code for loops with large datasets)
   OrderNames <- readRDS("Data/OrderNames.rds")
   OrderRichList <- readRDS("Data/OrderRichList.rds")
   BiomeNames <- readRDS("Data/BiomeNames.rds")

@@ -4,7 +4,8 @@
 
 # 0.0 FIRST ----------------------------------------------------------------
 
-#Run DataProcessing.R, BiomeDiversity.R, ORange.R, OrdBiomeBP.R, TotalAlpha.R, 
+#Run DataProcessing.R, Continents.R, BiomeContinents.R, BiomeDiversity.R, 
+    #ORange.R, OrdBiomeBP.R, TotalAlpha.R, 
     #then OrderBiomeDF.R - unless you can just load the DF (takes a while)
 OrderBiomeDF <- readRDS("Data/OrderBiomeDF.rds")
 #Run OrderRichness.R
@@ -41,6 +42,8 @@ OrdRichAbove100 <- readRDS("Data/OrdRichAbove100.rds")
 OrdRich25to100 <- readRDS("Data/OrdRich25to100.rds")
 OrdRich10to25 <- readRDS("Data/OrdRich10to25.rds")
 OrdRichBelow10 <-readRDS("Data/OrdRichBelow10.rds")
+
+OrderBiomeHemDF <- readRDS("Data/OrderBiomeHemDF.rds")
 
 # 0.3 Colors ---------------------------------------------------------------
 #From wes_palette() hex numbers on GitHub: karthik/wesanderson
@@ -120,13 +123,13 @@ source("Functions/OrdBiomeBP.R")
 
 ###Run OrdBiomeBP.R
 #Use OrdBiomeBP function for box, violin, or layered violin on box plot
-  #Enter any order; box, violin, or boxyviolin; hem = "Southern", "Northern", or "both"
+  #Enter any order; box, violin, or boxyviolin; cont = "Southern", "Northern", or "both"
 OrdBiomeBP("Hypnales", "box")
 OrdBiomeBP("Hypnales", "violin")
 OrdBiomeBP("Hypnales", "boxyviolin")
-OrdBiomeBP("Hypnales", "boxyviolin", hem="Southern")
-OrdBiomeBP("Hypnales", "boxyviolin", hem="Northern")
-OrdBiomeBP("Hypnales", "boxyviolin", hem="both")
+OrdBiomeBP("Hypnales", "boxyviolin", cont="South America")
+OrdBiomeBP("Hypnales", "boxyviolin", cont="North America")
+OrdBiomeBP("Hypnales", "boxyviolin", cont="both")
 
 
 # 2.0 RICHNESS FACET PLOTS in biomes by order ------------------------------
@@ -352,7 +355,6 @@ FacetOBRBelow10
 
 # 3.0 HEMISPHERE FACET PLOTS -----------------------------------------------
 OrderBiomeHemDF <- readRDS("Data/OrderBiomeHemDF.rds")
-View(OrderBiomeHemDF)
 
 FacetHemBiomeRich <- ggplot(OrderBiomeHemDF, 
                             aes(x=biome, y=alpha, fill=biome, color=biome)) + 

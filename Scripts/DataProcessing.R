@@ -258,6 +258,52 @@ for(i in 1:NumberOrders){
 saveRDS(OrderRichList, file = "Data/OrderRichList.rds")
 saveRDS(FamRichList, file = "Data/FamRichList.rds")
 
+
+##BiomeContinents.R##
+# Load Data 
+ContBiomeRichness <- readRDS("Data/BiomeRichness.rds")
+BiomeNames <- readRDS("Data/BiomeNames.rds")
+
+# Add Continent column to dataframe
+ContBiomeRichness$Cont <- NA
+
+for(i in 1:nrow(ContBiomeRichness)){
+  cell = ContBiomeRichness$CellID[i]
+  if(cell %in% NorthAmericaVec){
+    ContBiomeRichness$Cont[i] <- "NorthAmerica"
+  }else if(cell %in% SouthAmericaVec){
+    ContBiomeRichness$Cont[i] <- "SouthAmerica"
+  }
+}
+
+# Filter dataframe by continent and extract cell IDs for each biome, put in a list -------
+# North America
+NorthAmBiomeList <- list()
+for(i in 1:length(BiomeNames)){
+  b <- BiomeNames[i]
+  vec <- ContBiomeRichness %>%
+    filter(ContBiomeRichness$Cont == "NorthAmerica") %>%
+    filter(Type == b)
+  vec <- as.vector(vec$CellID)
+  NorthAmBiomeList[[i]] <- vec
+}
+
+# South America
+SouthAmBiomeList <- list()
+for(i in 1:length(BiomeNames)){
+  b <- BiomeNames[i]
+  vec <- ContBiomeRichness %>%
+    filter(ContBiomeRichness$Cont == "SouthAmerica") %>%
+    filter(Type == b)
+  vec <- as.vector(vec$CellID)
+  SouthAmBiomeList[[i]] <- vec
+}
+
+#  Save lists
+saveRDS(NorthAmBiomeList, "Data/NorthAmBiomeList.rds")
+saveRDS(SouthAmBiomeList, "Data/SouthAmBiomeList.rds")
+
+
 #Stop for order.alpha.comp.R, fam.alpha.com.R, ORange.R, OrdBiomeBP.R, 
     ##TreeMaps.R, and OrderBiomePlots.R------------------------------------------------
 

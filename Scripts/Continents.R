@@ -20,7 +20,7 @@ setwd("./Data/MapOutlines/")
 unzip("ne_10m_geography_regions_polys.zip")
 setwd("../")
 
-#  1. Reading data --------------------------------------------------------
+#  1. Reading data ---------------------------------------------------------
 # 1.1. North America
 data(wrld_simpl)
 
@@ -43,7 +43,7 @@ plot(region19No21_29_13)
 noIslands <- region19No21_29_13[which(region19No21_29_13@data$AREA>500), ]
 SouthAm <- gBuffer(noIslands,width=0.00001)
 
-# 2. Cropping to the New world --------------------------------------------
+# 2. Cropping to the New world ----------------------------------------------
 # 2.1 North America
 plot(NorthAm)
 extent(NorthAm)
@@ -87,7 +87,7 @@ writeOGR(obj=SouthAm_proj,
          overwrite = TRUE)
 
 
-# 7. Create raster including CellIDs for each cell ------------------
+# 7. Create raster including CellIDs for each cell -------------------
 LongLatRaster <- setValues(BlankRas, CellVec)
 
 # 8. Create a vector of CellIDs for North and South America ----------

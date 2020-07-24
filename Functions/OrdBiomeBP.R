@@ -6,7 +6,7 @@
 #Hailey Napier and Kathryn Dawdy
 #July 16, 2020
 
-OrdBiomeBP <- function(order, type, hem = "both"){
+OrdBiomeBP <- function(order, type, cont = "both"){
   
   #load data
   BiomeNames <- readRDS("Data/BiomeNames.rds")
@@ -23,7 +23,7 @@ OrdBiomeBP <- function(order, type, hem = "both"){
   source("Functions/ORange.R")
   
   #set up dataframe to add to
-  df <- data.frame(ORange(order, BiomeNames[1], hem))
+  df <- data.frame(ORange(order, BiomeNames[1], cont))
   names(df)[1] <- "Alpha"
   df$CellID <- c(1:15038)
   df$Biome <- BiomeNames[1]
@@ -59,12 +59,12 @@ OrdBiomeBP <- function(order, type, hem = "both"){
   }
   
   #set subtitle
-  if(hem == "both"){
-    sub <- "Both Hemispheres"
-  }else if(hem == "Northern"){
-    sub <- "Northern Hemisphere"
-  }else if(hem == "Southern"){
-    sub <- "Southern Hemisphere"
+  if(cont == "both"){
+    sub <- "North and South America"
+  }else if(cont == "North America"){
+    sub <- "North America"
+  }else if(hem == "South America"){
+    sub <- "South America"
   }
   
   

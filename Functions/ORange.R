@@ -6,7 +6,7 @@
 #Hailey Napier
 #July 16, 2020
 
-ORange <- function(order, range, hem = "both"){
+ORange <- function(order, range, cont = "both"){
   #load data
   OrderNames <- readRDS("Data/OrderNames.rds")
   OrderRichList <- readRDS("Data/OrderRichList.rds")
@@ -14,17 +14,17 @@ ORange <- function(order, range, hem = "both"){
   
   #load file containing CellIDs in the range/biome of interest
   RangeVec <- vector()
-  if(hem == "both"){
+  if(cont == "both"){
     file <- paste("Data/", range, "Vec.rds", sep = "")
     RangeVec <- readRDS(file)
-  }else if(hem == "Northern"){
-    NorthBiomeRichList <- readRDS("Data/NorthBiomeRichList.rds")
+  }else if(cont == "North America"){
+    NorthAmBiomeRichList <- readRDS("Data/NorthAmBiomeList.rds")
     index <- which(BiomeNames == range)
-    RangeVec <- NorthBiomeRichList[[index]]
-  }else if(hem == "Southern"){
-    SouthBiomeRichList <- readRDS("Data/SouthBiomeRichList.rds")
+    RangeVec <- NorthAmBiomeList[[index]]
+  }else if(cont == "South America"){
+    SouthAmBiomeList <- readRDS("Data/SouthAmBiomeList.rds")
     index <- which(BiomeNames == range)
-    RangeVec <- SouthBiomeRichList[[index]]
+    RangeVec <- SouthAmBiomeList[[index]]
   }
   
   #Make a new vector that contains only the cells that aren't in the range/biome of interest

@@ -1,7 +1,7 @@
 #Function to make boxplot of alpha diversity for a specified order in a specified biome/mountain range
 #Input: order = str, name of order (ex. "Hypnales")
 #Input: type = str, type of plot: "box", "violin", "boxyviolin"
-#Input: hem = str, hemisphere: "both", "Northern", "Southern"; default = "both"
+#Input: cont = str, hemisphere: "both", "North America", "South America"; default = "both"
 #Ouput: set of boxplots for alpha diversity in each biome for the specified order -- in either type violin or box
 #Hailey Napier and Kathryn Dawdy
 #July 16, 2020
@@ -37,7 +37,7 @@ OrdBiomeBP <- function(order, type, cont = "both"){
   
   #loop through biomes and add to the dataframe
   for(i in 2:NumberBiomes){
-    temp <- data.frame(ORange(order, BiomeNames[i], hem))
+    temp <- data.frame(ORange(order, BiomeNames[i], cont))
     names(temp)[1] <- "Alpha"
     temp$CellID <- c(1:15038)
     temp$Biome <- BiomeNames[i] 
@@ -63,7 +63,7 @@ OrdBiomeBP <- function(order, type, cont = "both"){
     sub <- "North and South America"
   }else if(cont == "North America"){
     sub <- "North America"
-  }else if(hem == "South America"){
+  }else if(cont == "South America"){
     sub <- "South America"
   }
   

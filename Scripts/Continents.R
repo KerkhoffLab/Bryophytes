@@ -18,7 +18,7 @@ download.file("https://www.naturalearthdata.com/http//www.naturalearthdata.com/d
 
 setwd("./Data/MapOutlines/")
 unzip("ne_10m_geography_regions_polys.zip")
-setwd("../")
+setwd("../../")
 
 #  1. Reading data ---------------------------------------------------------
 # 1.1. North America
@@ -71,17 +71,18 @@ plot(SouthAm_proj)
 # 5. Writing shapefiles ---------------------------------------------------
 setwd("./Data/MapOutlines/")
 dir.create("./Continents/")
+setwd("../../")
 
 NorthAm_proj <- as(NorthAm_proj, "SpatialPolygonsDataFrame")
 writeOGR(obj=NorthAm_proj, 
-         dsn="./Continents/", 
+         dsn="./Data/MapOutlines/Continents/north_america.shp", 
          layer="north_america", 
          driver="ESRI Shapefile", 
          overwrite = TRUE)
 
 SouthAm_proj <- as(SouthAm_proj, "SpatialPolygonsDataFrame")
 writeOGR(obj=SouthAm_proj, 
-         dsn="./Continents/", 
+         dsn="./Data/MapOutlines/Continents/south_america.shp", 
          layer="south_america", 
          driver="ESRI Shapefile", 
          overwrite = TRUE)

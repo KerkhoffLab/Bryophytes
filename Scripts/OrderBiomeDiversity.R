@@ -116,6 +116,13 @@ biome_cols_29 <- c(biome_cols_11,
                      "#FDD262", "#D3DDDC", "#C7B19C", 
                      "#C27D38"))
 
+biome_cols_18 <- c(c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
+                  "#446455", "#FDD262", "#D3DDDC", "#798E87", 
+                  "#C27D38"),
+                  c("#972D15", "#A2A475", "#81A88D", "#02401B",
+                  "#FDD262", "#D3DDDC", "#C7B19C", 
+                  "#C27D38"))
+
 # 1.0 Biome Richness by Order ----------------------------------------------
 
 #Hailey's function:
@@ -387,3 +394,23 @@ FacetRichOrder <- ggplot(OrderBiomeDF,
         axis.text.x = element_text(angle = 90, hjust = 1, size = 6))+
   facet_wrap(~Biome)
 FacetRichOrder
+
+
+# 5.0 CONTINENT FACET PLOTS -----------------------------------------------
+OrderBiomeContDF <- readRDS("Data/OrderBiomeContDF.rds")
+
+FacetContBiomeRich <- ggplot(OrderBiomeContDF, 
+                            aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
+  geom_boxplot(show.legend = FALSE, fill=biome_cols_18, color="black") +
+  guides(x = guide_axis(angle=30)) +
+  theme_gray() +
+  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35, 
+              color="gray25") +
+  xlab("Biome") +
+  ylab("Richness") +  
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),
+        axis.text.y = element_text(size=15), 
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 8))+
+  facet_wrap(~Cont)
+FacetContBiomeRich

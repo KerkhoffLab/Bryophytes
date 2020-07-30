@@ -383,23 +383,7 @@ FacetHemBiomeRich <- ggplot(OrderBiomeHemDF,
 FacetHemBiomeRich
 
 
-# ?.? Orders on x axis, facet of biomes boxplots ---------------------------
-#Not sure if we should keep this...
-FacetRichOrder <- ggplot(OrderBiomeDF, 
-                         aes(x=Order, y=Alpha)) + 
-  geom_boxplot(show.legend = FALSE) +
-  theme_minimal() +
-  xlab("Order") +
-  ylab("Richness") +  
-  theme(axis.title.y = element_text(size=32), 
-        axis.title.x = element_text(size=32),
-        axis.text.y = element_text(size=20), 
-        axis.text.x = element_text(angle = 90, hjust = 1, size = 6))+
-  facet_wrap(~Biome)
-FacetRichOrder
-
-
-# 5.0 CONTINENT FACET PLOTS -----------------------------------------------
+# 4.0 CONTINENT FACET PLOTS -----------------------------------------------
 OrderBiomeContDF <- readRDS("Data/OrderBiomeContDF.rds")
 
 FacetContBiomeRich <- ggplot(OrderBiomeContDF, 
@@ -419,7 +403,7 @@ FacetContBiomeRich <- ggplot(OrderBiomeContDF,
 FacetContBiomeRich
 
 
-# 6.0 MOSS ORDER CONTINENT FACET PLOTS -------------------------------------
+# 5.0 MOSS ORDER CONTINENT FACET PLOTS -------------------------------------
 # MossOBC is made in MossPlotData.R, it's also in the BryophytesData folder
 MossOBC <- readRDS("Data/MossOBC.rds")
 
@@ -440,3 +424,17 @@ MossFacetContBiomeRich <- ggplot(MossOBC,
 MossFacetContBiomeRich
 
 
+# ?.? Orders on x axis, facet of biomes boxplots ---------------------------
+#Not sure if we should keep this...
+FacetRichOrder <- ggplot(OrderBiomeDF, 
+                         aes(x=Order, y=Alpha)) + 
+  geom_boxplot(show.legend = FALSE) +
+  theme_minimal() +
+  xlab("Order") +
+  ylab("Richness") +  
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),
+        axis.text.y = element_text(size=20), 
+        axis.text.x = element_text(angle = 90, hjust = 1, size = 6))+
+  facet_wrap(~Biome)
+FacetRichOrder

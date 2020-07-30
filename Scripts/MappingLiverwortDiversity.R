@@ -137,7 +137,7 @@ OutlierBetaMap <- gplot(OutlierBetaRaster, maxpixels=15038) +  geom_tile(aes(fil
 OutlierBetaMap
 
 
-#Map beta diversity with values over 0.5 shown in dark grey (how many values over 0.5?)
+# 2.5 Map beta diversity with values over 0.5 shown in dark grey (how many values over 0.5?)
 source("Functions/gplot_data.R")
 gplotB<- gplot_data(BetaRaster)
 gplotOutlier<- gplot_data(OutlierBetaRaster)
@@ -156,3 +156,31 @@ LiverwortBetaMap
 png("Figures/LiverwortBetaMap.png", width = 1000, height = 1000, pointsize = 30)
 LiverwortBetaMap
 dev.off()
+
+
+# 3.0 Plot liverwort beta diversity by latitude ------------------------------------------------------------------------------------------------
+###INCOMPLETE
+
+# 3.1 Convert UTM to longitude and latitude
+LongLatBetaVec <- rep(0, 15038)
+LongLatBetaVec[Cell8]<-Beta8Vec
+LongLatBetaVec[Cell7]<-Beta7Vec
+LongLatBetaVec[LongLatBetaVec==0]<-NA
+LongLatBetaVec <- 1-LongLatBetaVec
+
+LongLatBetaRaster <- setValues(BlankRas, LongLatBetaVec)
+LongLatBetaPoints<-rasterToPoints(LongLatBetaRaster)
+LongLatBetaDF <- data.frame(LongLatBetaPoints)
+colnames(LongLatBetaDF) <- c("Longitude", "Latitude", "Beta")
+
+coordinates(LongLatBetaDF) <- ~Longitude+Latitude 
+proj4string(LongLatBetaDF) <- CRS("+proj=utm +zone=10") 
+BetaLongLat <- spTransform(LongLatBetaDF, CRS("+proj=longlat")) 
+LongLatBetaDF <- data.frame(BetaLongLat)
+LongLatBetaDF[c("Longitude", "Latitude", "Beta")]
+saveRDS(LongLatBetaDF, file = "Data/LivLongLatBetaDF.rds")
+
+BetaLongLat <- data.frame(BetaLongLat)
+colnames(BetaLongLat) <- c("Beta", "Longitude", "Latitude")
+
+saveRDS(LongLatBetaRaster, file="Data/LivLongLatBetaRaster.rds")

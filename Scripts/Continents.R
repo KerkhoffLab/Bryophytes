@@ -89,6 +89,8 @@ writeOGR(obj=SouthAm_proj,
 
 
 # 7. Create raster including CellIDs for each cell -------------------
+BlankRas <- raster("Data/blank_100km_raster.tif")
+CellVec <- c(1:15038)
 LongLatRaster <- setValues(BlankRas, CellVec)
 
 # 8. Create a vector of CellIDs for North and South America ----------

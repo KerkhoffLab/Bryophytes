@@ -1,4 +1,4 @@
-#Plotting alpha diversity of bryophyte orders by biome and hemisphere
+#Plotting alpha diversity of BRYOPHYTE orders by biome and continent
 #Adapted from BiomeDiversity.R
 #Kathryn Dawdy and Hailey Napier, July 2020
 
@@ -9,7 +9,6 @@
     #then OrderBiomeDF.R - unless you can just load the DF (takes a while)
     #then MossPlotData.R - or just load the DF
 OrderBiomeDF <- readRDS("Data/OrderBiomeDF.rds")
-MossOBC <- readRDS("Data/MossOBC.rds")
 
 #Run OrderRichness.R
 
@@ -47,6 +46,7 @@ OrdRich10to25 <- readRDS("Data/OrdRich10to25.rds")
 OrdRichBelow10 <-readRDS("Data/OrdRichBelow10.rds")
 
 OrderBiomeHemDF <- readRDS("Data/OrderBiomeHemDF.rds")
+
 
 # 0.3 Colors ---------------------------------------------------------------
 #From wes_palette() hex numbers on GitHub: karthik/wesanderson
@@ -126,7 +126,8 @@ biome_cols_18 <- c(c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
                   "#FDD262", "#D3DDDC", "#C7B19C", 
                   "#C27D38"))
 
-# 1.0 Biome Richness by Order ----------------------------------------------
+
+# 1.0 BIOME RICHNESS BY ORDER ----------------------------------------------
 
 #Hailey's function:
 source("Functions/OrdBiomeBP.R")
@@ -401,27 +402,6 @@ FacetContBiomeRich <- ggplot(OrderBiomeContDF,
         axis.text.x = element_text(angle = 30, hjust = 1, size = 8))+
   facet_wrap(~Cont)
 FacetContBiomeRich
-
-
-# 5.0 MOSS ORDER CONTINENT FACET PLOTS -------------------------------------
-# MossOBC is made in MossPlotData.R, it's also in the BryophytesData folder
-MossOBC <- readRDS("Data/MossOBC.rds")
-
-MossFacetContBiomeRich <- ggplot(MossOBC, 
-                             aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
-  geom_boxplot(show.legend = FALSE, fill=biome_cols_18, color="black") +
-  guides(x = guide_axis(angle=30)) +
-  theme_gray() +
-  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35, 
-              color="gray25") +
-  xlab("Biome") +
-  ylab("Richness") +  
-  theme(axis.title.y = element_text(size=32), 
-        axis.title.x = element_text(size=32),
-        axis.text.y = element_text(size=15), 
-        axis.text.x = element_text(angle = 30, hjust = 1, size = 8))+
-  facet_wrap(~Cont)
-MossFacetContBiomeRich
 
 
 # ?.? Orders on x axis, facet of biomes boxplots ---------------------------

@@ -1,13 +1,16 @@
-#Plotting alpha diversity of orders by biome and hemisphere
+#Plotting alpha diversity of bryophyte orders by biome and hemisphere
 #Adapted from BiomeDiversity.R
-#Kathryn Dawdy, July 2020
+#Kathryn Dawdy and Hailey Napier, July 2020
 
 # 0.0 FIRST ----------------------------------------------------------------
 
 #Run DataProcessing.R, Continents.R, BiomeContinents.R, BiomeDiversity.R, 
     #ORange.R, OrdBiomeBP.R, TotalAlpha.R, 
     #then OrderBiomeDF.R - unless you can just load the DF (takes a while)
+    #then MossPlotData.R - or just load the DF
 OrderBiomeDF <- readRDS("Data/OrderBiomeDF.rds")
+MossOBC <- readRDS("Data/MossOBC.rds")
+
 #Run OrderRichness.R
 
 # 0.1 Load Packages --------------------------------------------------------
@@ -416,7 +419,7 @@ FacetContBiomeRich <- ggplot(OrderBiomeContDF,
 FacetContBiomeRich
 
 
-# 6.0 MOSS ORDER CONTINENT FACET PLOTS --------------------------------------
+# 6.0 MOSS ORDER CONTINENT FACET PLOTS -------------------------------------
 # MossOBC is made in MossPlotData.R, it's also in the BryophytesData folder
 MossOBC <- readRDS("Data/MossOBC.rds")
 

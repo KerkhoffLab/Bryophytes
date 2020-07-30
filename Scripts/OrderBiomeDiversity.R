@@ -414,3 +414,26 @@ FacetContBiomeRich <- ggplot(OrderBiomeContDF,
         axis.text.x = element_text(angle = 30, hjust = 1, size = 8))+
   facet_wrap(~Cont)
 FacetContBiomeRich
+
+
+# 6.0 MOSS ORDER CONTINENT FACET PLOTS --------------------------------------
+# MossOBC is made in MossPlotData.R, it's also in the BryophytesData folder
+MossOBC <- readRDS("Data/MossOBC.rds")
+
+MossFacetContBiomeRich <- ggplot(MossOBC, 
+                             aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
+  geom_boxplot(show.legend = FALSE, fill=biome_cols_18, color="black") +
+  guides(x = guide_axis(angle=30)) +
+  theme_gray() +
+  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35, 
+              color="gray25") +
+  xlab("Biome") +
+  ylab("Richness") +  
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),
+        axis.text.y = element_text(size=15), 
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 8))+
+  facet_wrap(~Cont)
+MossFacetContBiomeRich
+
+

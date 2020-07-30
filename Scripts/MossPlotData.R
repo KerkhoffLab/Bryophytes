@@ -108,6 +108,7 @@ for(m in 2:length(MossOrderNames)){
 
 saveRDS(MossOBC, file = "Data/MossOBC.rds")
 
+
 # 2.3 Make vectors based on max alpha diversity
 #Make a dataframe to look at numbers for max alpha diversity 
 MossOrderMaxAlpha <- data.frame(tapply(MossOBC$Alpha, MossOBC$Order, max, na.rm = T))
@@ -137,5 +138,6 @@ saveRDS(MossOrdRichAbove100, "Data/MossOrdRichAbove100.rds")
 saveRDS(MossOrdRich25to100, "Data/MossOrdRich25to100.rds")
 saveRDS(MossOrdRich10to25, "Data/MossOrdRich10to25.rds")
 saveRDS(MossOrdRichBelow10, "Data/MossOrdRichBelow10.rds")
+
 
 

@@ -11,7 +11,6 @@ for(i in 1:length(OrderNames)){
   orderrichdf$totalalpha[i] <- TotalAlpha(o)
 }
 
-
 # 2.0 Make a bar chart to look at max alpha diversity -----------------------
 theme_set(theme_gray())
 ggplot(orderrichdf, aes(x = OrderNames, y = totalalpha)) + 

@@ -6,9 +6,9 @@
 # 0.0 FIRST ----------------------------------------------------------------
 
 #Run DataProcessing.R, Continents.R, BiomeContinents.R, BiomeDiversity.R, 
-    #ORange.R, OrdBiomeBP.R, TotalAlpha.R, 
-    #then OrderBiomeDF.R - unless you can just load the DF (takes a while)
-    #then MossPlotData.R - or just load the DF
+#ORange.R, OrdBiomeBP.R, TotalAlpha.R, 
+#then OrderBiomeDF.R - unless you can just load the DF (takes a while)
+#then MossPlotData.R - or just load the DF
 OrderBiomeDF <- readRDS("Data/OrderBiomeDF.rds")
 MossOBC <- readRDS("Data/MossOBC.rds")
 
@@ -60,7 +60,7 @@ biome_cols_11 <- c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
 # 1.1 Remove "NA" strings
 NoNABiomeBetaDF <- BiomeBetaDF[!grepl("NA", BiomeBetaDF$Beta),]
 View(NoNABiomeBetaDF)
-    #from 165,418 rows to only 3,844 rows...? doesn't seem like enough cells
+#from 165,418 rows to only 3,844 rows...? doesn't seem like enough cells
 
 # 1.2 Coerce beta values into double-precision vector
 typeof(NoNABiomeBetaDF$Biome)

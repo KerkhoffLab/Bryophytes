@@ -84,3 +84,7 @@ BiomeBetaBV <- ggplot(NoNABiomeBetaDF, aes(x=Biome, y=Beta, fill=Biome, color=Bi
         axis.text.y = element_text(size=20), 
         axis.text.x = element_text(angle = 30, hjust = 1, size = 12))
 BiomeBetaBV
+
+
+# 3.0 Beta diversity plot in biomes by order? ------------------------------
+###requires dataframe that includes orders

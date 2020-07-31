@@ -343,7 +343,51 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
   circos.text(mean(xlim), ylim[1], sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex=0.5)
 }, bg.border = NA)
 
+## PLOT 25% ABUNDANCE WITH MOSSES ONLY  ##
+# Make empty matrix 
+CircleMat25Moss <- matrix(NA, length(OrderNames), length(BiomeNames))
+rownames(CircleMat25Moss) <- OrderNames
+colnames(CircleMat25Moss) <- BiomeNames
 
+# Fill plot matrix
+for(h in 1:length(MossOrderNames)){
+  order <- MossOrderNames[h]
+  speclist <- MossOrderSpeciesList[[h]]
+  for(i in 1:length(BiomeNames)){
+    biome <- BiomeNames[i]
+    val = 0
+    for(j in 1:length(speclist)){
+      species <- speclist[j]
+      index <- which(SpeciesNames == species)
+      tot <- SpecAb[index]
+      ab <- SpBiMat[species,biome]
+      if(ab > 0){
+        if(ab/tot >= .25){
+          val = val + 1
+        }else{
+          val = val
+        }
+      }else{
+        val = val
+      }
+    }
+    CircleMat25Moss[order,biome] <- val
+  }
+}
+
+# Plot
+circos.clear()
+circos.par(start.degree = 0)
+chordDiagram(CircleMat25Moss, grid.col = grid.col, column.col = biome_cols_11, 
+             directional = 1, direction.type = "arrows", link.arr.type = "big.arrow", 
+             link.arr.length = 0.05, link.largest.ontop = T, annotationTrack = c("grid"), 
+             preAllocateTracks = 1, big.gap = 20, small.gap = 2)
+circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
+  xlim = get.cell.meta.data("xlim")
+  ylim = get.cell.meta.data("ylim")
+  sector.name = get.cell.meta.data("sector.index")
+  circos.text(mean(xlim), ylim[1], sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex=0.5)
+}, bg.border = NA)
 
 ## PLOT WITH EACH SPECIES COUNTED IN  BIOMES WHERE THEY HAVE AT LEAST 50% ABUNDANCE ##
 
@@ -494,3 +538,36 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
   sector.name = get.cell.meta.data("sector.index")
   circos.text(mean(xlim), ylim[1], sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex=0.5)
 }, bg.border = NA)
+
+
+
+# Make empty matrix 
+CircleMatAllMoss <- matrix(NA, length(MossOrderNames), length(BiomeNames))
+rownames(CircleMatAllMoss) <- MossOrderNames
+colnames(CircleMatAllMoss) <- BiomeNames
+
+#Fill matrix so it counts species based on top biome (moss)
+for(h in 1:length(MossOrderNames)){
+  order <- MossOrderNames[h]
+  speclist <- MossOrderSpeciesList[[h]]
+  valvec <- as.vector(rep(0, length(BiomeNames)))
+  for(i in 1:length(speclist)){
+    species <- speclist[i]
+    biomenumcells <- vector()
+    for(j in 1:length(BiomeNames)){
+      biome <- BiomeNames[j]
+      ab <- SpBiMat[species,biome]
+      biomenumcells[j] <- ab
+    }
+    biomeindex <- which(biomenumcells == max(biomenumcells))
+    valvec[biomeindex] <- valvec[biomeindex] + 1
+  }
+  for(k in 1:length(valvec)){
+    val <- valvec[k]
+    biome <- BiomeNames[k]
+    CircleMatAllMoss[order, biome] <- k
+  }
+}
+
+
+

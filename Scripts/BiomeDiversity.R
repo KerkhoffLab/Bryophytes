@@ -46,6 +46,7 @@ LongLatBetaRaster <- readRDS("Data/LongLatBetaRaster.rds")
 RichnessRaster <- readRDS("Data/RichnessRaster.rds")
 CellVec <- c(1:15038)
 
+LongLatDF <- readRDS("Data/LongLatDF.rds")
 
 # 1.0 Load biome shapefiles ------------------------------------------------
 # 1.1 Load entire BIEN_FEE_paper repository (branch: Trait_phylo)

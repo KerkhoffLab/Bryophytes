@@ -1,4 +1,4 @@
-# Plotting beta diversity of BRYOPHYTES by biome and continent
+# Plotting beta diversity of BRYOPHYTES by biome
 # Adapted from BiomeDiversity.R and OrderBiomeDiversity.R
 # Kathryn Dawdy, July 2020
 

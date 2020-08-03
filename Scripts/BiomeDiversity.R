@@ -5,7 +5,7 @@
 #Kathryn Dawdy, July 2020
 
 
-# 0.0 Load packages --------------------------------------------------------
+# Load packages ------------------------------------------------------------
 require(BIEN)
 require(maps) 
 require(dplyr)
@@ -46,9 +46,13 @@ LongLatBetaRaster <- readRDS("Data/LongLatBetaRaster.rds")
 RichnessRaster <- readRDS("Data/RichnessRaster.rds")
 CellVec <- c(1:15038)
 
+# Make and save the below dataframes in section 4.0
 LongLatDF <- readRDS("Data/LongLatDF.rds")
+BiomeRichness <- readRDS("Data/BiomeRichness.rds")
 
-# 1.0 Load biome shapefiles ------------------------------------------------
+
+
+# 1.0 LOAD BIOME SHAPEFILES ------------------------------------------------
 # 1.1 Load entire BIEN_FEE_paper repository (branch: Trait_phylo)
 download.file(url = "https://github.com/susyelo/BIEN_FEE_paper/archive/Trait_phylo.zip", 
               destfile = "./Data/Biomes/BIEN_FEE_paper-Trait_phylo.zip")
@@ -68,7 +72,8 @@ unlink("./Data/Biomes/BIEN_FEE_paper-Trait_phylo", recursive=TRUE)
 unlink("./Data/Biomes/BIEN_FEE_paper-Trait_phylo.zip")
 
 
-# 2.0 Set theme and colors -------------------------------------------------
+
+# 2.0 SET THEME AND COLORS -------------------------------------------------
 # 2.1 Richness map colors
 cols <- (wes_palette("Zissou1", 500, type = "continuous"))
 theme_set(theme_void())
@@ -78,11 +83,19 @@ cols1 <- (wes_palette("Zissou1", 5632, type = "continuous"))
 
 # 2.3 Color scheme for biomes (in order of BiomeNames (BiomeProcessing.R))
 #wes_palette() hex numbers on GitHub: karthik/wesanderson
+
+BiomeRichness <- readRDS("Data/BiomeRichness.rds")
+BiomeNames <- unique(BiomeRichness$Type)
+BiomeNames
+
 cols7 <- c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
            "#446455", "#FDD262", "#D3DDDC", "#C7B19C",
            "#798E87", "#C27D38")
 
-# 2.4 Colors used for plots (# corresponds to # of boxplots/length of data)
+# 2.4 Colors used for plots 
+# Number in name corresponds to # of boxes per plot
+# Removed hex number where box is absent (no values)
+# Therefore, total # of boxes = length of data = # of hex numbers
 biome_cols_11 <- c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
                    "#446455", "#FDD262", "#D3DDDC", "#C7B19C", "#798E87", 
                    "#C27D38")
@@ -146,54 +159,10 @@ biome_cols_29 <- c(biome_cols_11,
                      "#FDD262", "#D3DDDC", "#C7B19C", 
                      "#C27D38"))
 
-#We ended up not using the <25 grouping, but keeping this just in case...
-biome_cols_232 <- c(biome_cols_22,
-                    c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
-                      "#FDD262", "#D3DDDC", "#C7B19C", 
-                      "#C27D38"),
-                    biome_cols_11,
-                    c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
-                      "#446455", "#FDD262", "#D3DDDC", 
-                      "#C27D38"),
-                    c("#D8B70A", "#972D15", "#81A88D", "#02401B",
-                      "#446455", "#FDD262", "#D3DDDC", "#C7B19C", "#798E87", 
-                      "#C27D38"),
-                    c("#81A88D",
-                      "#FDD262", "#D3DDDC"),
-                    c("#D8B70A", "#972D15", "#81A88D",
-                      "#446455", "#D3DDDC", "#C7B19C", "#798E87"),
-                    biome_cols_11,
-                    c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
-                      "#FDD262", "#D3DDDC", "#C7B19C", 
-                      "#C27D38"),
-                    "#81A88D",
-                    biome_cols_11,
-                    c("#972D15", "#A2A475", "#81A88D", "#02401B",
-                      "#FDD262", "#D3DDDC", "#C7B19C", 
-                      "#C27D38"),
-                    biome_cols_22,
-                    c("#D8B70A",
-                      "#446455", "#FDD262", "#D3DDDC"),
-                    biome_cols_22,
-                    c("#D8B70A", "#972D15", "#81A88D",
-                      "#D3DDDC", "#C7B19C", 
-                      "#C27D38"),
-                    biome_cols_11,
-                    c("#D8B70A",
-                      "#446455", "#FDD262", "#D3DDDC", "#798E87", 
-                      "#C27D38"),
-                    c("#A2A475", "#81A88D", "#02401B",
-                      "#FDD262", "#D3DDDC", "#C7B19C"),
-                    c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
-                      "#FDD262", "#D3DDDC", "#C7B19C", 
-                      "#C27D38"),
-                    biome_cols_11,
-                    c("#D8B70A", 
-                      "#C27D38"),
-                    biome_cols_22)
 
 
-# 3.0 Create bryophyte richness dataframe ----------------------------------
+# 3.0 BRYOPHYTE RICHNESS MAPS ----------------------------------------------
+# 3.1 Create bryophyte richness dataframe ----------------------------------
 RichnessVec[which(RichnessVec==0)]=NA
 RichnessRaster <- setValues(BlankRas, RichnessVec)
 RichnessDF <- rasterToPoints(RichnessRaster)
@@ -201,17 +170,16 @@ RichnessDF <- data.frame(RichnessDF)
 colnames(RichnessDF) <- c("Longitude", "Latitude", "Alpha")
 
 
-
-# 4.0 BRYOPHYTE RICHNESS - continental and mountainous outlines ------------
-# 4.1 Add continental and mountainous outlines
+# 3.2 BRYOPHYTE RICHNESS - continental and mountainous outlines ------------
+# 3.2.1 Add continental and mountainous outlines
 nw_mount <- shapefile("Data/MapOutlines/Mountains/Koeppen-Geiger_biomes.shp")
 nw_bound <- shapefile("Data/MapOutlines/Global_bound/Koeppen-Geiger_biomes.shp")
 
 nw_mount_sf <- st_as_sf(nw_mount)
 nw_bound_sf <- st_as_sf(nw_bound)
 
-# 4.2 Create map
-RichnessMap <- ggplot() +          #un-comment this section to make bryophyte richness map with continental/mountain outlines
+# 3.2.2 Create map
+CMRichnessMap <- ggplot() +
   geom_tile(data=RichnessDF, aes(x=Longitude, y=Latitude, fill=Alpha)) + 
   scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent") + 
   scale_fill_gradientn(colours=cols, na.value="transparent") +
@@ -223,16 +191,15 @@ RichnessMap <- ggplot() +          #un-comment this section to make bryophyte ri
         #legend.title=element_text(size=32), 
         #axis.title = element_blank()
         )
-RichnessMap
+CMRichnessMap
 
 
-
-# 5.0 BRYOPHYTE RICHNESS - biomes ------------------------------------------
-# 5.1 Add biomes outlines
+# 3.3 BRYOPHYTE RICHNESS - biomes ------------------------------------------
+# 3.3.1 Add biomes outlines
 biomes_shp <- shapefile("Data/Biomes/Biomes_olson_projected.shp")
 biomes_sf <- st_as_sf(biomes_shp)
 
-# 5.2 Create map
+# 3.3.2 Create map
 BiomeRichnessMap <- ggplot(fill=biomes_shp$biomes) +            #delete "fill=biomes_shp$biomes if not coloring the biomes
   geom_tile(data=RichnessDF, aes(x=Longitude, y=Latitude, fill=Alpha)) + 
   scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent") + 
@@ -248,7 +215,9 @@ BiomeRichnessMap <- ggplot(fill=biomes_shp$biomes) +            #delete "fill=bi
 BiomeRichnessMap
 
 
-# 6.0 SUBSETTING BIOMES ----------------------------------------------------
+
+# 4.0 CREATE RICHNESS BY BIOME DATAFRAME -----------------------------------
+# 4.1 Subset biomes --------------------------------------------------------
 sort(biomes_shp@data[["biomes"]])
 
 Coniferous_Forests <- subset(biomes_shp, biomes == "Coniferous_Forests")
@@ -264,16 +233,7 @@ Tundra <- subset(biomes_shp, biomes == "Tundra")
 Xeric_Woodlands <- subset(biomes_shp, biomes == "Xeric_Woodlands")
 
 
-
-#should have loaded this already...will test...
-
-#load data etc.
-#LongLatBetaRaster <- readRDS("Data/LongLatBetaRaster.rds")
-#RichnessRaster <- readRDS("Data/RichnessRaster.rds")
-#BlankRas <-raster("Data/blank_100km_raster.tif")
-#CellVec <- c(1:15038)
-
-# Create dataframe including coordinates for each cell ---------------------
+# 4.2 Create dataframe including coordinates for each cell -----------------
 LongLatRaster <- setValues(BlankRas, CellVec)
 LongLatPoints<-rasterToPoints(LongLatRaster)
 LongLatDF <- data.frame(LongLatPoints)
@@ -288,25 +248,7 @@ LongLatDF <- subset(LongLatDF, select = -c(optional))
 saveRDS(LongLatDF, "Data/LongLatDF.rds")
 
 
-#---------------------------------------------------------------------------
-#Scatterplots of α-diversity values of cells whose centers are within biomes
-LongLatDF <- readRDS("Data/LongLatDF.rds")
-
-#All Biomes ----------------------------------------------------------------
-#Doesn't really tell us much...
-#Also not working right now. Come back to this........................
-LongLatDF <- readRDS("Data/LongLatDF.rds")
-AlphaBiomes <- extract(RichnessRaster, biomes_shp, df = TRUE, cellnumbers = TRUE)
-colnames(AlphaBiomes) <- c("Type", "CellID", "Alpha")
-AlphaBiomes$Type <- "Biome"
-AlphaBiomesVec <- AlphaBiomes$CellID
-AlphaBiomes <- merge(AlphaBiomes, LongLatDF)
-#saveRDS(AlphaBiomes, file = "Data/AlphaBiomes.rds")
-AlphaBiomesScatterplot <- ggplot() + geom_point(data = AlphaBiomes, aes(Latitude, Alpha), shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "goldenrod2") + ylab("Alpha diversity in biomes") + ylim(0, 1000) + xlab("Latitude") + theme_minimal() +  theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
-AlphaBiomesScatterplot
-
-
-#INDIVIDUAL BIOMES ---------------------------------------------------------
+# 4.3 Create dataframes for each biome with cell coordinates and richness --
 #Coniferous Forests --------------------------------------------------------
 AlphaConFor <- raster::extract(RichnessRaster, Coniferous_Forests, df = TRUE, cellnumbers = TRUE)
 colnames(AlphaConFor) <- c("Type", "CellID", "Alpha")
@@ -393,7 +335,7 @@ AlphaXericWoodVec <- AlphaXericWood$CellID
 AlphaXericWood <- merge(AlphaXericWood, LongLatDF)
 
 
-#Bind biome dataframes -----------------------------------------------------
+# 4.4 Bind biome dataframes ------------------------------------------------
 BiomeRichness <- bind_rows(AlphaConFor, AlphaDryFor, AlphaMedWood,
                            AlphaMoistFor,AlphaSavanna, AlphaTaiga, 
                            AlphaTempGrass, AlphaTempMix,AlphaTropGrass,
@@ -401,31 +343,14 @@ BiomeRichness <- bind_rows(AlphaConFor, AlphaDryFor, AlphaMedWood,
 saveRDS(BiomeRichness, file = "Data/BiomeRichness.rds")
 
 
-#MAKE PLOTS ----------------------------------------------------------------
+
+# 5.0 MAKE PLOTS -----------------------------------------------------------
+# Richness values of cells whose centers are within each biome
 
 #Biome richness scatterplot ------------------------------------------------
-BiomeRichness <- readRDS("Data/BiomeRichness.rds")
-#BiomeRichnessScatter <- ggplot() + 
-  #geom_point(data = BiomeRichness, 
-             #aes(Latitude, Alpha), 
-             #shape = 16, size = 5, 
-             #show.legend = FALSE, 
-             #alpha=0.5, 
-             #color = Type
-             #) + 
-  #ylab("α div in biomes") + 
-  #ylim(0, 500) + 
-  #xlab("Latitude") +
-  #labs(color="Biome")
-  #theme_minimal() +  
-  #theme(axis.title.y = element_text(size=32), 
-        #axis.title.x = element_text(size=32),  
-        #axis.text = element_text(size=20))
-#BiomeRichnessScatter
-
 BiomeRichScatter <- ggplot(BiomeRichness, aes(Latitude, Alpha, color=Type)) +
-  geom_smooth() +
   geom_point(shape=16, size=1, alpha=0.5) +
+  geom_smooth() +
   xlab("Latitude") +
   ylab("Biome Alpha Diversity") +
   labs(color="Biome") +
@@ -481,7 +406,7 @@ BiomeRichBV <- ggplot(BiomeRichness, aes(x=Type, y=Alpha, fill=Type, color=Type)
 BiomeRichBV
 
 
-#Biomes Map ----------------------------------------------------------------
+# 6.0 BIOMES MAP -----------------------------------------------------------
 #Biome map wih legend inside frame
 BiomeMap <- qtm(biomes_shp,
                         fill="biomes", 
@@ -494,14 +419,3 @@ BiomeMap <- qtm(biomes_shp,
                         layout.frame=FALSE)
 BiomeMap
 
-#Biome map with ggplot (labels are weird)
-#BiomeMapLabel <- ggplot(fill=biomes_shp$biomes, color=biomes_shp$biomes) +
-#  coord_equal() +
-  #geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) +           #remove continental outlines for visual clarity
-  #geom_sf(data = nw_mount_sf, size = 0.5, fill=NA) +           #remove mountain outlines for visual clarity
-#  geom_sf(data = biomes_sf, size = 0.5, fill=cols7, color="black") +
-#  geom_sf_label(data = biomes_sf, 
-#                aes(alpha=0.5, label = biomes_shp$biomes, size=.01), 
-#                show.legend = FALSE) +
-#  theme_void()
-#BiomeMapLabel

@@ -50,4 +50,3 @@ ORange <- function(order = "all", range, cont = "both"){
   return(orange)
 }
 
-

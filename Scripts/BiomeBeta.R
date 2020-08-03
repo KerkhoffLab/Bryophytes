@@ -1,6 +1,6 @@
 # Biome Beta Diversity
 # Hailey Napier,  July 2020
-# Adapted from OrdilyDiversity.R
+# Adapted from FamilyDiversity.R
 
 # Load packages
 library(reshape2)

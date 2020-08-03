@@ -90,7 +90,21 @@ RangeConForVec <- RangeConFor$CellID
 RangeConFor <- merge(RangeConFor, LongLatDF)
 
 #scatterplot
-RangeConForScatterplot <- ggplot() + geom_point(data = RangeConFor, aes(Latitude, Range), shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "goldenrod2") + ylab("α div in Coniferous Forests") + ylim(0, 500) + xlab("Latitude") + theme_minimal() +  theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
+RangeConForScatterplot <- ggplot() + 
+  geom_point(data = RangeConFor, 
+             aes(Latitude, Range), 
+             shape = 16, 
+             size = 5, 
+             show.legend = FALSE, 
+             alpha=0.5, 
+             color = "goldenrod2") + 
+  ylab("α div in Coniferous Forests") + 
+  ylim(0, 500) + 
+  xlab("Latitude") + 
+  theme_minimal() +  
+  theme(axis.title.y = element_text(size=32),
+        axis.title.x = element_text(size=32),  
+        axis.text = element_text(size=20))
 RangeConForScatterplot
 
 #boxplot

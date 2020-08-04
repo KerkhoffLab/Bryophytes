@@ -87,7 +87,6 @@ BiomeCells <- bind_rows(AlphaConFor, AlphaDryFor, AlphaMedWood,
                            AlphaTundra, AlphaXericWood)
 BiomeCells$CellID...2 <- NULL
 names(BiomeCells)[2] <- "CellID"
-saveRDS(BiomeCells, file = "Data/BiomeCells")
 
 #Number of Overlapped cells
 length(as.vector(BiomeCells$CellID)) - length(unique(BiomeCells$CellID))
@@ -104,4 +103,5 @@ for(i in BiomeCellID){
   }
 }
 
+saveRDS(BiomeCellsClean, file = "Data/BiomeCells")
 

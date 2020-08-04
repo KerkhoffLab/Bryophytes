@@ -204,6 +204,10 @@ BiomeRangeBox <- ggplot(BiomeRange, aes(x=Type, y=Range, fill=Type)) +
         axis.text.x = element_text(angle = 30, hjust = 1, size = 12))
 BiomeRangeBox
 
+png("Figures/RangeBiomeBox.png", width = 1500, height = 1000, pointsize = 20)
+BiomeRangeBox
+dev.off()
+
 # 3.2 Biome richness boxplot with violins ----------------------------------
 BiomeRangeBV <- ggplot(BiomeRange, aes(x=Type, y=Range, fill=Type, color=Type)) + 
   geom_boxplot(show.legend = FALSE, fill=biome_cols_11, color="black") +
@@ -221,3 +225,8 @@ BiomeRangeBV <- ggplot(BiomeRange, aes(x=Type, y=Range, fill=Type, color=Type)) 
         axis.text.y = element_text(size=20), 
         axis.text.x = element_text(angle = 30, hjust = 1, size = 12))
 BiomeRangeBV
+
+png("Figures/RangeBiomeBoxViolin.png", width = 1500, height = 1000, pointsize = 20)
+BiomeRangeBV
+dev.off()
+

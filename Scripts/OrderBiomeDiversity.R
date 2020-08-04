@@ -9,6 +9,7 @@
     #then OrderBiomeDF.R - unless you can just load the DF (takes a while)
     #then MossPlotData.R - or just load the DF
 OrderBiomeDF <- readRDS("Data/OrderBiomeDF.rds")
+OrderBiomeContDF <- readRDS("Data/OrderBiomeContDF.rds")
 
 #Run OrderRichness.R
 
@@ -159,6 +160,10 @@ FacetOrdBiomeRich <- ggplot(OrderBiomeDF,
   facet_wrap(~Order)
 FacetOrdBiomeRich
 
+png("Figures/AlphaOrderBiomeFacet.png", width = 1500, height = 1000, pointsize = 20)
+FacetOrdBiomeRich
+dev.off()
+
 # 2.2 Subset order by maximum alpha diversity value ------------------------
 ###Run OrderRichness.R
 # max α > 100
@@ -266,6 +271,10 @@ FacetOBRAbove100 <- ggplot(OBRAbove100DF,
   )
 FacetOBRAbove100
 
+png("Figures/AlphaOrderBiomeAbove100.png", width = 1500, height = 1000, pointsize = 20)
+FacetOBRAbove100
+dev.off()
+
 # 2.4.2 Max α 25-100 -------------------------------------------------------
 FacetOBR25to100 <- ggplot(OBR25to100DF, 
                           aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
@@ -291,6 +300,10 @@ FacetOBR25to100 <- ggplot(OBR25to100DF,
              ncol=4
   )
 FacetOBR25to100
+
+png("Figures/AlphaOrderBiome25to100.png", width = 1500, height = 1000, pointsize = 20)
+FacetOBR25to100
+dev.off()
 
 # 2.4.3 Max α 10-25 --------------------------------------------------------
 FacetOBR10to25 <- ggplot(OBR10to25DF, 
@@ -319,6 +332,10 @@ FacetOBR10to25 <- ggplot(OBR10to25DF,
   )
 FacetOBR10to25
 
+png("Figures/AlphaOrderBiome10to25.png", width = 1500, height = 1000, pointsize = 20)
+FacetOBR10to25
+dev.off()
+
 # 2.4.4 Max α <10 ----------------------------------------------------------
 FacetOBRBelow10 <- ggplot(OBRBelow10DF, 
                           aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
@@ -344,49 +361,13 @@ FacetOBRBelow10 <- ggplot(OBRBelow10DF,
   )
 FacetOBRBelow10
 
-# 2.4.5 Max α <25 ----------------------------------------------------------
-#We ended up not using the <25 grouping, but keeping this just in case...
-#FacetOBRBelow25 <- ggplot(OBRBelow25DF,aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
-#geom_boxplot(show.legend = FALSE, fill=biome_cols_232, color="black", outlier.size=0.5) +
-#theme_minimal() +     #un-comment whichever theme you want
-#theme_gray() +
-#theme_light() +
-#theme_bw() +
-#geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35, color="gray25") +       #un-comment for transparent violins
-#xlab("Biome") +
-#ylab("Richness") +  
-#theme(axis.title.y = element_text(size=32), 
-#axis.title.x = element_text(size=32),
-#axis.text.y = element_text(size=15), 
-#axis.text.x = element_text(angle = 90, hjust = 1, size = 8))+
-#facet_wrap(~Order, ncol=7)
-#FacetOBRBelow25
+png("Figures/AlphaOrderBiomeBelow10.png", width = 1500, height = 1000, pointsize = 20)
+FacetOBRBelow10
+dev.off()
 
 
 
-# 3.0 HEMISPHERE FACET PLOTS -----------------------------------------------
-OrderBiomeHemDF <- readRDS("Data/OrderBiomeHemDF.rds")
-
-FacetHemBiomeRich <- ggplot(OrderBiomeHemDF, 
-                            aes(x=biome, y=alpha, fill=biome, color=biome)) + 
-  geom_boxplot(show.legend = FALSE, fill=biome_cols_29, color="black") +
-  guides(x = guide_axis(angle=30)) +
-  theme_gray() +
-  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35, 
-              color="gray25") +
-  xlab("Biome") +
-  ylab("Richness") +  
-  theme(axis.title.y = element_text(size=32), 
-        axis.title.x = element_text(size=32),
-        axis.text.y = element_text(size=15), 
-        axis.text.x = element_text(angle = 30, hjust = 1, size = 8))+
-  facet_wrap(~hem)
-FacetHemBiomeRich
-
-
-# 4.0 CONTINENT FACET PLOTS -----------------------------------------------
-OrderBiomeContDF <- readRDS("Data/OrderBiomeContDF.rds")
-
+# 3.0 CONTINENT FACET PLOTS -----------------------------------------------
 FacetContBiomeRich <- ggplot(OrderBiomeContDF, 
                             aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
   geom_boxplot(show.legend = FALSE, fill=biome_cols_18, color="black") +
@@ -403,9 +384,11 @@ FacetContBiomeRich <- ggplot(OrderBiomeContDF,
   facet_wrap(~Cont)
 FacetContBiomeRich
 
+png("Figures/AlphaBiomeContinents.png", width = 1500, height = 1000, pointsize = 20)
+FacetContBiomeRich
+dev.off()
 
-# ?.? Orders on x axis, facet of biomes boxplots ---------------------------
-#Not sure if we should keep this...
+# 4.0 Orders on x axis, facet of biomes boxplots ---------------------------
 FacetRichOrder <- ggplot(OrderBiomeDF, 
                          aes(x=Order, y=Alpha)) + 
   geom_boxplot(show.legend = FALSE) +
@@ -418,3 +401,7 @@ FacetRichOrder <- ggplot(OrderBiomeDF,
         axis.text.x = element_text(angle = 90, hjust = 1, size = 6))+
   facet_wrap(~Biome)
 FacetRichOrder
+
+png("Figures/AlphaOrderBiomeSwapped.png", width = 1500, height = 1000, pointsize = 20)
+FacetRichOrder
+dev.off()

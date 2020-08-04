@@ -1,3 +1,6 @@
+# Find all cells that biomes overlap, weighted by proportion covered
+# Hailey Napier, August 2020
+
 Coniferous_Forests <- subset(biomes_shp, biomes == "Coniferous_Forests")
 Dry_Forest <- subset(biomes_shp, biomes == "Dry_Forest")
 Mediterranean_Woodlands <- subset(biomes_shp, biomes == "Mediterranean_Woodlands")
@@ -86,7 +89,19 @@ BiomeCells$CellID...2 <- NULL
 names(BiomeCells)[2] <- "CellID"
 saveRDS(BiomeCells, file = "Data/BiomeCells")
 
-#Overlapped cells
+#Number of Overlapped cells
 length(as.vector(BiomeCells$CellID)) - length(unique(BiomeCells$CellID))
+
+#Choose one biome per cell (cells with multiple biomes go to biome with higher proportion coverage)
+BiomeCellsClean <- BiomeCells
+BiomeCellID <- unique(BiomeCells$CellID)
+for(i in BiomeCellID){
+  vec <- BiomeCellsClean$Weight[which(BiomeCellsClean$CellID == i)]
+  if(length(vec) > 1){
+    min <- min(vec)
+    drop <- which(BiomeCellsClean$CellID == i & BiomeCellsClean$Weight == min)
+    BiomeCellsClean <- BiomeCellsClean[-drop,]
+  }
+}
 
 

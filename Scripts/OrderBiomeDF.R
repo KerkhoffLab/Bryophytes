@@ -3,7 +3,6 @@
 #July 21, 2020
 
 # Load data ------------------------------------------------------------
-Nec
 OrderRichList <- readRDS("Data/OrderRichList.rds")
 NorthAmBiomeList <- readRDS("Data/NorthAmBiomeList.rds")
 SouthAmBiomeList <- readRDS("Data/SouthAmBiomeList.rds")

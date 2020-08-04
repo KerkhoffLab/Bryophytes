@@ -170,8 +170,11 @@ RichnessDF <- data.frame(RichnessDF)
 colnames(RichnessDF) <- c("Longitude", "Latitude", "Alpha")
 
 
-# 3.2 BRYOPHYTE RICHNESS - continental and mountainous outlines ------------
-# 3.2.1 Add continental and mountainous outlines
+# 3.2 BRYOPHYTE RICHNESS - biomes ------------------------------------------
+# 3.2.1 Add biomes outlines (and continental and mountainous outlines)
+biomes_shp <- shapefile("Data/Biomes/Biomes_olson_projected.shp")
+biomes_sf <- st_as_sf(biomes_shp)
+
 nw_mount <- shapefile("Data/MapOutlines/Mountains/Koeppen-Geiger_biomes.shp")
 nw_bound <- shapefile("Data/MapOutlines/Global_bound/Koeppen-Geiger_biomes.shp")
 
@@ -179,40 +182,23 @@ nw_mount_sf <- st_as_sf(nw_mount)
 nw_bound_sf <- st_as_sf(nw_bound)
 
 # 3.2.2 Create map
-CMRichnessMap <- ggplot() +
-  geom_tile(data=RichnessDF, aes(x=Longitude, y=Latitude, fill=Alpha)) + 
-  scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent") + 
-  scale_fill_gradientn(colours=cols, na.value="transparent") +
-  coord_equal() +
-  geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
-  geom_sf(data = nw_mount_sf, size = 0.5, fill=NA) + 
-  theme_void() +
-  theme(legend.text=element_text(size=20), 
-        #legend.title=element_text(size=32), 
-        #axis.title = element_blank()
-        )
-CMRichnessMap
-
-
-# 3.3 BRYOPHYTE RICHNESS - biomes ------------------------------------------
-# 3.3.1 Add biomes outlines
-biomes_shp <- shapefile("Data/Biomes/Biomes_olson_projected.shp")
-biomes_sf <- st_as_sf(biomes_shp)
-
-# 3.3.2 Create map
 BiomeRichnessMap <- ggplot(fill=biomes_shp$biomes) +            #delete "fill=biomes_shp$biomes if not coloring the biomes
   geom_tile(data=RichnessDF, aes(x=Longitude, y=Latitude, fill=Alpha)) + 
   scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent") + 
-  scale_fill_gradientn(colours=cols, na.value="transparent") +
   coord_equal() +
-  #geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) +           #remove continental outlines for visual clarity
-  #geom_sf(data = nw_mount_sf, size = 0.5, fill=NA) +           #remove mountain outlines for visual clarity
+  #geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) +           #un-comment for continental outlines
+  #geom_sf(data = nw_mount_sf, size = 0.5, fill=NA) +           #un-comment for mountain outlines
   geom_sf(data = biomes_sf, size = 0.5, fill=NA) +
   theme_void() +
   theme(legend.text=element_text(size=20), 
         legend.title=element_text(size=32), 
         axis.title = element_blank())
 BiomeRichnessMap
+
+# 3.2.3 Save map
+png("Figures/AlphaBiomeMap.png", width = 1000, height = 1000, pointsize = 30)
+BiomeRichnessMap
+dev.off()
 
 
 
@@ -345,11 +331,11 @@ saveRDS(BiomeRichness, file = "Data/BiomeRichness.rds")
 
 
 # 5.0 MAKE PLOTS -----------------------------------------------------------
-# Richness values of cells whose centers are within each biome
+# Using richness values of cells whose centers are within each biome
 
 #Biome richness scatterplot ------------------------------------------------
 BiomeRichScatter <- ggplot(BiomeRichness, aes(Latitude, Alpha, color=Type)) +
-  geom_point(shape=16, size=1, alpha=0.5) +
+  geom_point(shape=16, size=2.5, alpha=0.5) +
   geom_smooth() +
   xlab("Latitude") +
   ylab("Biome Alpha Diversity") +
@@ -360,6 +346,9 @@ BiomeRichScatter <- ggplot(BiomeRichness, aes(Latitude, Alpha, color=Type)) +
         axis.text = element_text(size=20))
 BiomeRichScatter
 
+png("Figures/AlphaBiomeScatter.png", width = 1500, height = 1000, pointsize = 20)
+BiomeRichScatter
+dev.off()
 
 #Biome richness boxplot ----------------------------------------------------
 BiomeRichBox <- ggplot(BiomeRichness, aes(x=Type, y=Alpha, fill=Type)) + 
@@ -371,21 +360,29 @@ BiomeRichBox <- ggplot(BiomeRichness, aes(x=Type, y=Alpha, fill=Type)) +
   theme(axis.title.y = element_text(size=32), 
         axis.title.x = element_text(size=32),
         axis.text.y = element_text(size=20), 
-        axis.text.x = element_text(angle = 30, hjust = 1, size = 12))
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 17))
 BiomeRichBox
+
+png("Figures/AlphaBiomeBox.png", width = 1500, height = 1000, pointsize = 20)
+BiomeRichBox
+dev.off()
 
 #Biome richness violin plot ------------------------------------------------
 BiomeRichViolin <- ggplot(BiomeRichness, 
                           aes(x=Type, y=Alpha, fill=Type)) +
-  geom_violin(scale="area", show.legend = FALSE, fill=cols1) +  #change fill colors
-  guides(x = guide_axis(angle=30)) +
+  geom_violin(scale="area", show.legend = FALSE, fill=cols1) +  #change fill colors +
   xlab("Biome") +
   ylab("Richness") +
   theme_minimal() +  
   theme(axis.title.y = element_text(size=32),
         axis.title.x = element_text(size=32),
-        axis.text.y = element_text(size=20))
+        axis.text.y = element_text(size=20),
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 17))
 BiomeRichViolin
+
+png("Figures/AlphaBiomeViolin.png", width = 1500, height = 1000, pointsize = 20)
+BiomeRichViolin
+dev.off()
 
 #Biome richness boxplot with violins ---------------------------------------
 BiomeRichBV <- ggplot(BiomeRichness, aes(x=Type, y=Alpha, fill=Type, color=Type)) + 
@@ -402,12 +399,16 @@ BiomeRichBV <- ggplot(BiomeRichness, aes(x=Type, y=Alpha, fill=Type, color=Type)
   theme(axis.title.y = element_text(size=32), 
         axis.title.x = element_text(size=32),
         axis.text.y = element_text(size=20), 
-        axis.text.x = element_text(angle = 30, hjust = 1, size = 12))
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 17))
 BiomeRichBV
+
+png("Figures/AlphaBiomeBoxViolin.png", width = 1500, height = 1000, pointsize = 20)
+BiomeRichBV
+dev.off()
 
 
 # 6.0 BIOMES MAP -----------------------------------------------------------
-#Biome map wih legend inside frame
+# 6.1 Biome map wih legend inside frame
 BiomeMap <- qtm(biomes_shp,
                         fill="biomes", 
                         fill.style="fixed",
@@ -419,3 +420,7 @@ BiomeMap <- qtm(biomes_shp,
                         layout.frame=FALSE)
 BiomeMap
 
+# 6.2 Save map
+png("Figures/BiomeMap.png", width = 1000, height = 1000, pointsize = 30)
+BiomeMap
+dev.off()

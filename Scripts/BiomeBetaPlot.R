@@ -1,5 +1,5 @@
 # Plotting beta diversity of BRYOPHYTES by biome
-# Adapted from BiomeDiversity.R and OrderBiomeDiversity.R
+# Adapted from BiomeDiversity.R, OrderBiomeDiversity.R, MappingLiverwortDiversity, and Bryophytes.Rmd
 # Kathryn Dawdy, July 2020
 
 
@@ -42,7 +42,6 @@ require(tmap)
 
 # 0.2 Load data -------------------------------------------------------------
 BiomeBetaDF <- readRDS("Data/BiomeBetaDF.rds")
-View(BiomeBetaDF)
 
 # 0.3 Colors ----------------------------------------------------------------
 #From wes_palette() hex numbers on GitHub: karthik/wesanderson
@@ -85,6 +84,10 @@ BiomeBetaBV <- ggplot(NoNABiomeBetaDF, aes(x=Biome, y=Beta, fill=Biome, color=Bi
         axis.text.y = element_text(size=20), 
         axis.text.x = element_text(angle = 30, hjust = 1, size = 12))
 BiomeBetaBV
+
+png("Figures/BetaBiomeBoxViolin.png", width = 1500, height = 1000, pointsize = 20)
+BiomeBetaBV
+dev.off()
 
 
 
@@ -166,7 +169,7 @@ BetaVec <- 1-BetaVec
 plot(BetaVec, ylab = "Mean Pairwise β-Diversity", xlab = "Cell ID")
 
 
-# 3.2.0 Map beta diversity -------------------------------------------------------------------------------------------------------------
+# 3.2.0 Map beta diversity -------------------------------------------------
 
 # 3.2.1 Create colorscheme
 cols <- (wes_palette("Zissou1", 500, type = "continuous"))
@@ -220,7 +223,7 @@ source("Functions/gplot_data.R")
 gplotB<- gplot_data(BetaRaster)
 gplotOutlier<- gplot_data(OutlierBetaRaster)
 
-BetaMap <- ggplot() +
+BiomeBetaMap <- ggplot() +
   geom_tile(data = dplyr::filter(gplotOutlier, !is.na(value)), 
             aes(x = x, y = y), fill = "gray25") +
   geom_tile(data = gplotB, 
@@ -230,5 +233,9 @@ BetaMap <- ggplot() +
   geom_sf(data = biomes_sf, size = 0.5, fill=NA) + 
   theme_void() +
   theme(legend.text=element_text(size=20), legend.title=element_text(size=32), axis.title = element_blank())
-BetaMap
+BiomeBetaMap
+
+png("Figures/BetaBiomeMap.png", width = 1000, height = 1000, pointsize = 20)
+BiomeBetaMap
+dev.off()
 

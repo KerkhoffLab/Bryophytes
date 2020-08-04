@@ -1,7 +1,7 @@
 # Biome order circle plot
 # Hailey Napier, July 2020
 
-# Load packages -------------------------------------------------------------
+# 0.1 Load packages -------------------------------------------------------------
 library(dplyr)
 library(circlize)
 library(dendextend)
@@ -10,7 +10,7 @@ library(phangorn)
 library(phytools)
 library(rphast)
 
-# Load data -----------------------------------------------------------------
+# 0.2 Load data -----------------------------------------------------------------
 BryophytePresence <- readRDS("Data/BryophytePresence.rds") 
 BiomeNames <- readRDS("Data/BiomeNames.rds")
 BiomeRichness <- readRDS("Data/BiomeRichness.rds")
@@ -25,12 +25,10 @@ MossPresence <- readRDS("Data/MossPresence.rds")
 MossOrderNames <- unique(MossPresence$Order)
 MossSpeciesNames <- unique(MossPresence$Species)
 
-
-# Source functions ----------------------------------------------------------
+# 0.3 Source functions ----------------------------------------------------------
 source("Functions/ORange.R")
 
-
-# Make Necessary Data -------------------------------------------------------
+# 0.4 Make Necessary Data -------------------------------------------------------
 # Create a vector containing all of the biomes indexed by CellID
 BiomeCellsVec <- as.vector(rep(NA, 15038))
 for(i in 1:length(BiomeNames)){
@@ -45,11 +43,9 @@ for(i in 1:length(BiomeNames)){
 }
 BiomeCellsVec <- as.factor(BiomeCellsVec)
 
-
 # Make BiomeCellsDF
 BiomeCellsDF <- data.frame(CellID = 1:15038)
 BiomeCellsDF$Biome <- BiomeCellsVec
-
 
 # Filter BryophytePresence by species and find cell with highest richness value
 SpeciesNames <- unique(BryophytePresence$Species)
@@ -65,7 +61,6 @@ for(i in 1:length(SpeciesNames)){
   biome <- names(sort(summary(biomecells)))[1]
   SpeciesBiomes$Biome[SpeciesBiomes$Species == species] <- biome
 }
-
 
 # Filter BryophytePresence by species and find total abundance 
 SpeciesNames <- unique(BryophytePresence$Species)
@@ -92,7 +87,6 @@ for(i in 1:length(SpeciesNames)){
   }
 }
 
-
 # Make OrderSpeciesList
 OrderSpeciesList <- list()
 for(i in 1:length(OrderNames)){
@@ -102,7 +96,6 @@ for(i in 1:length(OrderNames)){
   specvec <- unique(orddf$Species)
   OrderSpeciesList[[i]] <- specvec
 }
-
 
 # MossOrderSpeciesList
 MossOrderSpeciesList <- list()
@@ -114,7 +107,7 @@ for(i in 1:length(MossOrderNames)){
   MossOrderSpeciesList[[i]] <- specvec
 }
 
-# Colors ------------------------------------------------------------------------
+# 0.5 Colors ------------------------------------------------------------------------
 grid.col <- c(Coniferous_Forests = "#D8B70A", Dry_Forest = "#972D15", 
               Mediterranean_Woodlands = "#A2A475", Moist_Forest = "#81A88D", 
               Savannas = "#02401B", Taiga = "#446455", Temperate_Grasslands = "#FDD262", 
@@ -145,6 +138,9 @@ biome_cols_11 <- c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
   # species in the biome where it is most abundant
 
 # Make dataframe for circle plot -------------------------------------------------
+# This doesn't actually work. It's in alphabetical order, not in order of order richness
+    # see PLOT WITH EACH SPECIES COUNTED IN THE BIOME WHERE THEY HAVE THE MOST RICHNESS 
+    # for a plot that works
 OrderBiomeSpeciesDF <- data.frame(from = rep(NA, 418), to = rep(NA,418), value = rep(NA, 418))
 end <- 0
 for(i in 1:length(OrderNames)){
@@ -204,7 +200,6 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
 
 
 ## PLOT WITH EACH SPECIES COUNTED IN EVERY BIOME WHERE THEY ARE PRESENT ##
-
 # Make empty matrix ------------------------------------------------------------------
 CircleMat <- matrix(NA, length(OrderNames), length(BiomeNames))
 rownames(CircleMat) <- OrderNames
@@ -244,7 +239,6 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
 
 
 ## PLOT WITH EACH SPECIES COUNTED IN  BIOMES WHERE THEY HAVE AT LEAST 10% ABUNDANCE ##
-
 # Make plot matrix -----------------------------------------------------------------------
   
 # Make empty matrix 
@@ -295,7 +289,6 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
 
 
 ## PLOT WITH EACH SPECIES COUNTED IN  BIOMES WHERE THEY HAVE AT LEAST 25% ABUNDANCE ##
-
 # Make plot matrix ----------------------------------------------------------
 
 # Make empty matrix 
@@ -343,6 +336,7 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
   circos.text(mean(xlim), ylim[1], sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex=0.5)
 }, bg.border = NA)
 
+
 ## PLOT 25% ABUNDANCE WITH MOSSES ONLY  ##
 # Make empty matrix 
 CircleMat25Moss <- matrix(NA, length(OrderNames), length(BiomeNames))
@@ -389,8 +383,9 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
   circos.text(mean(xlim), ylim[1], sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex=0.5)
 }, bg.border = NA)
 
-## PLOT WITH EACH SPECIES COUNTED IN  BIOMES WHERE THEY HAVE AT LEAST 50% ABUNDANCE ##
 
+
+## PLOT WITH EACH SPECIES COUNTED IN  BIOMES WHERE THEY HAVE AT LEAST 50% ABUNDANCE ##
 # Make plot matrix ----------------------------------------------------------
 
 # Make empty matrix 
@@ -439,8 +434,8 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
 }, bg.border = NA)
 
 
-## PLOT WITH EACH SPECIES COUNTED IN  BIOMES WHERE THEY HAVE AT LEAST 75% ABUNDANCE ##
 
+## PLOT WITH EACH SPECIES COUNTED IN  BIOMES WHERE THEY HAVE AT LEAST 75% ABUNDANCE ##
 # Make plot matrix ----------------------------------------------------------
 
 # Make empty matrix 
@@ -540,6 +535,9 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
 }, bg.border = NA)
 
 
+## PLOT WITH EACH SPECIES COUNTED IN THE BIOME WHERE THEY HAVE THE MOST RICHNESS ##
+## MOSSES ONLY ##
+# Make plot matrix ----------------------------------------------------------
 
 # Make empty matrix 
 CircleMatAllMoss <- matrix(NA, length(MossOrderNames), length(BiomeNames))
@@ -559,15 +557,36 @@ for(h in 1:length(MossOrderNames)){
       ab <- SpBiMat[species,biome]
       biomenumcells[j] <- ab
     }
-    biomeindex <- which(biomenumcells == max(biomenumcells))
+    biomeindex <- which(biomenumcells == max(biomenumcells, na.rm = T))
     valvec[biomeindex] <- valvec[biomeindex] + 1
   }
   for(k in 1:length(valvec)){
     val <- valvec[k]
     biome <- BiomeNames[k]
-    CircleMatAllMoss[order, biome] <- k
+    CircleMatAllMoss[order, biome] <- val
   }
 }
 
+for(i in 1:length(BiomeNames)){
+  biome <- BiomeNames[i]
+  for(j in 1:length(MossOrderNames)){
+    order <- MossOrderNames[j]
+    speclist <- MossOrderSpeciesList[[j]]
+    valvec <- as.vector(rep(0, length(BiomeNames)))
+  }
+}
 
+# Plot ------------------------------------------------------------------------
+circos.clear()
+circos.par(start.degree = 0)
+chordDiagram(CircleMatAllMoss, grid.col = grid.col, column.col = biome_cols_11, 
+             directional = 1, direction.type = "arrows", link.arr.type = "big.arrow", 
+             link.arr.length = 0.05, link.largest.ontop = T, annotationTrack = c("grid"), 
+             preAllocateTracks = 1, big.gap = 20, small.gap = 2)
+circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
+  xlim = get.cell.meta.data("xlim")
+  ylim = get.cell.meta.data("ylim")
+  sector.name = get.cell.meta.data("sector.index")
+  circos.text(mean(xlim), ylim[1], sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex=0.5)
+}, bg.border = NA)
 

@@ -415,4 +415,84 @@ saveRDS(SouthAmBiomeList, "Data/SouthAmBiomeList.rds")
 #Stop for order.alpha.comp.R, fam.alpha.com.R, ORange.R, OrdBiomeBP.R, 
     ##TreeMaps.R, and OrderBiomePlots.R------------------------------------------------
 
+##OrderBiomeDF.R##
+#Load Data
+OrderRichList <- readRDS("Data/OrderRichList.rds")
+NorthAmBiomeList <- readRDS("Data/NorthAmBiomeList.rds")
+SouthAmBiomeList <- readRDS("Data/SouthAmBiomeList.rds")
+
+OrderNames <- readRDS("Data/OrderNames.rds")
+NumberOrders <- length(OrderNames)
+BiomeNames <- readRDS("Data/BiomeNames.rds")
+NumberBiomes <- length(BiomeNames)
+ContinentNames <- c("North America", "South America")
+NumberContinents <- 2
+
+# OrderBiomeContDF 
+#THIS TAKES A LONG TIME TO RUN (it is also in the BryophytesData folder)
+# Separated by order, biome, and continent
+
+nrows <- 12571768
+OrderBiomeContDF <- data.frame(rep(NA,nrows))
+names(OrderBiomeContDF)[1] <- "Alpha"
+OrderBiomeContDF$Alpha <- NA
+OrderBiomeContDF$CellID <- NA
+OrderBiomeContDF$Order <- NA
+OrderBiomeContDF$Cont <- NA
+OrderBiomeContDF$Biome <- NA
+
+start <- 1
+end <- 15038
+o <- OrderNames[1]
+b <- BiomeNames[1]
+c <- ContinentNames[1]
+OrderBiomeContDF$Alpha[start:end] <- ORange(o,b,c)
+OrderBiomeContDF$CellID[start:end] <- c(1:15038)
+OrderBiomeContDF$Biome[start:end] <- b
+OrderBiomeContDF$Order[start:end] <- o
+OrderBiomeContDF$Cont[start:end] <- c
+
+start <- end + 1
+end <- start + 15037
+c <- ContinentNames[2]
+OrderBiomeContDF$Alpha[start:end] <- ORange(o, b, c)
+OrderBiomeContDF$CellID[start:end]<- c(1:15038)
+OrderBiomeContDF$Biome[start:end] <- b
+OrderBiomeContDF$Order[start:end] <- o
+OrderBiomeContDF$Cont[start:end] <- c
+
+for(j in 2:NumberBiomes){
+  b <- BiomeNames[j]
+  for(k in 1:NumberContinents){
+    start <- end + 1
+    end <- start + 15037
+    c <- ContinentNames[k]
+    OrderBiomeContDF$Alpha[start:end] <- ORange(o, b, c)
+    OrderBiomeContDF$CellID[start:end]<- c(1:15038)
+    OrderBiomeContDF$Biome[start:end] <- b
+    OrderBiomeContDF$Order[start:end] <- o
+    OrderBiomeContDF$Cont[start:end] <- c
+  }
+}
+
+for(m in 2:NumberOrders){
+  o <- OrderNames[m]
+  for(n in 1:NumberBiomes){
+    b <- BiomeNames[n]
+    for(p in 1:NumberContinents){
+      start <- end + 1
+      end <- start + 15037
+      c <- ContinentNames[p]
+      OrderBiomeContDF$Alpha[start:end] <- ORange(o, b, c)
+      OrderBiomeContDF$CellID[start:end]<- c(1:15038)
+      OrderBiomeContDF$Biome[start:end] <- b
+      OrderBiomeContDF$Order[start:end] <- o
+      OrderBiomeContDF$Cont[start:end] <- c
+    }
+  }
+}
+
+saveRDS(OrderBiomeContDF, file = "Data/OrderBiomeContDF.rds")
+
+
 

@@ -232,7 +232,3 @@ BetaMap <- ggplot() +
   theme(legend.text=element_text(size=20), legend.title=element_text(size=32), axis.title = element_blank())
 BetaMap
 
-
-
-# 4.0 Beta diversity plot in biomes by order? -------------------------------
-###requires dataframe that includes orders

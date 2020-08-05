@@ -1,3 +1,5 @@
+# BiomeBetaCells
+## Hailey Napier, August 2020
 # Find all cells in each biome
   # 3 different measures:
     # 1. Weighted; each cell is counted if it is overlapped by a biome. If it's overlapped by multiple biomes,
@@ -5,8 +7,6 @@
     # 2. Weighted clean; each cell is counted if it is overlapped by a biome. If it's overlapped by multiple 
         # biomes, then it's counted in the biome that covers a larger proportion of the cell
     # 3. Unweighted; each cell is counted in a biome ONLY if that biome overlaps the center of the cell
-
-# Hailey Napier, August 2020
 
 #FIRST -----------------------------------------------------------------
   # Run DataProcessing.R Bryophytes.rmd section under "ONLY NEEDED FOR MAPPING AND SHAPEFILE EXRACTION" (~ln. 160)

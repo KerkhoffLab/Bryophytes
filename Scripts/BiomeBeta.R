@@ -2,6 +2,8 @@
 # Hailey Napier,  July 2020
 # Adapted from FamilyDiversity.R
 
+#DON'T NEED THIS SCRIPT!!! USE BIOMEBETACELLS.R!
+
 # Load packages
 library(reshape2)
 

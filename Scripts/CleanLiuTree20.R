@@ -1,8 +1,8 @@
-#Clean script for reading Liu et al.(2019) tree & processing data
+#Clean script for reading Liu et al.(2019) supplementary figure 20 tree & processing data
 #Hailey Napier & Kathryn Dawdy
 #July 20, 2020
 
-# 0.0 Load Packages ------------------------------------------------------
+# 0.1 Load Packages ------------------------------------------------------
 library(ape)
 library(phytools)
 
@@ -25,6 +25,8 @@ library(gridExtra)
 
 library(png)
 
+
+# 0.2 Download tree from Dryad via https://datadryad.org/stash/dataset/doi:10.5061/dryad.tj3gd75
 
 
 # 1.0 Read tree from Liu et al., 2019 data ------------------------------

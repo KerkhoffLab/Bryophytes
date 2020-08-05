@@ -2,6 +2,8 @@
 #Hailey Napier
 #July 20, 2020
 
+## Continent grouping is more useful ##
+
 #Load packages -----------------------------------------------------------------------------
 library(dplyr)
 

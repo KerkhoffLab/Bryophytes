@@ -68,6 +68,7 @@ SouthAm_proj <- spTransform(SouthAm, crs_ref)
 plot(NorthAm_proj)
 plot(SouthAm_proj)
 
+
 # 5. Writing shapefiles ---------------------------------------------------
 setwd("./Data/MapOutlines/")
 dir.create("./Continents/")
@@ -88,12 +89,13 @@ writeOGR(obj=SouthAm_proj,
          overwrite = TRUE)
 
 
-# 7. Create raster including CellIDs for each cell -------------------
+# 7. Creating raster including CellIDs for each cell -------------------
 BlankRas <- raster("Data/blank_100km_raster.tif")
 CellVec <- c(1:15038)
 LongLatRaster <- setValues(BlankRas, CellVec)
 
-# 8. Create a vector of CellIDs for North and South America ----------
+
+# 8. Creating a vector of CellIDs for North and South America ----------
 NorthAm <- shapefile("Data/MapOutlines/Continents/north_america.shp")
 NorthACells <- raster::extract(LongLatRaster, NorthAm, df = TRUE, cellnumbers = TRUE, weight = TRUE)
 NorthAmericaVec <- NorthACells$cell

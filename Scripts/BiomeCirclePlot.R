@@ -28,7 +28,7 @@ MossSpeciesNames <- unique(MossPresence$Species)
 # 0.3 Source functions ----------------------------------------------------------
 source("Functions/ORange.R")
 
-# 0.4 Make Necessary Data -------------------------------------------------------
+# 0.4 Data processing -----------------------------------------------------------
 # Create a vector containing all of the biomes indexed by CellID
 BiomeCellsVec <- as.vector(rep(NA, 15038))
 for(i in 1:length(BiomeNames)){
@@ -137,7 +137,7 @@ biome_cols_11 <- c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
   # to prevent overrepresentation of species, only count each 
   # species in the biome where it is most abundant
 
-# Make dataframe for circle plot -------------------------------------------------
+# Make dataframe for circle plot ----------------------------------------------------
 # This doesn't actually work. It's in alphabetical order, not in order of order richness
     # see PLOT WITH EACH SPECIES COUNTED IN THE BIOME WHERE THEY HAVE THE MOST RICHNESS 
     # for a plot that works

@@ -41,7 +41,9 @@ require(tmap)
 
 
 # 0.2 Load data -------------------------------------------------------------
-BiomeBetaDF <- readRDS("Data/BiomeBetaDF.rds")
+BiomeBetaCellsCenterCov <- readRDS("Data/BiomeBetaCellsCenterCov.rds")
+BiomeBetaCellsClean <- readRDS("Data/BiomeBetaCellsClean.rds")
+BiomeBetaCellsWeighted <- readRDS("Data/BiomeBetaCellsWeighted.rds")
 
 # 0.3 Colors ----------------------------------------------------------------
 #From wes_palette() hex numbers on GitHub: karthik/wesanderson
@@ -56,19 +58,58 @@ biome_cols_11 <- c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
                    "#C27D38")
 
 
-# 1.0 Process data ----------------------------------------------------------
-# 1.1 Remove "NA" strings
-NoNABiomeBetaDF <- BiomeBetaDF[!grepl("NA", BiomeBetaDF$Beta),]
-View(NoNABiomeBetaDF)
-#from 165,418 rows to only 3,844 rows...? doesn't seem like enough cells
+# 1.0 BETA DIVERSITY PLOTS BY BIOME -----------------------------------------
+# 1.1 weights = F; Cell only counted if center is covered by biome polygon
+BiomeBetaBV <- ggplot(BiomeBetaCellsCenterCov, aes(x=Type, y=Beta, fill=Type, color=Type)) + 
+  geom_boxplot(show.legend = FALSE, fill=biome_cols_11, color="black") +
+  guides(x = guide_axis(angle=30)) +
+  theme_minimal() +        #un-comment whichever theme you want
+  #theme_gray() +
+  #theme_light() +
+  #theme_bw() +
+  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35,
+              color="gray25") +
+  xlab("Biome") +
+  ylab("Beta Diversity") +  
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),
+        axis.text.y = element_text(size=20), 
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 16))
+BiomeBetaBV
 
-# 1.2 Coerce beta values into double-precision vector
-typeof(NoNABiomeBetaDF$Biome)
-NoNABiomeBetaDF$Beta <- as.double(NoNABiomeBetaDF$Beta)
+png("Figures/BetaBiomeBoxViolin.png", width = 1500, height = 1000, pointsize = 20)
+BiomeBetaBV
+dev.off()
 
 
-# 2.0 Beta diversity plot by biome ------------------------------------------
-BiomeBetaBV <- ggplot(NoNABiomeBetaDF, aes(x=Biome, y=Beta, fill=Biome, color=Biome)) + 
+# 1.2 weight = T; Cell counted if biome polygon overlaps it, even if it's not the center
+  # If cell is covered by multiple biomes, then the biome that covers more of the cell
+  # is assigned to it
+BiomeBetaCleanWeightBV <- ggplot(BiomeBetaCellsClean, aes(x=Type, y=Beta, fill=Type, color=Type)) + 
+  geom_boxplot(show.legend = FALSE, fill=biome_cols_11, color="black") +
+  guides(x = guide_axis(angle=30)) +
+  theme_minimal() +        #un-comment whichever theme you want
+  #theme_gray() +
+  #theme_light() +
+  #theme_bw() +
+  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35,
+              color="gray25") +
+  xlab("Biome") +
+  ylab("Beta Diversity") +  
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),
+        axis.text.y = element_text(size=20), 
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 16))
+BiomeBetaCleanWeightBV
+
+png("Figures/BetaBiomeCleanWeightBoxViolin.png", width = 1500, height = 1000, pointsize = 20)
+BiomeBetaCleanWeightBV
+dev.off()
+
+
+# 1.3 weight =  T; Cell counted if biome polygon overlaps it, even if it's not covering the 
+  #center. Cell is counted multiple times if it is covered by multiple biomes
+BiomeBetaAllWeightBV <- ggplot(BiomeBetaCellsWeighted, aes(x=Type, y=Beta, fill=Type, color=Type)) + 
   geom_boxplot(show.legend = FALSE, fill=biome_cols_11, color="black") +
   guides(x = guide_axis(angle=30)) +
   theme_minimal() +        #un-comment whichever theme you want
@@ -83,17 +124,15 @@ BiomeBetaBV <- ggplot(NoNABiomeBetaDF, aes(x=Biome, y=Beta, fill=Biome, color=Bi
         axis.title.x = element_text(size=32),
         axis.text.y = element_text(size=20), 
         axis.text.x = element_text(angle = 30, hjust = 1, size = 12))
-BiomeBetaBV
+BiomeBetaAllWeightBV
 
-png("Figures/BetaBiomeBoxViolin.png", width = 1500, height = 1000, pointsize = 20)
-BiomeBetaBV
+png("Figures/BetaBiomeAllWeightBoxViolin.png", width = 1500, height = 1000, pointsize = 20)
+BiomeBetaAllWeightBV
 dev.off()
 
+# 2.0 BIOME BETA MAP -------------------------------------------------------
 
-
-# 3.0 BIOME BETA MAP -------------------------------------------------------
-
-# 3.1 Run DataProcessing.R to generate necessary data -----------------------------------------------------------------
+# 2.1 Run DataProcessing.R to generate necessary data -----------------------------------------------------------------
 
 ## Load blank raster and cell richness data 
 ##Change file depending on if you want to map bryophytes, mosses, liverworts, etc. 
@@ -102,12 +141,12 @@ BetaMat <- readRDS("Data/BetaMat.rds")
 CellRichness <- readRDS("Data/CellRichness.rds")
 
 
-# 3.1.0 Extract cell IDs and create vector for all cells -----------------------------------------------------------------------------------------
+# 2.1.0 Extract cell IDs and create vector for all cells -----------------------------------------------------------------------------------------
 CellID <- CellRichness$CellID
 CellVec <- c(1:15038)
 
 
-# 3.1.1 Identify occupied cells that are adjacent to each occuppied cell + convert to vector
+# 2.1.1 Identify occupied cells that are adjacent to each occuppied cell + convert to vector
 neighbor <- function(CellVec) {(adjacent(BlankRas, CellVec, directions=8, pairs=FALSE, target=CellID, sorted=TRUE, include=FALSE, id=FALSE))}
 Neighbors <- lapply(CellVec, neighbor)
 names(Neighbors) <- CellVec
@@ -116,7 +155,7 @@ bryneighbors <- Neighbors[CellID]
 bryneighborvect <- unlist(lapply(bryneighbors, length))
 
 
-# 3.1.2 Separate out occuppied cells with 8 and 7 occuppied neighbors
+# 2.1.2 Separate out occuppied cells with 8 and 7 occuppied neighbors
 Cell8 <- CellID[which(bryneighborvect==8)]
 Neighbors8 <-Neighbors[Cell8]
 Neighbors8 <- data.frame(Neighbors8)
@@ -128,13 +167,13 @@ Neighbors7 <- data.frame(Neighbors7)
 names(Neighbors7) <- Cell7
 
 
-# 3.1.3 Make beta diversity matrix for all cells
+# 2.1.3 Make beta diversity matrix for all cells
 BetaMat<-as.matrix(BetaMat)
 row.names(BetaMat) <- CellID
 names(BetaMat) <- CellID
 
 
-# 3.1.4 Make beta diversity matrix for cells with 8 neighbors and cells with 7 neighbors
+# 2.1.4 Make beta diversity matrix for cells with 8 neighbors and cells with 7 neighbors
 BetaMat8<- BetaMat[!Cell8, !Cell8, drop=TRUE]
 inx8 <- match(as.character(Cell8), rownames(BetaMat8))
 BetaMat8 <- BetaMat8[inx8,inx8]
@@ -144,7 +183,7 @@ inx7 <- match(as.character(Cell7), rownames(BetaMat7))
 BetaMat7 <- BetaMat7[inx7,inx7]
 
 
-# 3.1.5 For each cell, pairwise beta diversity is calculated for that focal cell and each of its 8 (or 7) neighbors, and the mean of those values is found
+# 2.1.5 For each cell, pairwise beta diversity is calculated for that focal cell and each of its 8 (or 7) neighbors, and the mean of those values is found
 Cell8CH <- as.character(Cell8)
 Beta8 <- lapply(Cell8CH, function(x)mean(BetaMat[x, as.character(Neighbors8[,x])]))
 names(Beta8) <- Cell8CH
@@ -154,7 +193,7 @@ Beta7 <- lapply(Cell7CH, function(x)mean(BetaMat[x, as.character(Neighbors7[,x])
 names(Beta7) <- Cell7CH
 
 
-# 3.1.6 Plot mean pairwise beta diversity by Cell ID and convert to dissimilarity using 1-x where x is Jaccard similarity
+# 2.1.6 Plot mean pairwise beta diversity by Cell ID and convert to dissimilarity using 1-x where x is Jaccard similarity
 Beta7Vec<-unlist(Beta7)
 Beta8Vec<-unlist(Beta8)
 
@@ -169,13 +208,13 @@ BetaVec <- 1-BetaVec
 plot(BetaVec, ylab = "Mean Pairwise β-Diversity", xlab = "Cell ID")
 
 
-# 3.2.0 Map beta diversity -------------------------------------------------
+# 2.2.0 Map beta diversity -------------------------------------------------
 
-# 3.2.1 Create colorscheme
+# 2.2.1 Create colorscheme
 cols <- (wes_palette("Zissou1", 500, type = "continuous"))
 
 
-# 3.2.2 Add continental and mountainous and biomes outlines
+# 2.2.2 Add continental and mountainous and biomes outlines
 nw_mount <- shapefile("Data/MapOutlines/Mountains/Koeppen-Geiger_biomes.shp")
 nw_bound <- shapefile("Data/MapOutlines/Global_bound/Koeppen-Geiger_biomes.shp")
 
@@ -186,7 +225,7 @@ biomes_shp <- shapefile("Data/Biomes/Biomes_olson_projected.shp")
 biomes_sf <- st_as_sf(biomes_shp)
 
 
-# 3.2.3 Mapping method from Bryophytes.Rmd
+# 2.2.3 Mapping method from Bryophytes.Rmd
 BetaRaster <- setValues(BlankRas, BetaVec)
 BetaPoints<-rasterToPoints(BetaRaster)
 BetaDF <- data.frame(BetaPoints)
@@ -199,7 +238,7 @@ RawBetaMap <- ggplot() + geom_tile(data=BetaDF, aes(x=Longitude, y=Latitude, fil
 RawBetaMap
 
 
-# 3.2.4 Map outlier beta values (>0.5)
+# 2.2.4 Map outlier beta values (>0.5)
 OutlierBetaVec <- rep(0, 15038)
 OutlierBetaVec[Cell8]<-Beta8Vec
 OutlierBetaVec[Cell7]<-Beta7Vec
@@ -218,7 +257,7 @@ OutlierBetaMap <- gplot(OutlierBetaRaster, maxpixels=15038) +  geom_tile(aes(fil
 OutlierBetaMap
 
 
-# 3.2.5 Map beta diversity with values over 0.5 shown in dark grey (how many values over 0.5?)
+# 2.2.5 Map beta diversity with values over 0.5 shown in dark grey (how many values over 0.5?)
 source("Functions/gplot_data.R")
 gplotB<- gplot_data(BetaRaster)
 gplotOutlier<- gplot_data(OutlierBetaRaster)
@@ -238,4 +277,5 @@ BiomeBetaMap
 png("Figures/BetaBiomeMap.png", width = 1000, height = 1000, pointsize = 20)
 BiomeBetaMap
 dev.off()
+
 

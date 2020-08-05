@@ -176,7 +176,6 @@ MossFacetOBR <- ggplot(MossOBC,
   geom_boxplot(show.legend = FALSE, 
                #fill=biome_cols_18, color="black"
   ) +
-  guides(x = guide_axis(angle=30)) +
   theme_gray() +
   geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35, 
               color="gray25") +
@@ -185,9 +184,13 @@ MossFacetOBR <- ggplot(MossOBC,
   theme(axis.title.y = element_text(size=32), 
         axis.title.x = element_text(size=32),
         axis.text.y = element_text(size=15), 
-        axis.text.x = element_text(angle = 30, hjust = 1, size = 8))+
+        axis.text.x = element_text(angle = 90, hjust = 1, size = 8))+
   facet_wrap(~Order)
 MossFacetOBR
+
+png("Figures/AlphaMossOrderBiomeFacet.png", width = 1500, height = 1000, pointsize = 20)
+MossFacetOBR
+dev.off()
 
 # 1.3 Subset moss order by maximum alpha diversity value -------------------
 ###Run MossPlotData.R
@@ -271,6 +274,10 @@ MossFacetOBRAbove100 <- ggplot(MossOBRAbove100DF,
   )
 MossFacetOBRAbove100
 
+png("Figures/AlphaMossOrderBiomeAbove100.png", width = 1500, height = 1000, pointsize = 20)
+MossFacetOBRAbove100
+dev.off()
+
 # 1.5.2 Max α 25-100 -------------------------------------------------------
 MossFacetOBR25to100 <- ggplot(MossOBR25to100DF, 
                               aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
@@ -296,6 +303,10 @@ MossFacetOBR25to100 <- ggplot(MossOBR25to100DF,
              ncol=3
   )
 MossFacetOBR25to100
+
+png("Figures/AlphaMossOrderBiome25to100.png", width = 1500, height = 1000, pointsize = 20)
+MossFacetOBR25to100
+dev.off()
 
 # 1.5.3 Max α 10-25 --------------------------------------------------------
 MossFacetOBR10to25 <- ggplot(MossOBR10to25DF, 
@@ -323,6 +334,10 @@ MossFacetOBR10to25 <- ggplot(MossOBR10to25DF,
   )
 MossFacetOBR10to25
 
+png("Figures/AlphaMossOrderBiome10to25.png", width = 1500, height = 1000, pointsize = 20)
+MossFacetOBR10to25
+dev.off()
+
 # 1.5.4 Max α <10 ----------------------------------------------------------
 MossFacetOBRBelow10 <- ggplot(MossOBRBelow10DF, 
                               aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
@@ -348,11 +363,14 @@ MossFacetOBRBelow10 <- ggplot(MossOBRBelow10DF,
   )
 MossFacetOBRBelow10
 
+png("Figures/AlphaMossOrderBiomeBelow10.png", width = 1500, height = 1000, pointsize = 20)
+MossFacetOBRBelow10
+dev.off()
+
+
 
 # 2.0 MOSS ORDER CONTINENT FACET PLOTS -------------------------------------
-# MossOBC is made in MossPlotData.R, it's also in the BryophytesData folder
-MossOBC <- readRDS("Data/MossOBC.rds")
-
+# MossOBC is made in MossPlotData.R; it's also in the BryophytesData folder
 MossFacetContBiomeRich <- ggplot(MossOBC, 
                                  aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
   geom_boxplot(show.legend = FALSE, fill=biome_cols_18, color="black") +
@@ -368,3 +386,7 @@ MossFacetContBiomeRich <- ggplot(MossOBC,
         axis.text.x = element_text(angle = 30, hjust = 1, size = 8))+
   facet_wrap(~Cont)
 MossFacetContBiomeRich
+
+png("Figures/AlphaMossBiomeContinents.png", width = 1500, height = 1000, pointsize = 20)
+MossFacetContBiomeRich
+dev.off()

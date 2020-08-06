@@ -1,0 +1,88 @@
+---
+title: "Bryophytes; Kerkhoff Lab Summer 2020"
+authors: Hailey Napier and Kathryn Dawdy
+output: html_notebook
+---
+```{r, setup, include = FALSE}
+root <- find_rstudio_root_file()
+knitr::opts_knit$set(root.dir = root)
+```
+
+```{r, message = FALSE}
+require(knitr)
+require(latexpdf)
+require(sp)
+require(raster)
+require(rasterVis)
+require(ggplot2)
+require(gridExtra)
+require(sf)
+require(rgdal)
+```
+
+
+Load biome data
+```{r}
+biomes_shp <- shapefile("Data/Biomes/Biomes_olson_projected.shp")
+```
+
+Load plot colors
+```{r}
+cols7 <- c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
+           "#446455", "#FDD262", "#D3DDDC", "#C7B19C",
+           "#798E87", "#C27D38")
+```
+
+Map of biomes in North and South America
+```{r}
+BiomeMap <- qtm(biomes_shp,
+                        fill="biomes", 
+                        fill.style="fixed",
+                        fill.labels=biomes_shp$biomes,
+                        fill.palette=cols7,
+                        fill.title="Biomes",
+                        layout.legend.position=c("left","bottom"),
+                        layout.legend.width=1.5,
+                        layout.frame=FALSE)
+BiomeMap
+```
+
+Beta diversity plots by biome
+```{r}
+
+```
+
+
+Range size plots by biome
+```{r}
+
+```
+
+
+Alpha diversity by order split into biomes
+Orders with max alpha diversity < 10
+```{r}
+
+```
+
+Orders with max alpha diversity between 10 and 25
+```{r}
+
+```
+
+Orders with max alpha diversity between 25 and 100
+```{r}
+
+```
+
+Orders with max alpha diversity > 100
+```{r}
+
+```
+
+
+Circle plot showing order richness in each biome
+```{r}
+
+```
+

@@ -224,6 +224,9 @@ for(i in 1:length(BiomeNames)){
 
 # Plot ---------------------------------------------------------------------------------
 circos.clear()
+
+png("Figures/CircleBryTopAb.png", width = 1000, height = 1000, pointsize = 20)
+
 circos.par(start.degree = 0)
 chordDiagram(CircleMat, grid.col = grid.col, column.col = biome_cols_11, 
              directional = 1, direction.type = "arrows", link.arr.type = "big.arrow", 
@@ -236,7 +239,7 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
   circos.text(mean(xlim), ylim[1], sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex=0.5)
 }, bg.border = NA)
 
-
+dev.off()
 
 ## PLOT WITH EACH SPECIES COUNTED IN  BIOMES WHERE THEY HAVE AT LEAST 10% ABUNDANCE ##
 # Make plot matrix -----------------------------------------------------------------------
@@ -274,6 +277,9 @@ for(h in 1:length(OrderNames)){
 
 # Plot ------------------------------------------------------------------------
 circos.clear()
+
+png("Figures/CircleBry10.png", width = 1000, height = 1000, pointsize = 20)
+
 circos.par(start.degree = 0)
 chordDiagram(CircleMat10, grid.col = grid.col, column.col = biome_cols_11, 
              directional = 1, direction.type = "arrows", link.arr.type = "big.arrow", 
@@ -286,7 +292,7 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
   circos.text(mean(xlim), ylim[1], sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex=0.5)
 }, bg.border = NA)
 
-
+dev.off()
 
 ## PLOT WITH EACH SPECIES COUNTED IN  BIOMES WHERE THEY HAVE AT LEAST 25% ABUNDANCE ##
 # Make plot matrix ----------------------------------------------------------
@@ -324,6 +330,9 @@ for(h in 1:length(OrderNames)){
 
 # Plot ------------------------------------------------------------------------
 circos.clear()
+
+png("Figures/CircleBry25.png", width = 1000, height = 1000, pointsize = 20)
+
 circos.par(start.degree = 0)
 chordDiagram(CircleMat25, grid.col = grid.col, column.col = biome_cols_11, 
              directional = 1, direction.type = "arrows", link.arr.type = "big.arrow", 
@@ -335,6 +344,8 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
   sector.name = get.cell.meta.data("sector.index")
   circos.text(mean(xlim), ylim[1], sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex=0.5)
 }, bg.border = NA)
+
+dev.off()
 
 
 ## PLOT 25% ABUNDANCE WITH MOSSES ONLY  ##
@@ -371,6 +382,9 @@ for(h in 1:length(MossOrderNames)){
 
 # Plot
 circos.clear()
+
+png("Figures/CircleMoss25.png", width = 1000, height = 1000, pointsize = 20)
+
 circos.par(start.degree = 0)
 chordDiagram(CircleMat25Moss, grid.col = grid.col, column.col = biome_cols_11, 
              directional = 1, direction.type = "arrows", link.arr.type = "big.arrow", 
@@ -383,7 +397,7 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
   circos.text(mean(xlim), ylim[1], sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex=0.5)
 }, bg.border = NA)
 
-
+dev.off()
 
 ## PLOT WITH EACH SPECIES COUNTED IN  BIOMES WHERE THEY HAVE AT LEAST 50% ABUNDANCE ##
 # Make plot matrix ----------------------------------------------------------
@@ -421,6 +435,9 @@ for(h in 1:length(OrderNames)){
 
 # Plot ------------------------------------------------------------------------
 circos.clear()
+
+png("Figures/CircleBry50.png", width = 1000, height = 1000, pointsize = 20)
+
 circos.par(start.degree = 0)
 chordDiagram(CircleMat50, grid.col = grid.col, column.col = biome_cols_11, 
              directional = 1, direction.type = "arrows", link.arr.type = "big.arrow", 
@@ -433,6 +450,7 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
   circos.text(mean(xlim), ylim[1], sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex=0.5)
 }, bg.border = NA)
 
+dev.off()
 
 
 ## PLOT WITH EACH SPECIES COUNTED IN  BIOMES WHERE THEY HAVE AT LEAST 75% ABUNDANCE ##
@@ -471,6 +489,9 @@ for(h in 1:length(OrderNames)){
 
 # Plot ------------------------------------------------------------------------
 circos.clear()
+
+png("Figures/CircleBry75.png", width = 1000, height = 1000, pointsize = 20)
+
 circos.par(start.degree = 0)
 chordDiagram(CircleMat75, grid.col = grid.col, column.col = biome_cols_11, 
              directional = 1, direction.type = "arrows", link.arr.type = "big.arrow", 
@@ -483,6 +504,7 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
   circos.text(mean(xlim), ylim[1], sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex=0.5)
 }, bg.border = NA)
 
+dev.off()
 
 
 ## PLOT WITH EACH SPECIES COUNTED IN  BIOMES WHERE THEY HAVE AT LEAST 75% ABUNDANCE ##
@@ -522,6 +544,9 @@ for(h in 1:length(MossOrderNames)){
 
 # Plot ------------------------------------------------------------------------
 circos.clear()
+
+png("Figures/CircleMoss75.png", width = 1000, height = 1000, pointsize = 20)
+
 circos.par(start.degree = 0)
 chordDiagram(CircleMat75Moss, grid.col = grid.col, column.col = biome_cols_11, 
              directional = 1, direction.type = "arrows", link.arr.type = "big.arrow", 
@@ -534,6 +559,8 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
   circos.text(mean(xlim), ylim[1], sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex=0.5)
 }, bg.border = NA)
 
+dev.off()
+
 
 ## PLOT WITH EACH SPECIES COUNTED IN THE BIOME WHERE THEY HAVE THE MOST RICHNESS ##
 ## MOSSES ONLY ##
@@ -544,7 +571,7 @@ CircleMatAllMoss <- matrix(NA, length(MossOrderNames), length(BiomeNames))
 rownames(CircleMatAllMoss) <- MossOrderNames
 colnames(CircleMatAllMoss) <- BiomeNames
 
-#Fill matrix so it counts species based on top biome (moss)
+# Fill matrix so it counts species based on top biome (moss)
 for(h in 1:length(MossOrderNames)){
   order <- MossOrderNames[h]
   speclist <- MossOrderSpeciesList[[h]]
@@ -578,6 +605,9 @@ for(i in 1:length(BiomeNames)){
 
 # Plot ------------------------------------------------------------------------
 circos.clear()
+
+png("Figures/CircleMossTopAb.png", width = 1000, height = 1000, pointsize = 20)
+
 circos.par(start.degree = 0)
 chordDiagram(CircleMatAllMoss, grid.col = grid.col, column.col = biome_cols_11, 
              directional = 1, direction.type = "arrows", link.arr.type = "big.arrow", 
@@ -589,4 +619,6 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
   sector.name = get.cell.meta.data("sector.index")
   circos.text(mean(xlim), ylim[1], sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex=0.5)
 }, bg.border = NA)
+
+dev.off()
 

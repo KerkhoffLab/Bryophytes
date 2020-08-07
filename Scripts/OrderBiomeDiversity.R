@@ -238,6 +238,64 @@ saveRDS(OBR25to100DF, "Data/OBR25to100DF.rds")
 saveRDS(OBR10to25DF, "Data/OBR10to25DF.rds")
 saveRDS(OBRBelow10DF, "Data/OBRBelow10DF.rds")
 
+# 2.2.5 Subset for cells that don't have centers covered
+# max α > 100
+OrdRichAbove100 <- readRDS("Data/OrdRichAbove100.rds")
+OrdRichAbove100
+OBRAbove100DF <- subset(CleanOrderBiomeDF, 
+                        CleanOrderBiomeDF$Order=="Hypnales"|
+                          CleanOrderBiomeDF$Order=="Dicranales")
+
+# max α 25-100
+OrdRich25to100 <- readRDS("Data/OrdRich25to100.rds")
+OrdRich25to100
+OBR25to100DF <- subset(CleanOrderBiomeDF,
+                       CleanOrderBiomeDF$Order=="Bartramiales"|
+                         CleanOrderBiomeDF$Order=="Bryales"|
+                         CleanOrderBiomeDF$Order=="Grimmiales"|
+                         CleanOrderBiomeDF$Order=="Hookeriales"|
+                         CleanOrderBiomeDF$Order=="Jungermanniales"|
+                         CleanOrderBiomeDF$Order=="Orthotrichales"|
+                         CleanOrderBiomeDF$Order=="Porellales"|
+                         CleanOrderBiomeDF$Order=="Pottiales")
+
+# max α 10-25
+OrdRich10to25 <- readRDS("Data/OrdRich10to25.rds")
+OrdRich10to25
+OBR10to25DF <- subset(CleanOrderBiomeDF,
+                      CleanOrderBiomeDF$Order=="Funariales"|
+                        CleanOrderBiomeDF$Order=="Hedwigiales"|
+                        CleanOrderBiomeDF$Order=="Marchantiales"|
+                        CleanOrderBiomeDF$Order=="Metzgeriales"|
+                        CleanOrderBiomeDF$Order=="Polytrichales"|
+                        CleanOrderBiomeDF$Order=="Sphagnales")
+
+# max α < 10
+OrdRichBelow10 <-readRDS("Data/OrdRichBelow10.rds")
+OrdRichBelow10
+OBRBelow10DF <- subset(CleanOrderBiomeDF,
+                       CleanOrderBiomeDF$Order!="Hypnales"&
+                         CleanOrderBiomeDF$Order!="Dicranales"&
+                         CleanOrderBiomeDF$Order!="Bartramiales"&
+                         CleanOrderBiomeDF$Order!="Bryales"&
+                         CleanOrderBiomeDF$Order!="Grimmiales"&
+                         CleanOrderBiomeDF$Order!="Hookeriales"&
+                         CleanOrderBiomeDF$Order!="Jungermanniales"&
+                         CleanOrderBiomeDF$Order!="Orthotrichales"&
+                         CleanOrderBiomeDF$Order!="Porellales"&
+                         CleanOrderBiomeDF$Order!="Pottiales"&
+                         CleanOrderBiomeDF$Order!="Funariales"&
+                         CleanOrderBiomeDF$Order!="Hedwigiales"&
+                         CleanOrderBiomeDF$Order!="Marchantiales"&
+                         CleanOrderBiomeDF$Order!="Metzgeriales"&
+                         CleanOrderBiomeDF$Order!="Polytrichales"&
+                         CleanOrderBiomeDF$Order!="Sphagnales")
+
+saveRDS(OBRAbove100DF, "Data/CleanOBRAbove100DF.rds")
+saveRDS(OBR25to100DF, "Data/CleanOBR25to100DF.rds")
+saveRDS(OBR10to25DF, "Data/CleanOBR10to25DF.rds")
+saveRDS(OBRBelow10DF, "Data/CleanOBRBelow10DF.rds")
+
 # 2.3 Load max richness value groupings ------------------------------------
 OBRAbove100DF <- readRDS("Data/OBRAbove100DF.rds")
 OBR25to100DF <- readRDS("Data/OBR25to100DF.rds")
@@ -366,6 +424,127 @@ FacetOBRBelow10
 dev.off()
 
 
+# 2.5 Plots with weighted cell biome count
+# 2.5.1 Max α >100 ---------------------------------------------------------
+CleanFacetOBRAbove100 <- ggplot(CleanOBRAbove100DF, 
+                           aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
+  geom_boxplot(show.legend = FALSE, fill=biome_cols_22, color="black",
+               outlier.size=1) +
+  #theme_minimal() +     #un-comment whichever theme you want
+  theme_gray() +
+  #theme_light() +
+  #theme_bw() +
+  #theme_dark() +
+  #theme_linedraw() +
+  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35,
+              color="gray25") +
+  xlab("Biome") +
+  ylab("Richness") +  
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),
+        axis.text.y = element_text(size=15), 
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 8))+
+  facet_wrap(~Order
+             , 
+             #ncol=1        #un-comment # of rows you want
+             ncol=2
+  )
+CleanFacetOBRAbove100
+
+png("Figures/CleanAlphaOrderBiomeAbove100.png", width = 1500, height = 1000, pointsize = 20)
+CleanFacetOBRAbove100
+dev.off()
+
+# 2.4.2 Max α 25-100 -------------------------------------------------------
+CleanFacetOBR25to100 <- ggplot(CleanOBR25to100DF, 
+                          aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
+  geom_boxplot(show.legend = FALSE, fill=biome_cols_87, color="black",
+               outlier.size=0.7) +
+  #theme_minimal() +     #un-comment whichever theme you want
+  theme_gray() +
+  #theme_light() +
+  #theme_bw() +
+  #theme_dark() +
+  #theme_linedraw() +
+  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35,
+              color="gray25") +
+  xlab("Biome") +
+  ylab("Richness") +  
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),
+        axis.text.y = element_text(size=15), 
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 8))+
+  facet_wrap(~Order
+             , 
+             #ncol=2        #un-comment # of rows you want
+             ncol=4
+  )
+CleanFacetOBR25to100
+
+png("Figures/CleanAlphaOrderBiome25to100.png", width = 1500, height = 1000, pointsize = 20)
+CleanFacetOBR25to100
+dev.off()
+
+# 2.4.3 Max α 10-25 --------------------------------------------------------
+CleanFacetOBR10to25 <- ggplot(CleanOBR10to25DF, 
+                         aes(x=Biome, y=Alpha, fill=Biome, color=Biome
+                         )) + 
+  geom_boxplot(show.legend = FALSE, fill=biome_cols_66, color="black",
+               outlier.size=0.7) +
+  #theme_minimal() +     #un-comment whichever theme you want
+  theme_gray() +
+  #theme_light() +
+  #theme_bw() +
+  #theme_dark() +
+  #theme_linedraw() +
+  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35, 
+              color="gray25") +
+  xlab("Biome") +
+  ylab("Richness") +  
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),
+        axis.text.y = element_text(size=15), 
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 8))+
+  facet_wrap(~Order
+             , 
+             ncol=3        #un-comment # of rows you want
+             #ncol=2
+  )
+CleanFacetOBR10to25
+
+png("Figures/CleanAlphaOrderBiome10to25.png", width = 1500, height = 1000, pointsize = 20)
+CleanFacetOBR10to25
+dev.off()
+
+# 2.4.4 Max α <10 ----------------------------------------------------------
+CleanFacetOBRBelow10 <- ggplot(CleanOBRBelow10DF, 
+                          aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
+  geom_boxplot(show.legend = FALSE, fill=biome_cols_166, color="black",
+               outlier.size=0.7) +
+  #theme_minimal() +     #un-comment whichever theme you want
+  theme_gray() +
+  #theme_light() +
+  #theme_bw() +
+  #theme_dark() +
+  #theme_linedraw() +
+  #geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35, color="gray25") +
+  xlab("Biome") +
+  ylab("Richness") +  
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),
+        axis.text.y = element_text(size=15), 
+        axis.text.x = element_text(angle = 90, hjust = 1, size = 8))+
+  facet_wrap(~Order
+             ,
+             ncol=6        #un-comment # of rows you want
+             #ncol=5
+  )
+CleanFacetOBRBelow10
+
+png("Figures/CleanAlphaOrderBiomeBelow10.png", width = 1500, height = 1000, pointsize = 20)
+CleanFacetOBRBelow10
+dev.off()
+
 
 # 3.0 CONTINENT FACET PLOTS -----------------------------------------------
 FacetContBiomeRich <- ggplot(OrderBiomeContDF, 
@@ -382,7 +561,7 @@ FacetContBiomeRich <- ggplot(OrderBiomeContDF,
         axis.text.y = element_text(size=15), 
         axis.text.x = element_text(angle = 30, hjust = 1, size = 8))+
   facet_wrap(~Cont)
-FacetContBiomeRich
+CleanFacetContBiomeRich
 
 png("Figures/AlphaBiomeContinents.png", width = 1500, height = 1000, pointsize = 20)
 FacetContBiomeRich

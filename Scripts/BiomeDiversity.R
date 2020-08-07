@@ -406,6 +406,106 @@ png("Figures/AlphaBiomeBoxViolin.png", width = 1500, height = 1000, pointsize = 
 BiomeRichBV
 dev.off()
 
+# 5.5 Dataframe and BV plot with weighted cells counted in the biome which 
+ ## covers the greatest proportion of the cell
+#Coniferous Forests
+AlphaConFor <- raster::extract(RichnessRaster, Coniferous_Forests, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+colnames(AlphaConFor) <- c("Type", "CellID", "Alpha", "Weight")
+AlphaConFor$Type <- "Coniferous_Forests"
+
+#Dry Forest
+AlphaDryFor <- raster::extract(RichnessRaster, Dry_Forest, df = TRUE, cellnumbers = TRUE,  weight = TRUE)
+colnames(AlphaDryFor) <- c("Type", "CellID", "Alpha", "Weight")
+AlphaDryFor$Type <- "Dry_Forest"
+
+#Mediterranean Woodlands
+AlphaMedWood <- raster::extract(RichnessRaster, Mediterranean_Woodlands, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+colnames(AlphaMedWood) <- c("Type", "CellID", "Alpha", "Weight")
+AlphaMedWood$Type <- "Mediterranean_Woodlands"
+
+#Moist Forest
+AlphaMoistFor <- raster::extract(RichnessRaster, Moist_Forest, df = TRUE, cellnumbers = TRUE,  weight = TRUE)
+colnames(AlphaMoistFor) <- c("Type", "CellID", "Alpha", "Weight")
+AlphaMoistFor$Type <- "Moist_Forest"
+
+#Savannas
+AlphaSavanna <- raster::extract(RichnessRaster, Savannas, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+colnames(AlphaSavanna) <- c("Type", "CellID", "Alpha", "Weight")
+AlphaSavanna$Type <- "Savannas"
+
+#Taiga
+AlphaTaiga <- raster::extract(RichnessRaster, Taiga, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+colnames(AlphaTaiga) <- c("Type", "CellID", "Alpha", "Weight")
+AlphaTaiga$Type <- "Taiga"
+
+#Temperate Grasslands
+AlphaTempGrass <- raster::extract(RichnessRaster, Temperate_Grasslands, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+colnames(AlphaTempGrass) <- c("Type", "CellID", "Alpha", "Weight")
+AlphaTempGrass$Type <- "Temperate_Grasslands"
+
+#Temperate Mixed
+AlphaTempMix <- raster::extract(RichnessRaster, Temperate_Mixed, df = TRUE, cellnumbers = TRUE,  weight = TRUE)
+colnames(AlphaTempMix) <- c("Type", "CellID", "Alpha", "Weight")
+AlphaTempMix$Type <- "Temperate_Mixed"
+
+#Tropical Grasslands
+AlphaTropGrass <- raster::extract(RichnessRaster, Tropical_Grasslands, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+colnames(AlphaTropGrass) <- c("Type", "CellID", "Alpha", "Weight")
+AlphaTropGrass$Type <- "Tropical_Grasslands"
+
+#Tundra
+AlphaTundra <- raster::extract(RichnessRaster, Tundra, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+colnames(AlphaTundra) <- c("Type", "CellID", "Alpha", "Weight")
+AlphaTundra$Type <- "Tundra"
+
+#Xeric Woodlands
+AlphaXericWood <- raster::extract(RichnessRaster, Xeric_Woodlands, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+colnames(AlphaXericWood) <- c("Type", "CellID", "Alpha", "Weight")
+AlphaXericWood$Type <- "Xeric_Woodlands"
+
+
+# Bind biome dataframes
+BiomeRichnessWeight <- bind_rows(AlphaConFor, AlphaDryFor, AlphaMedWood,
+                           AlphaMoistFor,AlphaSavanna, AlphaTaiga, 
+                           AlphaTempGrass, AlphaTempMix,AlphaTropGrass,
+                           AlphaTundra, AlphaXericWood)
+
+#Choose one biome per cell (cells with multiple biomes go to biome with higher proportion coverage)
+BiomeRichClean <- BiomeRichnessWeight
+BiomeRichCellID <- unique(BiomeRichnessWeight$CellID)
+for(i in BiomeRichCellID){
+  vec <- BiomeRichClean$Weight[which(BiomeRichClean$CellID == i)]
+  if(length(vec) > 1){
+    min <- min(vec)
+    drop <- which(BiomeRichClean$CellID == i & BiomeRichClean$Weight == min)
+    BiomeRichClean <- BiomeRichClean[-drop,]
+  }
+}
+
+saveRDS(BiomeRichClean, "Data/BiomeRichClean.rds")
+
+#Biome richness boxplot with violins 
+BiomeRichBVCleanWeight <- ggplot(BiomeRichClean, aes(x=Type, y=Alpha, fill=Type, color=Type)) + 
+  geom_boxplot(show.legend = FALSE, fill=cols7, color="black") +
+  guides(x = guide_axis(angle=30)) +
+  theme_minimal() +        #un-comment whichever theme you want
+  #theme_gray() +
+  #theme_light() +
+  #theme_bw() +
+  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35,
+              color="gray25") +
+  xlab("Biome") +
+  ylab("Richness") +  
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),
+        axis.text.y = element_text(size=20), 
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 17))
+BiomeRichBVCleanWeight
+
+png("Figures/CleanAlphaBiomeBoxViolin.png", width = 1500, height = 1000, pointsize = 20)
+BiomeRichBVCleanWeight
+dev.off()
+
 
 # 6.0 BIOMES MAP -----------------------------------------------------------
 # 6.1 Biome map wih legend inside frame

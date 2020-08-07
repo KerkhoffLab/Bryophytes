@@ -14,9 +14,11 @@ NumberBiomes <- length(BiomeNames)
 ContinentNames <- c("North America", "South America")
 NumberContinents <- 2
 
+# Source function -------------------------------------------------------
+source("Functions/ORange.R")
 
 # OrderBiomeDF ----------------------------------------------------------
-# Includes orders and biomes, not separated by biome or hemisphere
+# Includes orders and biomes, not separated by continent or hemisphere
 o <- OrderNames[1]
 b <- BiomeNames[1]
 
@@ -42,6 +44,36 @@ for(i in 2:NumberOrders){
 }
 names(OrderBiomeDF)[1] <- "Alpha"
 saveRDS(OrderBiomeDF, file = "Data/OrderBiomeDF.rds")
+
+
+# CleanOrderBiomeDF ----------------------------------------------------------
+# Includes orders and biomes, not separated by continent or hemisphere
+CleanOrderBiomeDF <- data.frame()
+o <- OrderNames[1]
+b <- BiomeNames[1]
+
+for(i in 2:NumberBiomes){
+  b <- BiomeNames[i]
+  tempdf <- data.frame(ORange(o, b, "both", "clean"))
+  tempdf$CellID <- c(1:15038)
+  tempdf$Biome <- b
+  tempdf$Order <- o
+  CleanOrderBiomeDF <- bind_rows(CleanOrderBiomeDF, tempdf)
+}
+
+for(i in 2:NumberOrders){
+  o <- OrderNames[i]
+  for(i in 1:NumberBiomes){
+    b <- BiomeNames[i]
+    tempdf <- data.frame(ORange(o,b,"both","clean"))
+    tempdf$CellID <- c(1:15038)
+    tempdf$Biome <- b
+    tempdf$Order <- o
+    CleanOrderBiomeDF <- bind_rows(CleanOrderBiomeDF, tempdf)
+  }
+}
+names(CleanOrderBiomeDF)[1] <- "Alpha"
+saveRDS(CleanOrderBiomeDF, file = "Data/CleanOrderBiomeDF.rds")
 
 
 # OrderBiomeContDF -----------------------------------------------------

@@ -1,40 +1,94 @@
 ---
-title: "Bryophytes; Kerkhoff Lab Summer 2020"
-authors: Hailey Napier and Kathryn Dawdy
-output: html_notebook
+title: "Bryophyte Diversity Patterns Across Biomes in North and South America"
+author: "Hailey Napier and Kathryn Dawdy"
+output:
+  html_document:
+    df_print: paged
 ---
-```{r, setup, include = FALSE}
-root <- find_rstudio_root_file()
-knitr::opts_knit$set(root.dir = root)
-```
 
-```{r, message = FALSE}
+```{r, include = FALSE}
 require(knitr)
 require(latexpdf)
 require(sp)
+require(vegan)
 require(raster)
 require(rasterVis)
 require(ggplot2)
 require(gridExtra)
 require(sf)
 require(rgdal)
+require(rprojroot)
+require(tmap)
+require(circlize)
 ```
 
+```{r, setup, include = FALSE} 
+root <- find_rstudio_root_file()
+opts_knit$set(root.dir = root)
+```
 
-Load biome data
-```{r}
+```{r, include = FALSE}
+#Load plot data
+#Run DataProcessing2020 for plot data
+BiomeBetaCellsCentCov <- readRDS("Data/BiomeBetaCellsCentCov.rds")
 biomes_shp <- shapefile("Data/Biomes/Biomes_olson_projected.shp")
+BiomeRange <- readRDS("Data/BiomeRange.rds")
+OBRAbove100DF <- readRDS("Data/OBRAbove100DF.rds")
+OBR25to100DF <- readRDS("Data/OBR25to100DF.rds")
+OBR10to25DF <- readRDS("Data/OBR10to25DF.rds")
+OBRBelow10DF <- readRDS("Data/OBRBelow10DF.rds")
+CircleMatAll <- readRDS("Data/CircleMatAll.rds")
+CircleMatAllMoss <- readRDS("Data/CircleMatAllMoss.rds")
 ```
 
-Load plot colors
-```{r}
+```{r, include = FALSE}
+#Load plot colors
 cols7 <- c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
-           "#446455", "#FDD262", "#D3DDDC", "#C7B19C",
-           "#798E87", "#C27D38")
+           "#446455", "#FDD262", "#D3DDDC", "#C7B19C", "#798E87",
+           "#C27D38")
+biome_cols_11 <- c("#D8B70A", "#972D15", "#A2A475", "#81A88D",
+                   "#02401B","#446455", "#FDD262", "#D3DDDC",
+                   "#C7B19C", "#798E87", "#C27D38")
+
+biome_cols_22 <- c(biome_cols_11, biome_cols_11)
+
+biome_cols_87 <- c(biome_cols_22, biome_cols_11,
+                   "#D8B70A", "#972D15", "#A2A475", "#81A88D",
+                   "#02401B", "#446455", "#FDD262", "#D3DDDC",
+                   "#C7B19C", "#C27D38", biome_cols_22, biome_cols_22)
+
+biome_cols_66 <- c(biome_cols_22, biome_cols_22, biome_cols_22)
+
+biome_cols_166 <- c(biome_cols_22,
+                    c("#D8B70A", "#972D15", "#A2A475", "#81A88D",  "#02401B", "#FDD262", "#D3DDDC", "#C7B19C",  "#C27D38"), biome_cols_11, c("#D8B70A", "#972D15", "#A2A475", "#81A88D","#02401B", "#446455", "#FDD262", "#D3DDDC","#C27D38"), c("#D8B70A", "#972D15", "#81A88D", "#02401B", "#446455", "#FDD262", "#D3DDDC", "#C7B19C", "#798E87", "#C27D38"), c("#81A88D","#FDD262", "#D3DDDC"), c("#D8B70A", "#972D15", "#81A88D", "#446455", "#D3DDDC", "#C7B19C", "#798E87"),
+c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B","#FDD262", "#D3DDDC", "#C7B19C", "#C27D38"),"#81A88D", c("#972D15", "#A2A475", "#81A88D", "#02401B", "#FDD262", "#D3DDDC", "#C7B19C", "#C27D38"),
+c("#D8B70A","#446455", "#FDD262", "#D3DDDC"), biome_cols_22, c("#D8B70A", "#972D15", "#81A88D","#D3DDDC", "#C7B19C", "#C27D38"), c("#D8B70A", "#446455", "#FDD262", "#D3DDDC", "#798E87", "#C27D38"), c("#A2A475", "#81A88D", "#02401B","#FDD262", "#D3DDDC", "#C7B19C"),
+c("#D8B70A", "#972D15", "#A2A475", "#81A88D",  "#02401B", "#FDD262", "#D3DDDC", "#C7B19C", "#C27D38"),biome_cols_11, c("#D8B70A", "#C27D38"), biome_cols_11)
+
+biome_cols_29 <- c(biome_cols_11,
+                   c("#D8B70A", "#972D15", "#A2A475", "#81A88D","#02401B", "#446455", "#FDD262", "#D3DDDC", "#798E87","#C27D38"), c("#972D15", "#A2A475", "#81A88D", "#02401B",
+"#FDD262", "#D3DDDC", "#C7B19C", "#C27D38"))
+
+grid.col <- c(Coniferous_Forests = "#D8B70A", Dry_Forest = "#972D15", 
+              Mediterranean_Woodlands = "#A2A475", Moist_Forest = "#81A88D", 
+              Savannas = "#02401B", Taiga = "#446455", Temperate_Grasslands = "#FDD262", 
+              Temperate_Mixed = "#D3DDDC", Tropical_Grasslands = "#C7B19C", Tundra = "#798E87", 
+              Xeric_Woodlands = "#C27D38", Hypnales = "grey", Porellales = "grey",  
+              Pottiales = "grey", Hookeriales  = "grey", Bryales = "grey", Jungermanniales = "grey", 
+              Andreaeaeales = "grey", Splachnales = "grey", Orthotrichales  =  "grey",  
+              Bartramiales = "grey", Metzgeriales = "grey", Dicranales = "grey", Anthocerotales = "grey",
+              Funariales = "grey", Treubiales = "grey", Archidiales = "grey", Marchantiales = "grey", 
+              Polytrichales = "grey", Aulacomniales = "grey", Fossombroniales = "grey", 
+              Grimmiales = "grey", Hedwigiales = "grey", Bryoxiphiales = "grey", Buxbaumiales  = "grey",
+              Ptychomniales = "grey", Gigaspermales = "grey", Dendrocerotales  = "grey", 
+              Pleuroziales = "grey", Rhizogoniales = "grey", Haplomitriales = "grey", Hypnodendrales  = "grey", 
+              Pallaviciniales = "grey",  Pelliales = "grey", Notothyladales = "grey", Ricciales = "grey", 
+              Ptilidiales = "grey", Sphaerocarpales = "grey", Sphagnales = "grey")
 ```
 
-Map of biomes in North and South America
-```{r}
+
+### Biomes in North and South America
+```{r my-chunk, fig.height=6, fig.width=10, fig.align="center"}
 BiomeMap <- qtm(biomes_shp,
                         fill="biomes", 
                         fill.style="fixed",
@@ -46,43 +100,202 @@ BiomeMap <- qtm(biomes_shp,
                         layout.frame=FALSE)
 BiomeMap
 ```
-
-Beta diversity plots by biome
-```{r}
-
+<center>
+*Figure 1. Map of North and South American biomes.* 
+</center>
+  
+     
+    
+      
+### Beta Diversity Plots by Biome
+```{r fig.height=9, fig.width=15, fig.align="center", warning=FALSE}
+BiomeBetaWeightBV <- ggplot(BiomeBetaCellsCentCov, aes(x=Type, y=Beta, fill=Type, color=Type)) + 
+  geom_boxplot(show.legend = FALSE, fill=biome_cols_11, color="black") +
+  guides(x = guide_axis(angle=30)) +
+  #theme_minimal() +        #un-comment whichever theme you want
+  theme_gray() +
+  #theme_light() +
+  #theme_bw() +
+  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35,
+              color="gray25") +
+  xlab("Biome") +
+  ylab("Beta Diversity") +  
+  theme(axis.title.y = element_text(size=22), 
+        axis.title.x = element_text(size=22),
+        axis.text.y = element_text(size=16), 
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 16))
+BiomeBetaWeightBV
 ```
-
-
-Range size plots by biome
-```{r}
-
+  
+  
+    
+      
+### Range Size Plots by Biome
+```{r fig.height=9, fig.width=15, fig.align="center", warning=FALSE}
+BiomeRangeBV <- ggplot(BiomeRange, aes(x=Type, y=Range, fill=Type, color=Type)) + 
+  geom_boxplot(show.legend = FALSE, fill=biome_cols_11, color="black") +
+  guides(x = guide_axis(angle=30)) +
+  #un-comment whichever theme you want
+  #theme_minimal() +        
+  theme_gray() +
+  #theme_light() +
+  #theme_bw() +
+  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35,
+              color="gray25") +
+  xlab("Biome") +
+  ylab("Range") +  
+  theme(axis.title.y = element_text(size=22), 
+        axis.title.x = element_text(size=22),
+        axis.text.y = element_text(size=20), 
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 16))
+BiomeRangeBV
 ```
-
-
-Alpha diversity by order split into biomes
-Orders with max alpha diversity < 10
-```{r}
-
+  
+    
+      
+        
+### Alpha Diversity by Order, Split into Biomes
+#### Orders with Maximum Alpha Diversity > 10
+```{r fig.height=9, fig.width=15, fig.align="center", warning=FALSE}
+FacetOBRBelow10 <- ggplot(OBRBelow10DF, aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
+  geom_boxplot(show.legend = FALSE, fill=biome_cols_166, color="black", outlier.size=0.7) +
+  #un-comment whichever theme you want
+  #theme_minimal() +
+  theme_gray() +
+  #theme_light() +
+  #theme_bw() +
+  #theme_dark() +
+  #theme_linedraw() +
+  #geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35, color="gray25") +
+  xlab("Biome") +
+  ylab("Richness") +  
+  theme(axis.title.y = element_text(size=22), 
+        axis.title.x = element_text(size=22),
+        axis.text.y = element_text(size=15), 
+        axis.text.x = element_text(angle = 90, hjust = 1, size = 12))+
+  facet_wrap(~Order,
+             #un-comment # of rows you want
+             ncol=6 
+             #ncol=5
+             )
+FacetOBRBelow10
 ```
-
-Orders with max alpha diversity between 10 and 25
-```{r}
-
+   
+      
+#### Orders with Maximum Alpha Diversity between 10 and 25
+```{r fig.height=9, fig.width=17, fig.align="center", warning=FALSE}
+FacetOBR10to25 <- ggplot(OBR10to25DF, aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
+  geom_boxplot(show.legend = FALSE, fill=biome_cols_66, color="black", outlier.size=0.7) +
+  #un-comment whichever theme you want
+  #theme_minimal() +
+  theme_gray() +
+  #theme_light() +
+  #theme_bw() +
+  #theme_dark() +
+  #theme_linedraw() +
+  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35, color="gray25") +
+  xlab("Biome") +
+  ylab("Richness") +  
+  theme(axis.title.y = element_text(size=22), 
+        axis.title.x = element_text(size=22),
+        axis.text.y = element_text(size=15), 
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 12))+
+  facet_wrap(~Order,
+             #un-comment # of rows you want
+             ncol=3
+             #ncol=2
+             )
+FacetOBR10to25
 ```
-
-Orders with max alpha diversity between 25 and 100
-```{r}
-
+  
+    
+#### Orders with Maximum Alpha Diversity between 25 and 100
+```{r fig.height=10, fig.width=16, fig.align="center", warning=FALSE}
+FacetOBR25to100 <- ggplot(OBR25to100DF, aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
+  geom_boxplot(show.legend = FALSE, fill=biome_cols_87, color="black", outlier.size=0.7) +
+  #un-comment whichever theme you want
+  #theme_minimal() +
+  theme_gray() +
+  #theme_light() +
+  #theme_bw() +
+  #theme_dark() +
+  #theme_linedraw() +
+  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35, color="gray25") +
+  xlab("Biome") +
+  ylab("Richness") +  
+  theme(axis.title.y = element_text(size=22), 
+        axis.title.x = element_text(size=22),axis.text.y = element_text(size=15), 
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 10)) +
+  facet_wrap(~Order, 
+             #un-comment # of rows you want
+             ncol=4
+             #ncol=2
+             )
+FacetOBR25to100
 ```
-
-Orders with max alpha diversity > 100
-```{r}
-
+  
+    
+#### Orders with Maximum Alpha Diversity > 100
+```{r fig.height=9, fig.width=15, fig.align="center", warning=FALSE}
+FacetOBRAbove100 <- ggplot(OBRAbove100DF, aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
+  geom_boxplot(show.legend = FALSE, fill=biome_cols_22, color="black",  outlier.size=1) +
+  #un-comment whichever theme you want
+  #theme_minimal() +
+  theme_gray() +
+  #theme_light() +
+  #theme_bw() +
+  #theme_dark() +
+  #theme_linedraw() +
+  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35, color="gray25") +
+  xlab("Biome") +
+  ylab("Richness") +  
+  theme(axis.title.y = element_text(size=22), 
+        axis.title.x = element_text(size=22),
+        axis.text.y = element_text(size=15), 
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 12)) +
+  facet_wrap(~Order, 
+             #un-comment # of rows you want
+             ncol=2
+             #ncol=1
+             )
+FacetOBRAbove100
 ```
-
-
-Circle plot showing order richness in each biome
-```{r}
-
+  
+  
+    
+       
+### Circle Plots 
+#### *Species richness for each order, grouped by biome*
+#### All bryophyte orders
+```{r fig.height=9, fig.width=9, fig.align="center"}
+circos.clear()
+circos.par(start.degree = 0)
+chordDiagram(CircleMatAll, grid.col = grid.col, column.col = biome_cols_11, 
+             directional = 1, direction.type = "arrows", link.arr.type = "big.arrow", 
+             link.arr.length = 0.05, link.largest.ontop = T, annotationTrack = c("grid"), 
+             preAllocateTracks = 1, big.gap = 20, small.gap = 2)
+circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
+  xlim = get.cell.meta.data("xlim")
+  ylim = get.cell.meta.data("ylim")
+  sector.name = get.cell.meta.data("sector.index")
+  circos.text(mean(xlim), ylim[1], sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex=0.5)
+}, bg.border = NA)
+```
+  
+    
+#### Only moss orders
+```{r fig.height=9, fig.width=9, fig.align="center"}
+circos.clear()
+circos.par(start.degree = 0)
+chordDiagram(CircleMatAllMoss, grid.col = grid.col, column.col = biome_cols_11, 
+             directional = 1, direction.type = "arrows", link.arr.type = "big.arrow", 
+             link.arr.length = 0.05, link.largest.ontop = T, annotationTrack = c("grid"), 
+             preAllocateTracks = 1, big.gap = 20, small.gap = 2)
+circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
+  xlim = get.cell.meta.data("xlim")
+  ylim = get.cell.meta.data("ylim")
+  sector.name = get.cell.meta.data("sector.index")
+  circos.text(mean(xlim), ylim[1], sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex=0.5)
+}, bg.border = NA)
 ```
 

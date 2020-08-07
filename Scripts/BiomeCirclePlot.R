@@ -562,6 +562,67 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
 dev.off()
 
 
+
+## PLOT WITH EACH SPECIES COUNTED IN THE BIOME WHERE THEY HAVE THE MOST RICHNESS ##
+# Make plot matrix ----------------------------------------------------------
+
+# Make empty matrix 
+CircleMatAll <- matrix(NA, length(OrderNames), length(BiomeNames))
+rownames(CircleMatAll) <- OrderNames
+colnames(CircleMatAll) <- BiomeNames
+
+# Fill matrix so it counts species based on top biome (moss)
+for(h in 1:length(OrderNames)){
+  order <- OrderNames[h]
+  speclist <- OrderSpeciesList[[h]]
+  valvec <- as.vector(rep(0, length(BiomeNames)))
+  for(i in 1:length(speclist)){
+    species <- speclist[i]
+    biomenumcells <- vector()
+    for(j in 1:length(BiomeNames)){
+      biome <- BiomeNames[j]
+      ab <- SpBiMat[species,biome]
+      biomenumcells[j] <- ab
+    }
+    biomeindex <- which(biomenumcells == max(biomenumcells, na.rm = T))
+    valvec[biomeindex] <- valvec[biomeindex] + 1
+  }
+  for(k in 1:length(valvec)){
+    val <- valvec[k]
+    biome <- BiomeNames[k]
+    CircleMatAll[order, biome] <- val
+  }
+}
+
+for(i in 1:length(BiomeNames)){
+  biome <- BiomeNames[i]
+  for(j in 1:length(OrderNames)){
+    order <- OrderNames[j]
+    speclist <- OrderSpeciesList[[j]]
+    valvec <- as.vector(rep(0, length(BiomeNames)))
+  }
+}
+
+# Plot ------------------------------------------------------------------------
+circos.clear()
+
+png("Figures/CircleTopAb.png", width = 1000, height = 1000, pointsize = 20)
+
+circos.par(start.degree = 0)
+chordDiagram(CircleMatAll, grid.col = grid.col, column.col = biome_cols_11, 
+             directional = 1, direction.type = "arrows", link.arr.type = "big.arrow", 
+             link.arr.length = 0.05, link.largest.ontop = T, annotationTrack = c("grid"), 
+             preAllocateTracks = 1, big.gap = 20, small.gap = 2)
+circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
+  xlim = get.cell.meta.data("xlim")
+  ylim = get.cell.meta.data("ylim")
+  sector.name = get.cell.meta.data("sector.index")
+  circos.text(mean(xlim), ylim[1], sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex=0.5)
+}, bg.border = NA)
+
+dev.off()
+
+
 ## PLOT WITH EACH SPECIES COUNTED IN THE BIOME WHERE THEY HAVE THE MOST RICHNESS ##
 ## MOSSES ONLY ##
 # Make plot matrix ----------------------------------------------------------
@@ -621,4 +682,7 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
 }, bg.border = NA)
 
 dev.off()
+
+
+
 

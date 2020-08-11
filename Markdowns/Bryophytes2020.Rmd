@@ -155,7 +155,7 @@ BiomeRangeBV
       
         
 ### Alpha Diversity by Order, Split into Biomes
-#### Orders with Maximum Alpha Diversity > 10
+#### Orders with Maximum Alpha Diversity < 10
 ```{r fig.height=9, fig.width=15, fig.align="center", warning=FALSE}
 FacetOBRBelow10 <- ggplot(OBRBelow10DF, aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
   geom_boxplot(show.legend = FALSE, fill=biome_cols_166, color="black", outlier.size=0.7) +

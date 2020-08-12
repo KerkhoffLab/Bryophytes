@@ -5,6 +5,10 @@ output:
   html_document:
     df_print: paged
 ---
+#### Kerkhoff Lab, Summer 2020
+#### Kenyon College
+
+<br>
 
 ```{r, include = FALSE}
 require(knitr)
@@ -88,7 +92,7 @@ grid.col <- c(Coniferous_Forests = "#D8B70A", Dry_Forest = "#972D15",
 
 
 ### Biomes in North and South America
-```{r my-chunk, fig.height=6, fig.width=10, fig.align="center"}
+```{r my-chunk, fig.height=6, fig.width=10, fig.align="center", echo=FALSE}
 BiomeMap <- qtm(biomes_shp,
                         fill="biomes", 
                         fill.style="fixed",
@@ -103,12 +107,13 @@ BiomeMap
 <center>
 *Figure 1. Map of North and South American biomes.* 
 </center>
-  
-     
-    
-      
+
+<br>
+
+<br>
+
 ### Beta Diversity Plots by Biome
-```{r fig.height=9, fig.width=15, fig.align="center", warning=FALSE}
+```{r fig.height=9, fig.width=15, fig.align="center", warning=FALSE, echo=FALSE}
 BiomeBetaWeightBV <- ggplot(BiomeBetaCellsCentCov, aes(x=Type, y=Beta, fill=Type, color=Type)) + 
   geom_boxplot(show.legend = FALSE, fill=biome_cols_11, color="black") +
   guides(x = guide_axis(angle=30)) +
@@ -126,12 +131,19 @@ BiomeBetaWeightBV <- ggplot(BiomeBetaCellsCentCov, aes(x=Type, y=Beta, fill=Type
         axis.text.x = element_text(angle = 30, hjust = 1, size = 16))
 BiomeBetaWeightBV
 ```
-  
-  
-    
-      
+
+<br>
+
+<center>
+*Figure 2. Species turnover (β-diversity) values of 100 km by 100 km raster cells in each biome for all bryophyte orders. Circles represent outliers.* 
+</center>
+
+<br>
+
+<br>
+
 ### Range Size Plots by Biome
-```{r fig.height=9, fig.width=15, fig.align="center", warning=FALSE}
+```{r fig.height=9, fig.width=15, fig.align="center", warning=FALSE, echo=FALSE}
 BiomeRangeBV <- ggplot(BiomeRange, aes(x=Type, y=Range, fill=Type, color=Type)) + 
   geom_boxplot(show.legend = FALSE, fill=biome_cols_11, color="black") +
   guides(x = guide_axis(angle=30)) +
@@ -150,13 +162,20 @@ BiomeRangeBV <- ggplot(BiomeRange, aes(x=Type, y=Range, fill=Type, color=Type)) 
         axis.text.x = element_text(angle = 30, hjust = 1, size = 16))
 BiomeRangeBV
 ```
-  
-    
-      
-        
+
+<br>
+
+<center>
+*Figure 3. Range sizes of all bryophyte species measured by the number of 100 km by 100 km of raster cells containing any given species, grouped by biome. Circles represent outliers.* 
+</center>
+
+<br>
+
+<br>
+
 ### Alpha Diversity by Order, Split into Biomes
-#### Orders with Maximum Alpha Diversity > 10
-```{r fig.height=9, fig.width=15, fig.align="center", warning=FALSE}
+#### Orders with Maximum Alpha Diversity < 10
+```{r fig.height=9, fig.width=15, fig.align="center", warning=FALSE, echo = FALSE}
 FacetOBRBelow10 <- ggplot(OBRBelow10DF, aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
   geom_boxplot(show.legend = FALSE, fill=biome_cols_166, color="black", outlier.size=0.7) +
   #un-comment whichever theme you want
@@ -180,10 +199,19 @@ FacetOBRBelow10 <- ggplot(OBRBelow10DF, aes(x=Biome, y=Alpha, fill=Biome, color=
              )
 FacetOBRBelow10
 ```
-   
-      
+
+<br>
+
+<center>
+*Figure 4. Richness (α-diversity) values of raster cells in each biome for bryophyte orders with a maximum richness value between 25 and 100. Circles represent outliers.* 
+</center>
+
+<br>
+
+<br>
+
 #### Orders with Maximum Alpha Diversity between 10 and 25
-```{r fig.height=9, fig.width=17, fig.align="center", warning=FALSE}
+```{r fig.height=9, fig.width=17, fig.align="center", warning=FALSE, echo = FALSE}
 FacetOBR10to25 <- ggplot(OBR10to25DF, aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
   geom_boxplot(show.legend = FALSE, fill=biome_cols_66, color="black", outlier.size=0.7) +
   #un-comment whichever theme you want
@@ -207,10 +235,19 @@ FacetOBR10to25 <- ggplot(OBR10to25DF, aes(x=Biome, y=Alpha, fill=Biome, color=Bi
              )
 FacetOBR10to25
 ```
-  
-    
+
+<br>
+
+<center>
+*Figure 5. Richness (α-diversity) values of raster cells in each biome for bryophyte orders with a maximum richness value between 10 and 25. Circles represent outliers.* 
+</center>
+
+<br>
+
+<br>
+
 #### Orders with Maximum Alpha Diversity between 25 and 100
-```{r fig.height=10, fig.width=16, fig.align="center", warning=FALSE}
+```{r fig.height=10, fig.width=16, fig.align="center", warning=FALSE, echo = FALSE}
 FacetOBR25to100 <- ggplot(OBR25to100DF, aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
   geom_boxplot(show.legend = FALSE, fill=biome_cols_87, color="black", outlier.size=0.7) +
   #un-comment whichever theme you want
@@ -233,10 +270,19 @@ FacetOBR25to100 <- ggplot(OBR25to100DF, aes(x=Biome, y=Alpha, fill=Biome, color=
              )
 FacetOBR25to100
 ```
-  
-    
+
+<br>
+
+<center>
+*Figure 6. Richness (α-diversity) values of raster cells in each biome for bryophyte orders with a maximum richness value below 10. Circles represent outliers.* 
+</center>
+
+<br>
+
+<br>
+
 #### Orders with Maximum Alpha Diversity > 100
-```{r fig.height=9, fig.width=15, fig.align="center", warning=FALSE}
+```{r fig.height=9, fig.width=15, fig.align="center", warning=FALSE, echo = FALSE}
 FacetOBRAbove100 <- ggplot(OBRAbove100DF, aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
   geom_boxplot(show.legend = FALSE, fill=biome_cols_22, color="black",  outlier.size=1) +
   #un-comment whichever theme you want
@@ -260,14 +306,21 @@ FacetOBRAbove100 <- ggplot(OBRAbove100DF, aes(x=Biome, y=Alpha, fill=Biome, colo
              )
 FacetOBRAbove100
 ```
-  
-  
-    
-       
+
+<br>
+
+<center>
+*Figure 1. Map of North and South American biomes.* 
+</center>
+
+<br>
+
+<br>
+
 ### Circle Plots 
 #### *Species richness for each order, grouped by biome*
 #### All bryophyte orders
-```{r fig.height=9, fig.width=9, fig.align="center"}
+```{r fig.height=9, fig.width=9, fig.align="center", echo = FALSE}
 circos.clear()
 circos.par(start.degree = 0)
 chordDiagram(CircleMatAll, grid.col = grid.col, column.col = biome_cols_11, 
@@ -281,10 +334,16 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
   circos.text(mean(xlim), ylim[1], sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex=0.5)
 }, bg.border = NA)
 ```
-  
+<center>
+*Figure 7. Relative contributions of the number of species in each bryophyte order to the total number of species present in each biome.* 
+</center>
+
+<br>
+
+<br>
     
-#### Only moss orders
-```{r fig.height=9, fig.width=9, fig.align="center"}
+#### Moss orders only
+```{r fig.height=9, fig.width=9, fig.align="center", echo=FALSE}
 circos.clear()
 circos.par(start.degree = 0)
 chordDiagram(CircleMatAllMoss, grid.col = grid.col, column.col = biome_cols_11, 
@@ -298,4 +357,8 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
   circos.text(mean(xlim), ylim[1], sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex=0.5)
 }, bg.border = NA)
 ```
+<center>
+*Figure 8. Relative contributions of the number of species in each moss order to the total number of species present in each biome.* 
+</center>
 
+<br>

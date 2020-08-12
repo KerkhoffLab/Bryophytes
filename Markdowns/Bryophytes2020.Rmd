@@ -92,6 +92,7 @@ grid.col <- c(Coniferous_Forests = "#D8B70A", Dry_Forest = "#972D15",
 
 
 ### Biomes in North and South America
+<<<<<<< HEAD
 ```{r my-chunk, fig.height=6, fig.width=10, fig.align="center", echo=FALSE}
 BiomeMap <- qtm(biomes_shp,
                         fill="biomes", 
@@ -199,6 +200,7 @@ FacetOBRBelow10 <- ggplot(OBRBelow10DF, aes(x=Biome, y=Alpha, fill=Biome, color=
              )
 FacetOBRBelow10
 ```
+<<<<<<< HEAD
 
 <br>
 
@@ -235,6 +237,7 @@ FacetOBR10to25 <- ggplot(OBR10to25DF, aes(x=Biome, y=Alpha, fill=Biome, color=Bi
              )
 FacetOBR10to25
 ```
+<<<<<<< HEAD
 
 <br>
 

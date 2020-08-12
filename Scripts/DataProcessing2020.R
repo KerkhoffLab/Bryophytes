@@ -169,7 +169,10 @@ saveRDS(LongLatBetaRaster, file="Data/LongLatBetaRaster.rds")
 
 # 2.3 Find cells in each biome (each cell assigned to the biome that covers the center of the cell)
 # Subset biome data
+<<<<<<< HEAD
 biomes_shp <- shapefile("Data/Biomes/Biomes_olson_projected.shp")
+=======
+>>>>>>> 057ee633511f436c9ef0a4ea2fa45dfb0bb11d15
 Coniferous_Forests <- subset(biomes_shp, biomes == "Coniferous_Forests")
 Dry_Forest <- subset(biomes_shp, biomes == "Dry_Forest")
 Mediterranean_Woodlands <- subset(biomes_shp, biomes == "Mediterranean_Woodlands")
@@ -360,10 +363,13 @@ saveRDS(BiomeRichness, file = "Data/BiomeRichness.rds")
 
 
 # 4.2 Loop through orders and tally richness for each order, store in a list
+<<<<<<< HEAD
 BiomeNames <- unique(BiomeRichness$Type)
 NumberBiomes <- length(BiomeNames)
 NumberOrders <- length(OrderNames)
 
+=======
+>>>>>>> 057ee633511f436c9ef0a4ea2fa45dfb0bb11d15
 OrderList <- list()
 for(i in 1:NumberOrders){
   ord <- OrderNames[i]
@@ -383,10 +389,17 @@ for(i in 1:NumberOrders){
 
 # 4.3 OrderBiomeDF
 # Includes orders and biomes, not separated by continent or hemisphere
+<<<<<<< HEAD
 OrderBiomeDF <- data.frame()
 o <- OrderNames[1]
 
 for(i in 1:NumberBiomes){
+=======
+o <- OrderNames[1]
+b <- BiomeNames[1]
+
+for(i in 2:NumberBiomes){
+>>>>>>> 057ee633511f436c9ef0a4ea2fa45dfb0bb11d15
   b <- BiomeNames[i]
   tempdf <- data.frame(ORange(o, b))
   tempdf$CellID <- c(1:15038)
@@ -454,9 +467,15 @@ OBRBelow10DF <- subset(OrderBiomeDF,
 
 
 # 4.5 Save data
+<<<<<<< HEAD
 saveRDS(OrderRichList, "Data/OrderRichList.rds")
 saveRDS(BiomeRichness, "Data/BiomeRichness.rds")
 saveRDS(OrderBiomeDF, "Data/OrderBiomeDF.rds")
+=======
+saveRDS(OrderRichList, file = "Data/OrderRichList.rds")
+saveRDS(BiomeRich, "Data/BiomeRich.rds")
+saveRDS(OrderBiomeDF, file = "Data/OrderBiomeDF.rds")
+>>>>>>> 057ee633511f436c9ef0a4ea2fa45dfb0bb11d15
 
 saveRDS(OBRAbove100DF, "Data/OBRAbove100DF.rds")
 saveRDS(OBR25to100DF, "Data/OBR25to100DF.rds")
@@ -534,10 +553,13 @@ for(i in 1:length(OrderNames)){
 }
 
 # 5.6 MossOrderSpeciesList
+<<<<<<< HEAD
 MossPresence <- BryophytePresence %>%
   filter(Group == "Moss" | Group == "Mosses")
 MossOrderNames <- unique(MossPresence$Order)
 
+=======
+>>>>>>> 057ee633511f436c9ef0a4ea2fa45dfb0bb11d15
 MossOrderSpeciesList <- list()
 for(i in 1:length(MossOrderNames)){
   order <- MossOrderNames[i]
@@ -553,7 +575,11 @@ CircleMatAll <- matrix(NA, length(OrderNames), length(BiomeNames))
 rownames(CircleMatAll) <- OrderNames
 colnames(CircleMatAll) <- BiomeNames
 
+<<<<<<< HEAD
 # 5.7.2 Fill matrix so it counts species based on top biome
+=======
+# 5.7.2 Fill matrix so it counts species based on top biome (moss)
+>>>>>>> 057ee633511f436c9ef0a4ea2fa45dfb0bb11d15
 for(h in 1:length(OrderNames)){
   order <- OrderNames[h]
   speclist <- OrderSpeciesList[[h]]
@@ -627,7 +653,11 @@ for(i in 1:length(BiomeNames)){
 }
 
 # 5.8.3 Save matrix
+<<<<<<< HEAD
 saveRDS(CircleMatAllMoss, "Data/CircleMatAllMoss.rds")
+=======
+saveRDS("Data/CircleMatAllMoss.rds")
+>>>>>>> 057ee633511f436c9ef0a4ea2fa45dfb0bb11d15
 
 
 

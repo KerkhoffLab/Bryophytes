@@ -49,8 +49,14 @@ saveRDS(OrderBiomeDF, file = "Data/OrderBiomeDF.rds")
 # Includes orders and biomes, not separated by continent or hemisphere
 CleanOrderBiomeDF <- data.frame()
 o <- OrderNames[1]
+<<<<<<< HEAD
 
 for(i in 1:NumberBiomes){
+=======
+b <- BiomeNames[1]
+
+for(i in 2:NumberBiomes){
+>>>>>>> 057ee633511f436c9ef0a4ea2fa45dfb0bb11d15
   b <- BiomeNames[i]
   tempdf <- data.frame(ORange(o, b, "both", "clean"))
   tempdf$CellID <- c(1:15038)

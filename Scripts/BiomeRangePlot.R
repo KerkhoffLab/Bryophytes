@@ -292,8 +292,8 @@ BiomeRangeCellID <- unique(BiomeRangeWeight$CellID)
 for(i in BiomeRangeCellID){
   vec <- BiomeRangeClean$Weight[which(BiomeRangeClean$CellID == i)]
   if(length(vec) > 1){
-    min <- min(vec)
-    drop <- which(BiomeRangeClean$CellID == i & BiomeRangeClean$Weight == min)
+    max <- max(vec)
+    drop <- which(BiomeRangeClean$CellID == i & BiomeRangeClean$Weight != max)
     BiomeRangeClean <- BiomeRangeClean[-drop,]
   }
 }

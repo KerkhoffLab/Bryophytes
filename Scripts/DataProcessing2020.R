@@ -483,6 +483,9 @@ BiomeCellsVec <- as.factor(BiomeCellsVec)
 BiomeCellsDF <- data.frame(CellID = 1:15038)
 BiomeCellsDF$Biome <- BiomeCellsVec
 
+# 5.2.1 Save BiomeCellsDF
+saveRDS(BiomeCellsDF, "Data/BiomeCellsDF.rds")
+
 # 5.3 Filter BryophytePresence by species and find cell with highest richness value
 SpeciesNames <- unique(BryophytePresence$Species)
 SpeciesBiomes <- data.frame("Species" = SpeciesNames)

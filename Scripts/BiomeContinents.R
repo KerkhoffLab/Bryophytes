@@ -5,7 +5,7 @@
 # Load Data ----------------------------------------------------------------------------------
 # Find in BiomeDiversity.R
 ContBiomeRichness <- readRDS("Data/BiomeRichness.rds")
-BiomeNames <- unique(BiomeRichness$Type)
+BiomeNames <- unique(ContBiomeRichness$Type)
 
 
 # 1.0 Add Continent column to dataframe ------------------------------------------------------

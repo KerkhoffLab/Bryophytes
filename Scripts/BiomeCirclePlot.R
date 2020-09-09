@@ -664,6 +664,10 @@ for(i in 1:length(BiomeNames)){
   }
 }
 
+# Save matrix for quantitative analysis
+saveRDS(CircleMatAllMoss, "Data/CircleMatAllMoss.rds")
+
+
 # Plot ------------------------------------------------------------------------
 circos.clear()
 

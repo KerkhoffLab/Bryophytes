@@ -159,6 +159,47 @@ biome_cols_29 <- c(biome_cols_11,
                      "#FDD262", "#D3DDDC", "#C7B19C", 
                      "#C27D38"))
 
+cols7 <- c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
+           "#446455", "#FDD262", "#D3DDDC", "#C7B19C",
+           "#798E87", "#C27D38")
+
+ConForVec <- vector(mode="character", length=260)
+ConForVec[1:260] <- "#D8B70A"
+
+DryForVec <- vector(mode="character", length=244)
+DryForVec[1:244] <- "#972D15"
+
+MedWoodVec <- vector(mode="character", length=30)
+MedWoodVec[1:30] <- "#A2A475"
+
+MoistVec <- vector(mode="character", length=929)
+MoistVec[1:929] <- "#81A88D"
+
+SavVec <- vector(mode="character", length=336)
+SavVec[1:336] <- "#02401B"
+
+TaigaVec <- vector(mode="character", length=612)
+TaigaVec[1:612] <- "#446455"
+
+TempGrassVec <- vector(mode="character", length=425)
+TempGrassVec[1:425] <- "#FDD262"
+
+TempMixVec <- vector(mode="character", length=334)
+TempMixVec[1:334] <- "#D3DDDC"
+
+TropGrassVec <- vector(mode="character", length=89)
+TropGrassVec[1:89] <- "#C7B19C"
+
+TundraVec <- vector(mode="character", length=385)
+TundraVec[1:385] <- "#798E87"
+
+XericVec <- vector(mode="character", length=392)
+XericVec[1:392] <- "#C27D38"
+
+biome_cols_4036 <- c(ConForVec, DryForVec, MedWoodVec, MoistVec, SavVec, 
+                     TaigaVec, TempGrassVec, TempMixVec, TropGrassVec, 
+                     TundraVec, XericVec)
+
 
 
 # 3.0 BRYOPHYTE RICHNESS MAPS ----------------------------------------------
@@ -332,11 +373,24 @@ saveRDS(BiomeRichness, file = "Data/BiomeRichness.rds")
 
 # 5.0 MAKE PLOTS -----------------------------------------------------------
 # Using richness values of cells whose centers are within each biome
+# Load data
+BiomeRichness <- readRDS("Data/BiomeRichness.rds")
 
 #Biome richness scatterplot ------------------------------------------------
-BiomeRichScatter <- ggplot(BiomeRichness, aes(Latitude, Alpha, color=Type)) +
+BiomeRichScatter <- ggplot(BiomeRichness, aes(Latitude, Alpha, color=Type), show.legend=TRUE) +
   geom_point(shape=16, size=2.5, alpha=0.5) +
-  geom_smooth() +
+  scale_color_manual(values=c("Coniferous_Forests"="#D8B70A", 
+                              "Dry_Forest"="#972D15",
+                              "Mediterranean_Woodlands"="#A2A475",
+                              "Moist_Forest"="#81A88D",
+                              "Savannas"="#02401B",
+                              "Taiga"="#446455",
+                              "Temperate_Grasslands"="#FDD262",
+                              "Temperate_Mixed"="#D3DDDC",
+                              "Tropical_Grasslands"="#C7B19C",
+                              "Tundra"="#798E87",
+                              "Xeric_Woodlands"="#C27D38")) +
+  #geom_smooth() +
   xlab("Latitude") +
   ylab("Biome Alpha Diversity") +
   labs(color="Biome") +
@@ -349,6 +403,20 @@ BiomeRichScatter
 png("Figures/AlphaBiomeScatter.png", width = 1500, height = 1000, pointsize = 20)
 BiomeRichScatter
 dev.off()
+
+#Biome richness scatterplot 2 (for the archives) ---------------------------
+BiomeRichScatter2 <- ggplot(BiomeRichness, aes(Latitude, Alpha, color=Type), show.legend=TRUE) +
+  geom_point(shape=16, size=2.5, alpha=0.5,
+             color=biome_cols_4036, show.legend=TRUE) +
+  #geom_smooth() +
+  xlab("Latitude") +
+  ylab("Biome Alpha Diversity") +
+  labs(color="Biome") +
+  theme_minimal() +
+  theme(axis.title.y = element_text(size=32),
+        axis.title.x = element_text(size=32),
+        axis.text = element_text(size=20))
+BiomeRichScatter2
 
 #Biome richness boxplot ----------------------------------------------------
 BiomeRichBox <- ggplot(BiomeRichness, aes(x=Type, y=Alpha, fill=Type)) + 

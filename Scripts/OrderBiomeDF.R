@@ -20,9 +20,8 @@ source("Functions/ORange.R")
 # OrderBiomeDF ----------------------------------------------------------
 # Includes orders and biomes, not separated by continent or hemisphere
 o <- OrderNames[1]
-b <- BiomeNames[1]
 
-for(i in 2:NumberBiomes){
+for(i in 1:NumberBiomes){
   b <- BiomeNames[i]
   tempdf <- data.frame(ORange(o, b))
   tempdf$CellID <- c(1:15038)
@@ -50,9 +49,8 @@ saveRDS(OrderBiomeDF, file = "Data/OrderBiomeDF.rds")
 # Includes orders and biomes, not separated by continent or hemisphere
 CleanOrderBiomeDF <- data.frame()
 o <- OrderNames[1]
-b <- BiomeNames[1]
 
-for(i in 2:NumberBiomes){
+for(i in 1:NumberBiomes){
   b <- BiomeNames[i]
   tempdf <- data.frame(ORange(o, b, "both", "clean"))
   tempdf$CellID <- c(1:15038)

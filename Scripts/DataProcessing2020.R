@@ -169,6 +169,7 @@ saveRDS(LongLatBetaRaster, file="Data/LongLatBetaRaster.rds")
 
 # 2.3 Find cells in each biome (each cell assigned to the biome that covers the center of the cell)
 # Subset biome data
+biomes_shp <- shapefile("Data/Biomes/Biomes_olson_projected.shp")
 Coniferous_Forests <- subset(biomes_shp, biomes == "Coniferous_Forests")
 Dry_Forest <- subset(biomes_shp, biomes == "Dry_Forest")
 Mediterranean_Woodlands <- subset(biomes_shp, biomes == "Mediterranean_Woodlands")
@@ -359,6 +360,10 @@ saveRDS(BiomeRichness, file = "Data/BiomeRichness.rds")
 
 
 # 4.2 Loop through orders and tally richness for each order, store in a list
+BiomeNames <- unique(BiomeRichness$Type)
+NumberBiomes <- length(BiomeNames)
+NumberOrders <- length(OrderNames)
+
 OrderList <- list()
 for(i in 1:NumberOrders){
   ord <- OrderNames[i]
@@ -378,10 +383,10 @@ for(i in 1:NumberOrders){
 
 # 4.3 OrderBiomeDF
 # Includes orders and biomes, not separated by continent or hemisphere
+OrderBiomeDF <- data.frame()
 o <- OrderNames[1]
-b <- BiomeNames[1]
 
-for(i in 2:NumberBiomes){
+for(i in 1:NumberBiomes){
   b <- BiomeNames[i]
   tempdf <- data.frame(ORange(o, b))
   tempdf$CellID <- c(1:15038)
@@ -449,9 +454,9 @@ OBRBelow10DF <- subset(OrderBiomeDF,
 
 
 # 4.5 Save data
-saveRDS(OrderRichList, file = "Data/OrderRichList.rds")
-saveRDS(BiomeRich, "Data/BiomeRich.rds")
-saveRDS(OrderBiomeDF, file = "Data/OrderBiomeDF.rds")
+saveRDS(OrderRichList, "Data/OrderRichList.rds")
+saveRDS(BiomeRichness, "Data/BiomeRichness.rds")
+saveRDS(OrderBiomeDF, "Data/OrderBiomeDF.rds")
 
 saveRDS(OBRAbove100DF, "Data/OBRAbove100DF.rds")
 saveRDS(OBR25to100DF, "Data/OBR25to100DF.rds")
@@ -477,6 +482,9 @@ BiomeCellsVec <- as.factor(BiomeCellsVec)
 # 5.2 Make BiomeCellsDF
 BiomeCellsDF <- data.frame(CellID = 1:15038)
 BiomeCellsDF$Biome <- BiomeCellsVec
+
+# 5.2.1 Save BiomeCellsDF
+saveRDS(BiomeCellsDF, "Data/BiomeCellsDF.rds")
 
 # 5.3 Filter BryophytePresence by species and find cell with highest richness value
 SpeciesNames <- unique(BryophytePresence$Species)
@@ -529,6 +537,10 @@ for(i in 1:length(OrderNames)){
 }
 
 # 5.6 MossOrderSpeciesList
+MossPresence <- BryophytePresence %>%
+  filter(Group == "Moss" | Group == "Mosses")
+MossOrderNames <- unique(MossPresence$Order)
+
 MossOrderSpeciesList <- list()
 for(i in 1:length(MossOrderNames)){
   order <- MossOrderNames[i]
@@ -544,7 +556,7 @@ CircleMatAll <- matrix(NA, length(OrderNames), length(BiomeNames))
 rownames(CircleMatAll) <- OrderNames
 colnames(CircleMatAll) <- BiomeNames
 
-# 5.7.2 Fill matrix so it counts species based on top biome (moss)
+# 5.7.2 Fill matrix so it counts species based on top biome 
 for(h in 1:length(OrderNames)){
   order <- OrderNames[h]
   speclist <- OrderSpeciesList[[h]]
@@ -618,8 +630,6 @@ for(i in 1:length(BiomeNames)){
 }
 
 # 5.8.3 Save matrix
-saveRDS("Data/CircleMatAllMoss.rds")
-
-
+saveRDS(CircleMatAllMoss, "Data/CircleMatAllMoss.rds")
 
 ######### CONGRATULATIONS! NOW YOU HAVE ALL OF THE DATA YOU NEED TO RUN BRYOPHYTES2020.RMD! #########

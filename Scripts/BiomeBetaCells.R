@@ -112,11 +112,11 @@ length(as.vector(BiomeBetaCellsWeighted$CellID)) - length(unique(BiomeBetaCellsW
 #Choose one biome per cell (cells with multiple biomes go to biome with higher proportion coverage)
 BiomeBetaCellsClean <- BiomeBetaCellsWeighted
 BiomeBetaCellID <- unique(BiomeBetaCellsWeighted$CellID)
-for(i in BiomeCellID){
+for(i in BiomeBetaCellID){
   vec <- BiomeBetaCellsClean$Weight[which(BiomeBetaCellsClean$CellID == i)]
   if(length(vec) > 1){
-    min <- min(vec)
-    drop <- which(BiomeBetaCellsClean$CellID == i & BiomeBetaCellsClean$Weight == min)
+    max <- max(vec)
+    drop <- which(BiomeBetaCellsClean$CellID == i & BiomeBetaCellsClean$Weight != max)
     BiomeBetaCellsClean <- BiomeBetaCellsClean[-drop,]
   }
 }

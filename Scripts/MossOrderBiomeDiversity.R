@@ -390,3 +390,21 @@ MossFacetContBiomeRich
 png("Figures/AlphaMossBiomeContinents.png", width = 1500, height = 1000, pointsize = 20)
 MossFacetContBiomeRich
 dev.off()
+
+
+
+# 3.0 MOSS BIOME DIVERSITY -------------------------------------------------
+MossAlphaBiomeBoxViolin <- ggplot(MossOBC, 
+                                  aes(x=Biome, y=Alpha, fill=Biome, color=Biome)) + 
+  geom_boxplot(show.legend = FALSE, fill=biome_cols_11, color="black") +
+  guides(x = guide_axis(angle=30)) +
+  theme_gray() +
+  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35, 
+              color="gray25") +
+  xlab("Biome") +
+  ylab("Richness") +  
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),
+        axis.text.y = element_text(size=15), 
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 8))
+MossAlphaBiomeBoxViolin

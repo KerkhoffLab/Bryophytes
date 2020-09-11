@@ -187,7 +187,7 @@ rownames(NullMOBMat) <- MossOrderNames
 colnames(NullMOBMat) <- BiomeNamesAndTotal
 
 SortedMossOrderNames <- sort(MossOrderNames)
-NumberReps <- 100
+NumberReps <- 1000
 
 for(i in 1:NumberReps){
   # 4.2.1: Use transform to shuffle order column (assign random order to each species)
@@ -287,7 +287,7 @@ for(i in 1:NumberOrders){
     nullpercent <- NullMOBPerMat[order, biome]
     obspercent <- MOBPerMatSpecies[order, biome]
     zscore <- ((nullpercent - obspercent)/sd)
-    MOBZMat[order, biome] <- zscore
+    MOBZMatBiomeSD[order, biome] <- zscore
   }
 }
 
@@ -301,7 +301,7 @@ for(i in 1:NumberOrders){
     nullpercent <- NullMOBPerMat[order, biome]
     obspercent <- MOBPerMatSpecies[order, biome]
     zscore <- ((nullpercent - obspercent)/obssd)
-    MOBZMat[order, biome] <- zscore
+    MOBZMatAllSD[order, biome] <- zscore
   }
 }
 
@@ -322,7 +322,7 @@ for(i in 1:NumberOrders){
   }
   for(j in 1:NumberBiomes){
     biome <- BiomeNames[j]
-    zscore <- MOBZMat[order,biome]
+    zscore <- MOBZMatBiomeSD[order,biome]
     rownumber <- rownumber + 1
     MOBZScoreDFBiomeSD$Order[rownumber] <- order
     MOBZScoreDFBiomeSD$Biome[rownumber] <- biome

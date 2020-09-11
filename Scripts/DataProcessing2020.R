@@ -550,6 +550,9 @@ for(i in 1:length(MossOrderNames)){
   MossOrderSpeciesList[[i]] <- specvec
 }
 
+#5.6.1 Save list
+saveRDS(MossOrderSpeciesList, "Data/MossOrderSpeciesList.rds")
+
 # 5.7 Make matrix for all bryophytes plot
 # 5.7.1 Make empty matrix 
 CircleMatAll <- matrix(NA, length(OrderNames), length(BiomeNames))

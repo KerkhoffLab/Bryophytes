@@ -234,7 +234,8 @@ MossBiomeBetaMap <- ggplot() +
   geom_tile(data = gplotB, 
             aes(x = x, y = y, fill = value)) +
   scale_fill_gradientn(name = "β diversity", colours=cols, na.value="transparent", limits = c(0,0.5)) +
-  coord_quickmap() + geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
+  coord_quickmap() + 
+  #geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) +                   #un-comment for continental boundaries
   #geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() +  #un-comment for mountains
   geom_sf(data = biomes_sf, size = 0.5, fill=NA) +
   theme(legend.text=element_text(size=20), legend.title=element_text(size=32), axis.title = element_blank())

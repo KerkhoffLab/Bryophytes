@@ -210,6 +210,8 @@ RichnessDF <- rasterToPoints(RichnessRaster)
 RichnessDF <- data.frame(RichnessDF)
 colnames(RichnessDF) <- c("Longitude", "Latitude", "Alpha")
 
+saveRDS(RichnessDF, file="Data/RichnessDF.rds")
+
 
 # 3.2 BRYOPHYTE RICHNESS - biomes ------------------------------------------
 # 3.2.1 Add biomes outlines (and continental and mountainous outlines)
@@ -438,7 +440,19 @@ dev.off()
 #Biome richness violin plot ------------------------------------------------
 BiomeRichViolin <- ggplot(BiomeRichness, 
                           aes(x=Type, y=Alpha, fill=Type)) +
-  geom_violin(scale="area", show.legend = FALSE, fill=cols1) +  #change fill colors +
+  geom_violin(scale="count", show.legend = FALSE) +
+  scale_fill_manual(values=c("Coniferous_Forests"="#D8B70A", 
+                             "Dry_Forest"="#972D15",
+                             "Mediterranean_Woodlands"="#A2A475",
+                             "Moist_Forest"="#81A88D",
+                             "Savannas"="#02401B",
+                             "Taiga"="#446455",
+                             "Temperate_Grasslands"="#FDD262",
+                             "Temperate_Mixed"="#D3DDDC",
+                             "Tropical_Grasslands"="#C7B19C",
+                             "Tundra"="#798E87",
+                             "Xeric_Woodlands"="#C27D38")) +
+  geom_boxplot(width=0.05, fill="white", show.legend=FALSE) +
   xlab("Biome") +
   ylab("Richness") +
   theme_minimal() +  

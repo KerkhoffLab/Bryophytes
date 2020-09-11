@@ -35,6 +35,7 @@ MossRichnessRaster <- readRDS("Data/MossRichnessRaster.rds")  #run 0.2 for data
 LongLatDF <- readRDS("Data/LongLatDF.rds")  #run BiomeDiversity.R for data
 biomes_shp <- shapefile("Data/Biomes/Biomes_olson_projected.shp")
 biomes_sf <- st_as_sf(biomes_shp)
+MossRichnessDF <- readRDS("Data/MossRichnessDF.rds")  #run through 2.1 for data
 
 # 0.2 Run for MossRichnessRaster -------------------------------------------
 
@@ -195,6 +196,8 @@ MossRichnessDF <- rasterToPoints(MossRichnessRaster)
 MossRichnessDF <- data.frame(MossRichnessDF)
 colnames(MossRichnessDF) <- c("Longitude", "Latitude", "Alpha")
 
+saveRDS(MossRichnessDF, file="Data/MossRichnessDF.rds")
+
 # 2.2 Add biomes outlines (and continental and mountainous outlines) -------
 biomes_shp <- shapefile("Data/Biomes/Biomes_olson_projected.shp")
 biomes_sf <- st_as_sf(biomes_shp)
@@ -249,7 +252,7 @@ dev.off()
 # 4.0 MAKE PLOTS -----------------------------------------------------------
 # Using richness values of cells whose centers are within each biome
 # Load data
-BiomeRichness <- readRDS("Data/BiomeRichness.rds")
+MossBiomeRichness <- readRDS("Data/MossBiomeRichness.rds")
 
 # 4.1 Biome richness scatterplot -------------------------------------------
 MossBiomeRichScatter <- ggplot(MossBiomeRichness, aes(Latitude, Alpha, color=Type), show.legend=TRUE) +
@@ -300,9 +303,19 @@ dev.off()
 # 4.3 Biome richness violin plot -------------------------------------------
 MossBiomeRichViolin <- ggplot(MossBiomeRichness, 
                           aes(x=Type, y=Alpha, fill=Type)) +
-  geom_violin(scale="area", show.legend = FALSE, 
-              fill=cols1
-              ) +  #change fill colors
+  geom_violin(scale="count", show.legend = FALSE) +
+  scale_fill_manual(values=c("Coniferous_Forests"="#D8B70A", 
+                              "Dry_Forest"="#972D15",
+                              "Mediterranean_Woodlands"="#A2A475",
+                              "Moist_Forest"="#81A88D",
+                              "Savannas"="#02401B",
+                              "Taiga"="#446455",
+                              "Temperate_Grasslands"="#FDD262",
+                              "Temperate_Mixed"="#D3DDDC",
+                              "Tropical_Grasslands"="#C7B19C",
+                              "Tundra"="#798E87",
+                              "Xeric_Woodlands"="#C27D38")) +
+  geom_boxplot(width=0.05, fill="white", show.legend=FALSE) +
   xlab("Biome") +
   ylab("Richness") +
   theme_minimal() +  

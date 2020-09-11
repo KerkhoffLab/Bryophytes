@@ -563,7 +563,7 @@ dev.off()
 
 
 
-## PLOT WITH EACH SPECIES COUNTED IN THE BIOME WHERE THEY HAVE THE MOST RICHNESS ##
+## PLOT WITH EACH SPECIES COUNTED IN THE BIOME WHERE THEY HAVE THE MOST ABUNDANCE ##
 # Make plot matrix ----------------------------------------------------------
 
 # Make empty matrix 
@@ -623,7 +623,7 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
 dev.off()
 
 
-## PLOT WITH EACH SPECIES COUNTED IN THE BIOME WHERE THEY HAVE THE MOST RICHNESS ##
+## PLOT WITH EACH SPECIES COUNTED IN THE BIOME WHERE THEY HAVE THE MOST ABUNDANCE ##
 ## MOSSES ONLY ##
 # Make plot matrix ----------------------------------------------------------
 

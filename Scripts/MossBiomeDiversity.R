@@ -36,6 +36,8 @@ LongLatDF <- readRDS("Data/LongLatDF.rds")  #run BiomeDiversity.R for data
 biomes_shp <- shapefile("Data/Biomes/Biomes_olson_projected.shp")
 biomes_sf <- st_as_sf(biomes_shp)
 MossRichnessDF <- readRDS("Data/MossRichnessDF.rds")  #run through 2.1 for data
+nw_mount <- shapefile("Data/MapOutlines/Mountains/Koeppen-Geiger_biomes.shp")
+
 
 # 0.2 Run for MossRichnessRaster -------------------------------------------
 
@@ -184,21 +186,35 @@ AlphaXericWood <- merge(AlphaXericWood, LongLatDF)
 # 1.3 Bind biome dataframes ------------------------------------------------
 MossBiomeRichness <- bind_rows(AlphaConFor, AlphaDryFor, AlphaMedWood,
                            AlphaMoistFor,AlphaSavanna, AlphaTaiga, 
-                           AlphaTempGrass, AlphaTempMix,AlphaTropGrass,
+                           AlphaTempGrass, AlphaTempMix, AlphaTropGrass,
                            AlphaTundra, AlphaXericWood)
 saveRDS(MossBiomeRichness, file = "Data/MossBiomeRichness.rds")
 
+# 2.0 CREATE MOSS RICHNESS BY BIOME AND MOUNTAINS DATAFRAME ----------------
+# Test - DF with biomes and mountain regions -------------------------------
+AlphaMount <- raster::extract(MossRichnessRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
+colnames(AlphaMount) <- c("Type", "CellID", "Alpha")
+AlphaMount$Type <-"nw_mount"
+AlphaMountVec <- AlphaMount$CellID
+AlphaMount <- merge(AlphaMount, LongLatDF)
+
+MossBiomeMountRichness <- bind_rows(AlphaConFor, AlphaDryFor, AlphaMedWood,
+                                    AlphaMoistFor,AlphaSavanna, AlphaTaiga, 
+                                    AlphaTempGrass, AlphaTempMix,
+                                    AlphaTropGrass, AlphaTundra, 
+                                    AlphaXericWood, AlphaMount)
 
 
-# 2.0 MOSS BIOME RICHNESS MAP ----------------------------------------------
-# 2.1 Create moss richness dataframe ---------------------------------------
+
+# 3.0 MOSS BIOME RICHNESS MAP ----------------------------------------------
+# 3.1 Create moss richness dataframe ---------------------------------------
 MossRichnessDF <- rasterToPoints(MossRichnessRaster)
 MossRichnessDF <- data.frame(MossRichnessDF)
 colnames(MossRichnessDF) <- c("Longitude", "Latitude", "Alpha")
 
 saveRDS(MossRichnessDF, file="Data/MossRichnessDF.rds")
 
-# 2.2 Add biomes outlines (and continental and mountainous outlines) -------
+# 3.2 Add biomes outlines (and continental and mountainous outlines) -------
 biomes_shp <- shapefile("Data/Biomes/Biomes_olson_projected.shp")
 biomes_sf <- st_as_sf(biomes_shp)
 
@@ -208,7 +224,7 @@ nw_bound <- shapefile("Data/MapOutlines/Global_bound/Koeppen-Geiger_biomes.shp")
 nw_mount_sf <- st_as_sf(nw_mount)
 nw_bound_sf <- st_as_sf(nw_bound)
 
-# 2.3 Create map -----------------------------------------------------------
+# 3.3 Create map -----------------------------------------------------------
 MossBiomeRichnessMap <- ggplot(fill=biomes_shp$biomes) +            #delete "fill=biomes_shp$biomes if not coloring the biomes
   geom_tile(data=MossRichnessDF, aes(x=Longitude, y=Latitude, fill=Alpha)) + 
   scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent") + 
@@ -222,14 +238,14 @@ MossBiomeRichnessMap <- ggplot(fill=biomes_shp$biomes) +            #delete "fil
         axis.title = element_blank())
 MossBiomeRichnessMap
 
-# 2.4 Save map
+# 3.4 Save map
 png("Figures/MossAlphaBiomeMap.png", width = 1000, height = 1000, pointsize = 30)
 MossBiomeRichnessMap
 dev.off()
 
 
 
-# 3.0 MOSS BIOME BETA MAP --------------------------------------------------
+# 4.0 MOSS BIOME BETA MAP --------------------------------------------------
 ### FIRST RUN MAPPINGMOSSDIVERSITY.R ###
 MossBiomeBetaMap <- ggplot() +
   geom_tile(data = dplyr::filter(gplotOutlier, !is.na(value)), 
@@ -349,4 +365,59 @@ MossBiomeRichBV
 
 png("Figures/MossAlphaBiomeBoxViolin.png", width = 1500, height = 1000, pointsize = 20)
 MossBiomeRichBV
+dev.off()
+
+
+# 4.5 Biome and mountainous richness scatterplot ---------------------------
+MossBiomeMountRichScatter <- ggplot(MossBiomeMountRichness, aes(Latitude, Alpha, color=Type, shape=Type), show.legend=TRUE) +
+  geom_point(size=2.5, alpha=0.5) +
+  scale_shape_manual(values=c("Coniferous_Forests"=16, 
+                              "Dry_Forest"=16,
+                              "Mediterranean_Woodlands"=16,
+                              "Moist_Forest"=16,
+                              "Savannas"=16,
+                              "Taiga"=16,
+                              "Temperate_Grasslands"=16,
+                              "Temperate_Mixed"=16,
+                              "Tropical_Grasslands"=16,
+                              "Tundra"=16,
+                              "Xeric_Woodlands"=16,
+                              "nw_mount"=1)) +
+  scale_color_manual(values=c("Coniferous_Forests"="#D8B70A", 
+                              "Dry_Forest"="#972D15",
+                              "Mediterranean_Woodlands"="#A2A475",
+                              "Moist_Forest"="#81A88D",
+                              "Savannas"="#02401B",
+                              "Taiga"="#446455",
+                              "Temperate_Grasslands"="#FDD262",
+                              "Temperate_Mixed"="#D3DDDC",
+                              "Tropical_Grasslands"="#C7B19C",
+                              "Tundra"="#798E87",
+                              "Xeric_Woodlands"="#C27D38",
+                              "nw_mount"="#000000"),
+                     labels=c("Coniferous Forests",
+                              "Dry Forest",
+                              "Mediterranean Woodlands",
+                              "Moist Forest", 
+                              "Mountainous",
+                              "Savannas",
+                              "Taiga",
+                              "Temperate Grasslands",
+                              "Temperate Mixed",
+                              "Tropical Grasslands",
+                              "Tundra",
+                              "Xeric Woodlands")) +
+  #geom_smooth() +
+  xlab("Latitude") +
+  ylab("Biome Alpha Diversity") +
+  labs(color="Biome") +
+  theme_minimal() +
+  theme(axis.title.y = element_text(size=32),
+        axis.title.x = element_text(size=32),
+        axis.text = element_text(size=20)) +
+  guides(shape="none")
+MossBiomeMountRichScatter
+
+png("Figures/MossAlphaBiomeMountScatter.png", width = 1500, height = 1000, pointsize = 20)
+MossBiomeMountRichScatter
 dev.off()

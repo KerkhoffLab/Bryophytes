@@ -190,8 +190,10 @@ MossBiomeRichness <- bind_rows(AlphaConFor, AlphaDryFor, AlphaMedWood,
                            AlphaTundra, AlphaXericWood)
 saveRDS(MossBiomeRichness, file = "Data/MossBiomeRichness.rds")
 
+
+
 # 2.0 CREATE MOSS RICHNESS BY BIOME AND MOUNTAINS DATAFRAME ----------------
-# Test - DF with biomes and mountain regions -------------------------------
+# 2.1 DF with mountainous regions considered Type --------------------------
 AlphaMount <- raster::extract(MossRichnessRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
 colnames(AlphaMount) <- c("Type", "CellID", "Alpha")
 AlphaMount$Type <-"nw_mount"
@@ -204,6 +206,32 @@ MossBiomeMountRichness <- bind_rows(AlphaConFor, AlphaDryFor, AlphaMedWood,
                                     AlphaTropGrass, AlphaTundra, 
                                     AlphaXericWood, AlphaMount)
 
+# DF with mountainous regions a new column ---------------------------------
+AlphaMount1 <- raster::extract(MossRichnessRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
+colnames(AlphaMount1) <- c("Region", "CellID", "Alpha")
+AlphaMount1$Region <- "Mountainous"
+AlphaMount1Vec <- AlphaMount1$CellID
+AlphaMount1 <- merge(AlphaMount1, LongLatDF)
+
+MossBiomeMountRichness1 <- bind_rows(AlphaConFor, AlphaDryFor, AlphaMedWood,
+                                     AlphaMoistFor,AlphaSavanna, AlphaTaiga, 
+                                     AlphaTempGrass, AlphaTempMix,
+                                     AlphaTropGrass, AlphaTundra, 
+                                     AlphaXericWood)
+MossRichBM <- full_join(MossBiomeMountRichness1, AlphaMount1,
+                                     by="CellID")
+View(MossRichBM)
+colnames(MossRichBM)[3] <- "Alpha"
+colnames(MossRichBM)[4] <- "Longitude"
+colnames(MossRichBM)[5] <- "Latitude"
+MossRichBM$Alpha.y <- NULL
+MossRichBM$Longitude.y <- NULL
+MossRichBM$Latitude.y <- NULL
+MossRichBM$Region[is.na(MossRichBM$Region)] <- "Lowland"
+#ignore rows with Biome NA values
+MossRichBM <- MossRichBM[complete.cases(MossRichBM[ , 2]),]
+
+saveRDS(MossRichBM, file = "Data/MossRichBM.rds")
 
 
 # 3.0 MOSS BIOME RICHNESS MAP ----------------------------------------------
@@ -420,4 +448,48 @@ MossBiomeMountRichScatter
 
 png("Figures/MossAlphaBiomeMountScatter.png", width = 1500, height = 1000, pointsize = 20)
 MossBiomeMountRichScatter
+dev.off()
+
+
+# 4.6 Biome and mountainous richness scatterplot NEW DF --------------------
+MossRichBMScatter <- ggplot(MossRichBM, 
+                                    aes(Latitude, Alpha, color=Type, 
+                                        shape=Region), show.legend=TRUE) +
+  geom_point(size=2.5, alpha=0.5) +
+  #guides(shape="none") +
+  scale_shape_manual(values=c("Lowland"=1,
+                              "Mountainous"=16)) +
+  scale_color_manual(values=c("Coniferous_Forests"="#D8B70A", 
+                              "Dry_Forest"="#972D15",
+                              "Mediterranean_Woodlands"="#A2A475",
+                              "Moist_Forest"="#81A88D",
+                              "Savannas"="#02401B",
+                              "Taiga"="#446455",
+                              "Temperate_Grasslands"="#FDD262",
+                              "Temperate_Mixed"="#D3DDDC",
+                              "Tropical_Grasslands"="#C7B19C",
+                              "Tundra"="#798E87",
+                              "Xeric_Woodlands"="#C27D38"),
+                     labels=c("Coniferous Forests",
+                              "Dry Forest",
+                              "Mediterranean Woodlands", 
+                              "Mountainous",
+                              "Savannas",
+                              "Taiga",
+                              "Temperate Grasslands",
+                              "Temperate Mixed",
+                              "Tropical Grasslands",
+                              "Tundra",
+                              "Xeric Woodlands")) +
+  xlab("Latitude") +
+  ylab("Biome Alpha Diversity") +
+  labs(color="Biome") +
+  theme_minimal() +
+  theme(axis.title.y = element_text(size=32),
+        axis.title.x = element_text(size=32),
+        axis.text = element_text(size=20))
+MossRichBMScatter
+
+png("Figures/MossAlphaBiomeMountLow.png", width = 1500, height = 1000, pointsize = 20)
+MossRichBMScatter
 dev.off()

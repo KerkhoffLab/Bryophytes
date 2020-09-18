@@ -35,8 +35,9 @@ MossRichnessRaster <- readRDS("Data/MossRichnessRaster.rds")  #run 0.2 for data
 LongLatDF <- readRDS("Data/LongLatDF.rds")  #run BiomeDiversity.R for data
 biomes_shp <- shapefile("Data/Biomes/Biomes_olson_projected.shp")
 biomes_sf <- st_as_sf(biomes_shp)
-MossRichnessDF <- readRDS("Data/MossRichnessDF.rds")  #run through 2.1 for data
+MossRichnessDF <- readRDS("Data/MossRichnessDF.rds")  #run through 3.1 for data
 nw_mount <- shapefile("Data/MapOutlines/Mountains/Koeppen-Geiger_biomes.shp")
+MossBiomeRichness <- readRDS("Data/MossBiomeRichness.rds")  #run through 1.3 for data
 
 
 # 0.2 Run for MossRichnessRaster -------------------------------------------
@@ -200,25 +201,18 @@ AlphaMount$Type <-"nw_mount"
 AlphaMountVec <- AlphaMount$CellID
 AlphaMount <- merge(AlphaMount, LongLatDF)
 
-MossBiomeMountRichness <- bind_rows(AlphaConFor, AlphaDryFor, AlphaMedWood,
-                                    AlphaMoistFor,AlphaSavanna, AlphaTaiga, 
-                                    AlphaTempGrass, AlphaTempMix,
-                                    AlphaTropGrass, AlphaTundra, 
-                                    AlphaXericWood, AlphaMount)
+MossBiomeMountRichness <- bind_rows(MossBiomeRichness, AlphaMount)
 
-# DF with mountainous regions a new column ---------------------------------
+saveRDS(MossBiomeMountRichness, file = "Data/MossBiomeMountRichness.rds")
+
+# 2.2 DF with mountainous regions a new column -----------------------------
 AlphaMount1 <- raster::extract(MossRichnessRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
 colnames(AlphaMount1) <- c("Region", "CellID", "Alpha")
 AlphaMount1$Region <- "Mountainous"
 AlphaMount1Vec <- AlphaMount1$CellID
 AlphaMount1 <- merge(AlphaMount1, LongLatDF)
 
-MossBiomeMountRichness1 <- bind_rows(AlphaConFor, AlphaDryFor, AlphaMedWood,
-                                     AlphaMoistFor,AlphaSavanna, AlphaTaiga, 
-                                     AlphaTempGrass, AlphaTempMix,
-                                     AlphaTropGrass, AlphaTundra, 
-                                     AlphaXericWood)
-MossRichBM <- full_join(MossBiomeMountRichness1, AlphaMount1,
+MossRichBM <- full_join(MossBiomeRichness, AlphaMount1,
                                      by="CellID")
 View(MossRichBM)
 colnames(MossRichBM)[3] <- "Alpha"
@@ -232,6 +226,47 @@ MossRichBM$Region[is.na(MossRichBM$Region)] <- "Lowland"
 MossRichBM <- MossRichBM[complete.cases(MossRichBM[ , 2]),]
 
 saveRDS(MossRichBM, file = "Data/MossRichBM.rds")
+
+# 2.3 DF with 2 regions columns? -------------------------------------------
+AlphaMount2 <- raster::extract(MossRichnessRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
+colnames(AlphaMount2) <- c("Region", "CellID", "Alpha")
+AlphaMount2$Region <- "Mountainous"
+AlphaMount2Vec <- AlphaMount2$CellID
+AlphaMount2 <- merge(AlphaMount2, LongLatDF)
+
+MossRichBM1 <- full_join(MossBiomeRichness, AlphaMount2,
+                        by="CellID")
+View(MossRichBM1)
+colnames(MossRichBM1)[3] <- "Alpha1"
+colnames(MossRichBM1)[4] <- "Longitude1"
+colnames(MossRichBM1)[5] <- "Latitude1"
+colnames(MossRichBM1)[6] <- "Region1"
+MossRichBM1$Alpha.y <- NULL
+MossRichBM1$Longitude.y <- NULL
+MossRichBM1$Latitude.y <- NULL
+MossRichBM1$Region1[is.na(MossRichBM1$Region1)] <- "Lowland"
+#ignore rows with Biome NA values
+MossRichBM1 <- MossRichBM1[complete.cases(MossRichBM1[ , 2]),]
+
+# 2nd half of DF
+AlphaMount3 <- raster::extract(MossRichnessRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
+colnames(AlphaMount3) <- c("Region", "CellID", "Alpha")
+AlphaMount3$Region <- "Mountainous"
+AlphaMount3Vec <- AlphaMount3$CellID
+AlphaMount3 <- merge(AlphaMount3, LongLatDF)
+
+MossRichBM2 <- bind_rows(MossRichBM1, AlphaMount3)
+
+View(MossRichBM2)
+colnames(MossRichBM2)[8] <- "Alpha2"
+colnames(MossRichBM2)[9] <- "Longitude2"
+colnames(MossRichBM2)[10] <- "Latitude2"
+colnames(MossRichBM2)[7] <- "Region2"
+
+
+saveRDS(MossRichBM2, file = "Data/MossRichBM2.rds")
+
+
 
 
 # 3.0 MOSS BIOME RICHNESS MAP ----------------------------------------------
@@ -493,3 +528,6 @@ MossRichBMScatter
 png("Figures/MossAlphaBiomeMountLow.png", width = 1500, height = 1000, pointsize = 20)
 MossRichBMScatter
 dev.off()
+
+
+# 4.7 Biome and mountainous richness scatterplot NEW NEW DF

@@ -88,6 +88,9 @@ for(i in 1:NumberOrders){
   }
 }
 
+#save matrix
+saveRDS(MOBMat, "Data/MOBMat.rds")
+
 # 2.2 Find percentages and put into a DF
 MOBPercentMat <- MOBMat
 for(i in 1:NumberOrders){

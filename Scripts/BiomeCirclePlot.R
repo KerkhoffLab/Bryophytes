@@ -1,5 +1,6 @@
 # Biome order circle plot
 # Hailey Napier, July 2020
+# DO NOT USE THIS SCRIPT
 
 # 0.1 Load packages -------------------------------------------------------------
 library(dplyr)

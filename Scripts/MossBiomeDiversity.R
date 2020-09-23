@@ -38,6 +38,10 @@ biomes_sf <- st_as_sf(biomes_shp)
 MossRichnessDF <- readRDS("Data/MossRichnessDF.rds")  #run through 3.1 for data
 nw_mount <- shapefile("Data/MapOutlines/Mountains/Koeppen-Geiger_biomes.shp")
 MossBiomeRichness <- readRDS("Data/MossBiomeRichness.rds")  #run through 1.3 for data
+MossBiomeMountRichness <- readRDS("Data/MossBiomeMountRichness.rds")  #run through 2.1
+MossRichBM <- readRDS("Data/MossRichBM.rds")
+MossRichBM2 <- readRDS("Data/MossRichBM2.rds")
+MossAllBiomeMount <- readRDS("Data/MossAllBiomeMount")
 
 
 # 0.2 Run for MossRichnessRaster -------------------------------------------
@@ -104,14 +108,6 @@ colnames(AlphaConFor) <- c("Type", "CellID", "Alpha")
 AlphaConFor$Type <- "Coniferous_Forests"
 AlphaConForVec <- AlphaConFor$CellID
 AlphaConFor <- merge(AlphaConFor, LongLatDF)
-
-#scatterplot
-AlphaConForScatterplot <- ggplot() + geom_point(data = AlphaConFor, aes(Latitude, Alpha), shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "goldenrod2") + ylab("α div in Coniferous Forests") + ylim(0, 500) + xlab("Latitude") + theme_minimal() +  theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
-AlphaConForScatterplot
-
-#boxplot
-theme_set(theme_grey())
-ggplot(AlphaConFor, aes(x=Type, y=Alpha)) + geom_boxplot()
 
 #Dry Forest ----------------------------------------------------------------
 AlphaDryFor <- raster::extract(MossRichnessRaster, Dry_Forest, df = TRUE, cellnumbers = TRUE)
@@ -267,7 +263,11 @@ colnames(MossRichBM2)[7] <- "Region2"
 saveRDS(MossRichBM2, file = "Data/MossRichBM2.rds")
 
 
+# 2.4 DF with additional "All" variable in Type ----------------------------
+MossAllBiomeMount <- MossRichBM
+MossAllBiomeMount$AllBiomes <- "All Biomes"
 
+saveRDS(MossAllBiomeMount, file="Data/MossAllBiomeMount")
 
 # 3.0 MOSS BIOME RICHNESS MAP ----------------------------------------------
 # 3.1 Create moss richness dataframe ---------------------------------------
@@ -431,7 +431,8 @@ MossBiomeRichBV
 dev.off()
 
 
-# 4.5 Biome and mountainous richness scatterplot ---------------------------
+# 4.5 Biome and mountainous richness scatterplots --------------------------
+# 4.5.1 Black circles around mountainous regions ---------------------------
 MossBiomeMountRichScatter <- ggplot(MossBiomeMountRichness, aes(Latitude, Alpha, color=Type, shape=Type), show.legend=TRUE) +
   geom_point(size=2.5, alpha=0.5) +
   scale_shape_manual(values=c("Coniferous_Forests"=16, 
@@ -486,7 +487,7 @@ MossBiomeMountRichScatter
 dev.off()
 
 
-# 4.6 Biome and mountainous richness scatterplot NEW DF --------------------
+# 4.5.2 Change shape of mountainous/lowland regions ------------------------
 MossRichBMScatter <- ggplot(MossRichBM, 
                                     aes(Latitude, Alpha, color=Type, 
                                         shape=Region), show.legend=TRUE) +
@@ -530,4 +531,191 @@ MossRichBMScatter
 dev.off()
 
 
-# 4.7 Biome and mountainous richness scatterplot NEW NEW DF
+
+# 4.5.3 Biome and mountainous richness scatterplot w/ more control ---------
+#Not really working - probably scrap DF
+MossRichBMScatter2 <- ggplot(show.legend=TRUE) +
+  geom_point(data=MossRichBM2, aes(Latitude1, Alpha1, color=Type), 
+             size=2.5, alpha=0.5, shape=16) +
+  #guides(shape="none") +
+  scale_color_manual(values=c("Coniferous_Forests"="#D8B70A", 
+                              "Dry_Forest"="#972D15",
+                              "Mediterranean_Woodlands"="#A2A475",
+                              "Moist_Forest"="#81A88D",
+                              "Savannas"="#02401B",
+                              "Taiga"="#446455",
+                              "Temperate_Grasslands"="#FDD262",
+                              "Temperate_Mixed"="#D3DDDC",
+                              "Tropical_Grasslands"="#C7B19C",
+                              "Tundra"="#798E87",
+                              "Xeric_Woodlands"="#C27D38"),
+                     labels=c("Coniferous Forests",
+                              "Dry Forest",
+                              "Mediterranean Woodlands", 
+                              "Mountainous",
+                              "Savannas",
+                              "Taiga",
+                              "Temperate Grasslands",
+                              "Temperate Mixed",
+                              "Tropical Grasslands",
+                              "Tundra",
+                              "Xeric Woodlands")) +
+  geom_point(data=MossRichBM2, aes(Latitude2, Alpha2, color=Region2, 
+                                   shape=Region2),
+             size=2.5, alpha=0.5) +
+  xlab("Latitude") +
+  ylab("Biome Alpha Diversity") +
+  labs(color="Biome") +
+  theme_minimal() +
+  theme(axis.title.y = element_text(size=32),
+        axis.title.x = element_text(size=32),
+        axis.text = element_text(size=20))
+MossRichBMScatter2
+
+
+# 4.5.4 Trying again to get more control over shapes + colors --------------
+#Grr this is also not working
+MountVec <- vector(mode="character", length=1133)
+MountVec[1:260] <- "#000000"
+
+LowVec <- vector(mode="character", length=3102)
+LowVec[1:244] <- NA
+
+MountLow_cols <- c(MountVec, LowVec)
+
+MossRichBMScatter3 <- ggplot(MossRichBM, 
+                            aes(Latitude, Alpha), show.legend=TRUE, color=Type) +
+  geom_point(data=MossRichBM, shape=16, size=2.5, alpha=0.5) +
+  #guides(shape="none") +
+  geom_point(data=MossRichBM, shape=1, size=2.5, alpha=0.5) +
+  scale_color_manual(values=c("Coniferous_Forests"="#D8B70A", 
+                              "Dry_Forest"="#972D15",
+                              "Mediterranean_Woodlands"="#A2A475",
+                              "Moist_Forest"="#81A88D",
+                              "Savannas"="#02401B",
+                              "Taiga"="#446455",
+                              "Temperate_Grasslands"="#FDD262",
+                              "Temperate_Mixed"="#D3DDDC",
+                              "Tropical_Grasslands"="#C7B19C",
+                              "Tundra"="#798E87",
+                              "Xeric_Woodlands"="#C27D38"),
+                     labels=c("Coniferous Forests",
+                              "Dry Forest",
+                              "Mediterranean Woodlands", 
+                              "Mountainous",
+                              "Savannas",
+                              "Taiga",
+                              "Temperate Grasslands",
+                              "Temperate Mixed",
+                              "Tropical Grasslands",
+                              "Tundra",
+                              "Xeric Woodlands")) +
+  xlab("Latitude") +
+  ylab("Biome Alpha Diversity") +
+  labs(color="Biome") +
+  theme_minimal() +
+  theme(axis.title.y = element_text(size=32),
+        axis.title.x = element_text(size=32),
+        axis.text = element_text(size=20))
+MossRichBMScatter3
+
+
+
+
+
+
+
+# 5.0 Panels of different biomes with all biomes in gray -------------------
+###IN PROGRESS###
+#I'll have to make separate DFs for each biome with AllBiomes, make a column to mark each biome+all as that biome, then bind_rows, divide by that biome marker
+
+# 5.1 Make dataframes ------------------------------------------------------
+# 5.1.1 Make DFs with each biome and all occurrences together; 
+  #one new column with name of biome in order to panel it out by that biome but with all occurrences also shown in each panel
+MossBiomeRichnessAllBiomes <- MossBiomeRichness
+MossBiomeRichnessAllBiomes$Type <- "All Biomes"
+
+ConForDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaConFor)
+ConForDF$Biome <- "Coniferous Forests"
+
+DryForDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaDryFor)
+DryForDF$Biome <- "Dry Forest"
+
+MedWoodDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaMedWood)
+MedWoodDF$Biome <- "Mediterranean Woodlands"
+
+MoistForDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaMoistFor)
+MoistForDF$Biome <- "Moist Forest"
+
+SavannaDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaSavanna)
+SavannaDF$Biome <- "Savannas"
+
+TaigaDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaTaiga)
+TaigaDF$Biome <- "Taiga"
+
+TempGrassDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaTempGrass)
+TempGrassDF$Biome <- "Temperate Grasslands"
+
+TempMixDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaTempMix)
+TempMixDF$Biome <- "Temperate Mixed"
+
+TropGrassDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaTropGrass)
+TropGrassDF$Biome <- "Tropical Grasslands"
+
+TundraDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaTundra)
+TundraDF$Biome <- "Tundra"
+
+XericWoodDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaXericWood)
+XericWoodDF$Biome <- "Xeric Woodlands"
+
+# 5.1.2 Bind all biomes together
+MossBiomePanelRichness <- bind_rows(ConForDF, DryForDF, MedWoodDF, MoistForDF,
+                                    SavannaDF, TaigaDF, TempGrassDF, TempMixDF,
+                                    TropGrassDF, TundraDF, XericWoodDF)
+
+# 5.2 Plot richness by latitude paneled by biome (w/ all points gray) ------
+MossBiomePanelScatter <- ggplot(MossBiomePanelRichness,
+                                 aes(Latitude, Alpha, color=Type, alpha=Type,
+                                     fill=Type)) +
+  geom_point(size=1.5, shape=16) +
+  scale_color_manual(values=c("Coniferous_Forests"="#D8B70A", 
+                             "Dry_Forest"="#972D15",
+                             "Mediterranean_Woodlands"="#A2A475",
+                             "Moist_Forest"="#81A88D",
+                             "Savannas"="#02401B",
+                             "Taiga"="#446455",
+                             "Temperate_Grasslands"="#FDD262",
+                             "Temperate_Mixed"="#D3DDDC",
+                             "Tropical_Grasslands"="#C7B19C",
+                             "Tundra"="#798E87",
+                             "Xeric_Woodlands"="#C27D38",
+                             "All Biomes"="gray85")) +
+  scale_alpha_manual(values=c("Coniferous_Forests"=0.5, 
+                              "Dry_Forest"=0.5,
+                              "Mediterranean_Woodlands"=0.5,
+                              "Moist_Forest"=0.5,
+                              "Savannas"=0.5,
+                              "Taiga"=0.5,
+                              "Temperate_Grasslands"=0.5,
+                              "Temperate_Mixed"=0.5,
+                              "Tropical_Grasslands"=0.5,
+                              "Tundra"=0.5,
+                              "Xeric_Woodlands"=0.5,
+                              "All Biomes"=0.1)) +
+  xlab("Latitude") +
+  ylab("Biome Alpha Diversity") +
+  labs(color="Biome") +
+  theme_minimal() +
+  theme(axis.title.y = element_text(size=32),
+        axis.title.x = element_text(size=32),
+        axis.text = element_text(size=10)) +
+  facet_wrap(~Biome) +
+  guides(alpha="none", color="none")
+MossBiomePanelScatter
+
+png("Figures/MossAlphaBiomePanel.png", width = 1500, height = 1000, pointsize = 20)
+MossBiomePanelScatter
+dev.off()
+
+
+# 5.3 Divide by montane/lowland areas --------------------------------------

@@ -632,59 +632,40 @@ MossRichBMScatter3
 # 5.1 Make dataframes ------------------------------------------------------
 # 5.1.1 Make DFs with each biome and all occurrences together; 
   #one new column with name of biome in order to panel it out by that biome but with all occurrences also shown in each panel
-ConForMossBiomeRichness <- MossBiomeRichness
-ConForMossBiomeRichness$Type <- "All Biomes"
-ConForDF <- bind_rows(ConForMossBiomeRichness, AlphaConFor)
+MossBiomeRichnessAllBiomes <- MossBiomeRichness
+MossBiomeRichnessAllBiomes$Type <- "All Biomes"
+
+ConForDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaConFor)
 ConForDF$Biome <- "Coniferous Forests"
 
-DryForMossBiomeRichness <- MossBiomeRichness
-DryForMossBiomeRichness$Type <- "All Biomes"
-DryForDF <- bind_rows(DryForMossBiomeRichness, AlphaDryFor)
+DryForDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaDryFor)
 DryForDF$Biome <- "Dry Forest"
 
-MedWoodMossBiomeRichness <- MossBiomeRichness
-MedWoodMossBiomeRichness$Type <- "All Biomes"
-MedWoodDF <- bind_rows(MedWoodMossBiomeRichness, AlphaMedWood)
+MedWoodDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaMedWood)
 MedWoodDF$Biome <- "Mediterranean Woodlands"
 
-MoistForMossBiomeRichness <- MossBiomeRichness
-MoistForMossBiomeRichness$Type <- "All Biomes"
-MoistForDF <- bind_rows(MoistForMossBiomeRichness, AlphaMoistFor)
+MoistForDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaMoistFor)
 MoistForDF$Biome <- "Moist Forest"
 
-SavannaMossBiomeRichness <- MossBiomeRichness
-SavannaMossBiomeRichness$Type <- "All Biomes"
-SavannaDF <- bind_rows(SavannaMossBiomeRichness, AlphaSavanna)
+SavannaDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaSavanna)
 SavannaDF$Biome <- "Savannas"
 
-TaigaMossBiomeRichness <- MossBiomeRichness
-TaigaMossBiomeRichness$Type <- "All Biomes"
-TaigaDF <- bind_rows(TaigaMossBiomeRichness, AlphaTaiga)
+TaigaDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaTaiga)
 TaigaDF$Biome <- "Taiga"
 
-TempGrassMossBiomeRichness <- MossBiomeRichness
-TempGrassMossBiomeRichness$Type <- "All Biomes"
-TempGrassDF <- bind_rows(TempGrassMossBiomeRichness, AlphaTempGrass)
+TempGrassDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaTempGrass)
 TempGrassDF$Biome <- "Temperate Grasslands"
 
-TempMixMossBiomeRichness <- MossBiomeRichness
-TempMixMossBiomeRichness$Type <- "All Biomes"
-TempMixDF <- bind_rows(TempMixMossBiomeRichness, AlphaTempMix)
+TempMixDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaTempMix)
 TempMixDF$Biome <- "Temperate Mixed"
 
-TropGrassMossBiomeRichness <- MossBiomeRichness
-TropGrassMossBiomeRichness$Type <- "All Biomes"
-TropGrassDF <- bind_rows(TropGrassMossBiomeRichness, AlphaTropGrass)
+TropGrassDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaTropGrass)
 TropGrassDF$Biome <- "Tropical Grasslands"
 
-TundraMossBiomeRichness <- MossBiomeRichness
-TundraMossBiomeRichness$Type <- "All Biomes"
-TundraDF <- bind_rows(TundraMossBiomeRichness, AlphaTundra)
+TundraDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaTundra)
 TundraDF$Biome <- "Tundra"
 
-XericWoodMossBiomeRichness <- MossBiomeRichness
-XericWoodMossBiomeRichness$Type <- "All Biomes"
-XericWoodDF <- bind_rows(XericWoodMossBiomeRichness, AlphaXericWood)
+XericWoodDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaXericWood)
 XericWoodDF$Biome <- "Xeric Woodlands"
 
 # 5.1.2 Bind all biomes together
@@ -693,8 +674,9 @@ MossBiomePanelRichness <- bind_rows(ConForDF, DryForDF, MedWoodDF, MoistForDF,
                                     TropGrassDF, TundraDF, XericWoodDF)
 
 # 5.2 Plot richness by latitude paneled by biome (w/ all points gray) ------
-MossBiomePanelScatter <- ggplot (MossBiomePanelRichness,
-                                 aes(Latitude, Alpha, color=Type, alpha=Type)) +
+MossBiomePanelScatter <- ggplot(MossBiomePanelRichness,
+                                 aes(Latitude, Alpha, color=Type, alpha=Type,
+                                     fill=Type)) +
   geom_point(size=1.5, shape=16) +
   scale_color_manual(values=c("Coniferous_Forests"="#D8B70A", 
                              "Dry_Forest"="#972D15",
@@ -734,3 +716,6 @@ MossBiomePanelScatter
 png("Figures/MossAlphaBiomePanel.png", width = 1500, height = 1000, pointsize = 20)
 MossBiomePanelScatter
 dev.off()
+
+
+# 5.3 Divide by montane/lowland areas --------------------------------------

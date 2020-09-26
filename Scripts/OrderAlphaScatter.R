@@ -107,15 +107,12 @@ leastdivcols <- c("#732832","#da7533","#d73f65","#a17235",
                   "#dca33a","#dbab83","#724529","#d37f80",
                   "#f84a11","#c14234")
 
+
+
 pal1 <- wes_palette("Darjeeling1")
 pal2 <- wes_palette("Chevalier1")
 mossorderpal <- c(pal1, pal2, wes_palette("IsleofDogs1")[1],
                   wes_palette("Cavalcanti1")[5])
-
-moredivcols2 <- c(mossorderpal[5], mossorderpal[6], mossorderpal[7],
-                  mossorderpal[8], mossorderpal[9], mossorderpal[10])
-lessdivcols2 <- c(mossorderpal[1], mossorderpal[2], mossorderpal[3],
-                  mossorderpal[5])
 
 # 2.1 Log Plots
   ##Can't get smooth to work on log plots, 

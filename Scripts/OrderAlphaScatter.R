@@ -107,6 +107,16 @@ leastdivcols <- c("#732832","#da7533","#d73f65","#a17235",
                   "#dca33a","#dbab83","#724529","#d37f80",
                   "#f84a11","#c14234")
 
+pal1 <- wes_palette("Darjeeling1")
+pal2 <- wes_palette("Chevalier1")
+mossorderpal <- c(pal1, pal2, wes_palette("IsleofDogs1")[1],
+                  wes_palette("Cavalcanti1")[5])
+
+moredivcols2 <- c(mossorderpal[5], mossorderpal[6], mossorderpal[7],
+                  mossorderpal[8], mossorderpal[9], mossorderpal[10])
+lessdivcols2 <- c(mossorderpal[1], mossorderpal[2], mossorderpal[3],
+                  mossorderpal[5])
+
 # 2.1 Log Plots
   ##Can't get smooth to work on log plots, 
   ##and log leaves bands that make the patterns hard to see
@@ -165,16 +175,16 @@ MossOrderRichScatter <- ggplot(MossOrdLogAlphaDF, aes(Latitude, Alpha, color=Ord
   xlab("Latitude") +
   ylab("Order Alpha Diversity") +
   theme_minimal() +
-  scale_color_manual(values=c("Andreaeaeales" = leastdivcols[1],
-                              "Archidiales" = leastdivcols[2],
-                              "Aulacomniales" = leastdivcols[3],
-                              "Bryoxiphales" = leastdivcols[4],
-                              "Buxbaumiales" = leastdivcols[5],
-                              "Gigaspermales" = leastdivcols[6],
-                              "Hypnodendrales" = leastdivcols[7],
-                              "Ptychomniales" = leastdivcols[8],
-                              "Rhizogoniales" = leastdivcols[9],
-                              "Splachnales" = leastdivcols[10],
+  scale_color_manual(values=c("Andreaeaeales" = mossorderpal[1],
+                              "Archidiales" = mossorderpal[2],
+                              "Aulacomniales" = mossorderpal[3],
+                              "Bryoxiphales" = mossorderpal[4],
+                              "Buxbaumiales" = mossorderpal[5],
+                              "Gigaspermales" = mossorderpal[6],
+                              "Hypnodendrales" = mossorderpal[7],
+                              "Ptychomniales" = mossorderpal[8],
+                              "Rhizogoniales" = mossorderpal[9],
+                              "Splachnales" = mossorderpal[10],
                               "Hypnales" = "darkslategray",
                               "Dicranales" = "green4",
                               "Funariales" = lessdivcols[1],
@@ -226,16 +236,16 @@ LeastDiverseMoss <- MossOrdLogAlphaDF %>%
 MossOrderMostRich <- ggplot(MostDiverseMoss, 
                              aes(Latitude, Alpha, color=Order), 
                              show.legend=TRUE) +
-  geom_point(shape=16, size=2.5, alpha=0.6) +
+  geom_point(shape=16, size=1.5, alpha=0.6) +
   xlab("Latitude") +
   ylab("Alpha Diversity") +
   theme_minimal() +
-  scale_color_manual(values=c("Hypnales" = "darkslategray",
-                              "Dicranales" = "green4")) + 
-  theme(axis.title.y = element_text(size=20),
-        axis.title.x = element_text(size=20),
+  scale_color_manual(values=c("Hypnales" = mossorderpal[7],
+                              "Dicranales" = mossorderpal[10])) + 
+  theme(axis.title.y = element_text(size=16),
+        axis.title.x = element_text(size=16),
         axis.text = element_text(size=15),
-        plot.title = element_text(size=20, hjust=0.5),
+        plot.title = element_text(size=17, hjust=0.5),
         legend.title = element_text(size=13),
         legend.text = element_text(size = 10)) + 
   labs(title = "Most Diverse (greater than 100 species)")
@@ -245,20 +255,20 @@ MossOrderMostRich
 MossOrderMoreRich <- ggplot(MoreDiverseMoss, 
                             aes(Latitude, Alpha, color=Order), 
                             show.legend=TRUE) +
-  geom_point(shape=16, size=2.5, alpha=0.6) +
+  geom_point(shape=16, size=1.5, alpha=0.6) +
   xlab("Latitude") +
   ylab("Alpha Diversity") +
   theme_minimal() +
-  scale_color_manual(values=c("Bartramiales" = moredivcols[1],
-                              "Bryales" = "springgreen4",
-                              "Grimmiales" = moredivcols[3],
-                              "Hookeriales" = moredivcols[4],
-                              "Orthotrichales" = moredivcols[5],
-                              "Pottiales" = moredivcols[6])) +
-  theme(axis.title.y = element_text(size=20),
-        axis.title.x = element_text(size=20),
+  scale_color_manual(values=c("Bartramiales" = mossorderpal[6],
+                              "Bryales" = mossorderpal[7],
+                              "Grimmiales" = mossorderpal[8],
+                              "Hookeriales" = mossorderpal[9],
+                              "Orthotrichales" = mossorderpal[4],
+                              "Pottiales" = mossorderpal[2])) +
+  theme(axis.title.y = element_text(size=16),
+        axis.title.x = element_text(size=16),
         axis.text = element_text(size=15),
-        plot.title = element_text(size=20, hjust=0.5),
+        plot.title = element_text(size=17, hjust=0.5),
         legend.title = element_text(size=13),
         legend.text = element_text(size = 10)) +
   labs(title = "More Diverse (26 - 100 species)")
@@ -268,19 +278,19 @@ MossOrderMoreRich
 MossOrderLessRich <- ggplot(LessDiverseMoss, 
                             aes(Latitude, Alpha, color=Order), 
                             show.legend=TRUE) +
-  geom_point(shape=16, size=2.5, alpha=0.6) +
+  geom_point(shape=16, size=1.5, alpha=0.6) +
   xlab("Latitude") +
   ylab("Alpha Diversity") +
   #geom_jitter(height = 0.3) +
   theme_minimal() +
-  scale_color_manual(values=c("Funariales" = lessdivcols[1],
-                              "Hedwigiales" = lessdivcols[2],
-                              "Polytrichales" = lessdivcols[3],
-                              "Sphagnales" = lessdivcols[4])) +
-  theme(axis.title.y = element_text(size=20),
-        axis.title.x = element_text(size=20),
+  scale_color_manual(values=c("Funariales" = mossorderpal[1],
+                              "Hedwigiales" = mossorderpal[2],
+                              "Polytrichales" = mossorderpal[3],
+                              "Sphagnales" = mossorderpal[11])) +
+  theme(axis.title.y = element_text(size=16),
+        axis.title.x = element_text(size=16),
         axis.text = element_text(size=15),
-        plot.title = element_text(size=20, hjust=0.5),
+        plot.title = element_text(size=17, hjust=0.5),
         legend.title = element_text(size=13),
         legend.text = element_text(size = 10)) +
   labs(title = "Less Diverse (11-25 species)")
@@ -290,25 +300,25 @@ MossOrderLessRich
 MossOrderLeastRich <- ggplot(LeastDiverseMoss, 
                                 aes(Latitude, Alpha, color=Order), 
                                 show.legend=TRUE) +
-  geom_point(shape=16, size=2.5, alpha=0.6) +
+  geom_point(shape=16, size=1.5, alpha=0.6) +
   xlab("Latitude") +
   ylab("Alpha Diversity") +
   #geom_jitter(0.3) +
   theme_minimal() +
-  scale_color_manual(values=c("Andreaeaeales" = leastdivcols[1],
-                              "Archidiales" = leastdivcols[2],
-                              "Aulacomniales" = leastdivcols[3],
-                              "Bryoxiphales" = leastdivcols[4],
-                              "Buxbaumiales" = leastdivcols[5],
-                              "Gigaspermales" = leastdivcols[6],
-                              "Hypnodendrales" = leastdivcols[7],
-                              "Ptychomniales" = leastdivcols[8],
-                              "Rhizogoniales" = leastdivcols[9],
-                              "Splachnales" = leastdivcols[10])) +
-  theme(axis.title.y = element_text(size=20),
-        axis.title.x = element_text(size=20),
+  scale_color_manual(values=c("Andreaeaeales" = mossorderpal[1],
+                              "Archidiales" = mossorderpal[2],
+                              "Aulacomniales" = mossorderpal[3],
+                              "Bryoxiphales" = mossorderpal[4],
+                              "Buxbaumiales" = mossorderpal[5],
+                              "Gigaspermales" = mossorderpal[6],
+                              "Hypnodendrales" = mossorderpal[7],
+                              "Ptychomniales" = mossorderpal[8],
+                              "Rhizogoniales" = mossorderpal[9],
+                              "Splachnales" = mossorderpal[10])) +
+  theme(axis.title.y = element_text(size=16),
+        axis.title.x = element_text(size=16),
         axis.text = element_text(size=15),
-        plot.title = element_text(size=20, hjust=0.5),
+        plot.title = element_text(size=17, hjust=0.5),
         legend.title = element_text(size=13),
         legend.text = element_text(size = 10)) +
   labs(title = "Least Diverse (10 or fewer species)")

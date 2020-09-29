@@ -668,16 +668,71 @@ TundraDF$Biome <- "Tundra"
 XericWoodDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaXericWood)
 XericWoodDF$Biome <- "Xeric Woodlands"
 
-# 5.1.2 Bind all biomes together
+# 5.1.2 Bind all biomes together -------------------------------------------
 MossBiomePanelRichness <- bind_rows(ConForDF, DryForDF, MedWoodDF, MoistForDF,
                                     SavannaDF, TaigaDF, TempGrassDF, TempMixDF,
                                     TropGrassDF, TundraDF, XericWoodDF)
+
+saveRDS(MossBiomePanelRichness, file="Data/MossBiomePanelRichness.rds")
+
+# 5.1.3 Make DF (same as above but also with montane cells) ----------------
+AlphaMount <- raster::extract(MossRichnessRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
+colnames(AlphaMount) <- c("Type", "CellID", "Alpha")
+AlphaMount$Type <-"Montane"
+AlphaMountVec <- AlphaMount$CellID
+AlphaMount <- merge(AlphaMount, LongLatDF)
+
+MossBiomeRichnessAllBiomes <- MossBiomeRichness
+MossBiomeRichnessAllBiomes$Type <- "All Biomes"
+
+MountConForDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaConFor, AlphaMount)
+MountConForDF$Biome <- "Coniferous Forests"
+
+MountDryForDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaDryFor, AlphaMount)
+MountDryForDF$Biome <- "Dry Forest"
+
+MountMedWoodDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaMedWood, AlphaMount)
+MountMedWoodDF$Biome <- "Mediterranean Woodlands"
+
+MountMoistForDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaMoistFor, AlphaMount)
+MountMoistForDF$Biome <- "Moist Forest"
+
+MountSavannaDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaSavanna, AlphaMount)
+MountSavannaDF$Biome <- "Savannas"
+
+MountTaigaDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaTaiga, AlphaMount)
+MountTaigaDF$Biome <- "Taiga"
+
+MountTempGrassDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaTempGrass, AlphaMount)
+MountTempGrassDF$Biome <- "Temperate Grasslands"
+
+MountTempMixDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaTempMix, AlphaMount)
+MountTempMixDF$Biome <- "Temperate Mixed"
+
+MountTropGrassDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaTropGrass, AlphaMount)
+MountTropGrassDF$Biome <- "Tropical Grasslands"
+
+MountTundraDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaTundra, AlphaMount)
+MountTundraDF$Biome <- "Tundra"
+
+MountXericWoodDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaXericWood, AlphaMount)
+MountXericWoodDF$Biome <- "Xeric Woodlands"
+
+MossBiomeMountPanelRichness <- bind_rows(MountConForDF, MountDryForDF, 
+                                          MountMedWoodDF, MountMoistForDF,
+                                          MountSavannaDF, MountTaigaDF, 
+                                          MountTempGrassDF, MountTempMixDF,
+                                          MountTropGrassDF, MountTundraDF, 
+                                          MountXericWoodDF)
+
+#saveRDS(MossBiomeMountPanelRichness, file="Data/MossBiomeMountPanelRichness.rds")
+
 
 # 5.2 Plot richness by latitude paneled by biome (w/ all points gray) ------
 MossBiomePanelScatter <- ggplot(MossBiomePanelRichness,
                                  aes(Latitude, Alpha, color=Type, alpha=Type,
                                      fill=Type)) +
-  geom_point(size=1.5, shape=16) +
+  geom_point(size=1.5, shape=16, show.legend=FALSE) +
   scale_color_manual(values=c("Coniferous_Forests"="#D8B70A", 
                              "Dry_Forest"="#972D15",
                              "Mediterranean_Woodlands"="#A2A475",
@@ -709,13 +764,164 @@ MossBiomePanelScatter <- ggplot(MossBiomePanelRichness,
   theme(axis.title.y = element_text(size=32),
         axis.title.x = element_text(size=32),
         axis.text = element_text(size=10)) +
-  facet_wrap(~Biome) +
-  guides(alpha="none", color="none")
+  facet_wrap(~Biome)
+  #guides(alpha="none", color="none")
 MossBiomePanelScatter
 
 png("Figures/MossAlphaBiomePanel.png", width = 1500, height = 1000, pointsize = 20)
 MossBiomePanelScatter
 dev.off()
+
+
+# 5.3 Make same plot as 5.2 but w/ black circles around montane cells ------
+MossBiomeMountPanelScatter <- ggplot(MossBiomeMountPanelRichness,
+                                aes(Latitude, Alpha, color=Type, alpha=Type,
+                                    fill=Type, shape=Type, size=Type)) +
+  geom_point(show.legend=FALSE) +
+  scale_shape_manual(values=c("Montane"=20,
+                              "Coniferous_Forests"=16, 
+                              "Dry_Forest"=16,
+                              "Mediterranean_Woodlands"=16,
+                              "Moist_Forest"=16,
+                              "Savannas"=16,
+                              "Taiga"=16,
+                              "Temperate_Grasslands"=16,
+                              "Temperate_Mixed"=16,
+                              "Tropical_Grasslands"=16,
+                              "Tundra"=16,
+                              "Xeric_Woodlands"=16,
+                              "All Biomes"=16)) +
+  scale_color_manual(values=c("Coniferous_Forests"="#D8B70A", 
+                              "Dry_Forest"="#972D15",
+                              "Mediterranean_Woodlands"="#A2A475",
+                              "Moist_Forest"="#81A88D",
+                              "Savannas"="#02401B",
+                              "Taiga"="#446455",
+                              "Temperate_Grasslands"="#FDD262",
+                              "Temperate_Mixed"="#D3DDDC",
+                              "Tropical_Grasslands"="#C7B19C",
+                              "Tundra"="#798E87",
+                              "Xeric_Woodlands"="#C27D38",
+                              "All Biomes"="gray85",
+                              "Montane"="#000000")) +
+  scale_alpha_manual(values=c("Coniferous_Forests"=0.5, 
+                              "Dry_Forest"=0.5,
+                              "Mediterranean_Woodlands"=0.5,
+                              "Moist_Forest"=0.5,
+                              "Savannas"=0.5,
+                              "Taiga"=0.5,
+                              "Temperate_Grasslands"=0.5,
+                              "Temperate_Mixed"=0.5,
+                              "Tropical_Grasslands"=0.5,
+                              "Tundra"=0.5,
+                              "Xeric_Woodlands"=0.5,
+                              "All Biomes"=0.2,
+                              "Montane"=0.2)) +
+  scale_size_manual(values=c("Coniferous_Forests"=1.5, 
+                             "Dry_Forest"=1.5,
+                             "Mediterranean_Woodlands"=1.5,
+                             "Moist_Forest"=1.5,
+                             "Savannas"=1.5,
+                             "Taiga"=1.5,
+                             "Temperate_Grasslands"=1.5,
+                             "Temperate_Mixed"=1.5,
+                             "Tropical_Grasslands"=1.5,
+                             "Tundra"=1.5,
+                             "Xeric_Woodlands"=1.5,
+                             "All Biomes"=1.5,
+                             "Montane"=0.7)) +
+  xlab("Latitude") +
+  ylab("Biome Alpha Diversity") +
+  #labs(color="Biome") +
+  #guides(alpha="none", color="none") +
+  theme_minimal() +
+  theme(axis.title.y = element_text(size=20),
+        axis.title.x = element_text(size=20),
+        axis.text = element_text(size=10)) +
+  facet_wrap(~Biome)
+MossBiomeMountPanelScatter
+
+
+# 6.0 New color scheme -----------------------------------------------------
+MossBiomeMountPanelScatter2 <- ggplot(MossBiomeMountPanelRichness,
+                                     aes(Latitude, Alpha, color=Type, alpha=Type,
+                                         fill=Type, shape=Type, size=Type)) +
+  geom_point(show.legend=FALSE) +
+  scale_shape_manual(values=c("Montane"=1,
+                              "Coniferous_Forests"=16, 
+                              "Dry_Forest"=16,
+                              "Mediterranean_Woodlands"=16,
+                              "Moist_Forest"=16,
+                              "Savannas"=16,
+                              "Taiga"=16,
+                              "Temperate_Grasslands"=16,
+                              "Temperate_Mixed"=16,
+                              "Tropical_Grasslands"=16,
+                              "Tundra"=16,
+                              "Xeric_Woodlands"=16,
+                              "All Biomes"=16)) +
+scale_color_manual(values=c("Coniferous_Forests"="#271a5b", 
+                            "Dry_Forest"="#82eb80",
+                            "Mediterranean_Woodlands"="#ff6baf",
+                            "Moist_Forest"="#01db96",
+                            "Savannas"="#8e0039",
+                            "Taiga"="#fbcf59",
+                            "Temperate_Grasslands"="#2d95ff",
+                            "Temperate_Mixed"="#ab4a00",
+                            "Tropical_Grasslands"="#015eb1",
+                            "Tundra"="#3b6100",
+                            "Xeric_Woodlands"="#ff7591",
+                            "All Biomes"="gray85",
+                            "Montane"="#000000")) +
+  #scale_color_manual(values=c("Coniferous_Forests"="#8c2520", 
+   #                           "Dry_Forest"="#50a0e7",
+    #                          "Mediterranean_Woodlands"="#5a388b",
+     #                         "Moist_Forest"="#56b873",
+      #                        "Savannas"="#7d9b3a",
+       #                       "Taiga"="#c563af",
+        #                      "Temperate_Grasslands"="#6d80d8",
+         #                     "Temperate_Mixed"="#c8993c",
+          #                    "Tropical_Grasslands"="#43c9b0",
+           #                   "Tundra"="#ba4758",
+            #                  "Xeric_Woodlands"="#b85937",
+             #                 "All Biomes"="gray85",
+              #                "Montane"="#000000")) +
+  scale_alpha_manual(values=c("Coniferous_Forests"=0.5, 
+                              "Dry_Forest"=0.5,
+                              "Mediterranean_Woodlands"=0.5,
+                              "Moist_Forest"=0.5,
+                              "Savannas"=0.5,
+                              "Taiga"=0.5,
+                              "Temperate_Grasslands"=0.5,
+                              "Temperate_Mixed"=0.5,
+                              "Tropical_Grasslands"=0.5,
+                              "Tundra"=0.5,
+                              "Xeric_Woodlands"=0.5,
+                              "All Biomes"=0.2,
+                              "Montane"=0.2)) +
+  scale_size_manual(values=c("Coniferous_Forests"=1.5, 
+                             "Dry_Forest"=1.5,
+                             "Mediterranean_Woodlands"=1.5,
+                             "Moist_Forest"=1.5,
+                             "Savannas"=1.5,
+                             "Taiga"=1.5,
+                             "Temperate_Grasslands"=1.5,
+                             "Temperate_Mixed"=1.5,
+                             "Tropical_Grasslands"=1.5,
+                             "Tundra"=1.5,
+                             "Xeric_Woodlands"=1.5,
+                             "All Biomes"=1.5,
+                             "Montane"=1.5)) +
+  xlab("Latitude") +
+  ylab("Biome Alpha Diversity") +
+  #labs(color="Biome") +
+  #guides(alpha="none", color="none") +
+  theme_minimal() +
+  theme(axis.title.y = element_text(size=20),
+        axis.title.x = element_text(size=20),
+        axis.text = element_text(size=10)) +
+  facet_wrap(~Biome)
+MossBiomeMountPanelScatter2
 
 
 # 5.3 Divide by montane/lowland areas --------------------------------------

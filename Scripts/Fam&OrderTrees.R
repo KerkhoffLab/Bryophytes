@@ -364,6 +364,14 @@ for(i in 1:nrow(OrderNodes20)){
 }
 tree
 
+
+##### 10/3/20 addition
+#Make moss only tree with highlighted order clade labels
+OrderNodes20 <- read.csv("./Data/OrderNodesS20.csv")
+tree20 <- read.tree("Data/trees/aa-nu-RAxML-FigS20.tre")
+tree2 <- ggtree::groupClade(tree20, c(272, 197, 262, 231, 218, 249, 239, 261, 268, 269, 200))
+
+
 #Make new maps
 dir.create("Figures/TreeMaps/Tree20OrderMaps")
 #Find the index numbers for the orders in tree20

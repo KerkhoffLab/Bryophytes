@@ -8,6 +8,7 @@ library(phytools)
 
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
+
 BiocManager::install("ggtree")
 BiocManager::install("treeio")
 BiocManager::install("rphast")

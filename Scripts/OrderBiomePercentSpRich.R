@@ -105,7 +105,7 @@ for(i in 1:NumberOrders){
 }
 
 
-# 3.0 Percent matrix for species composition (vs. range area) -----------------
+# 3.0 Percent matrix for species composition (not range area) -----------------
 # Use circle plot matrix
 MOBPerMatSpecies <- CircleMatAllMoss
 MOBPerMatSpecies <- cbind(MOBPerMatSpecies, NA)
@@ -363,6 +363,8 @@ ZScoreDotBiomeSD <- ggplot(data = MOBZScoreDFBiomeSD, aes(x = Biome, y = ZScore,
   geom_dotplot(binaxis = "y", stackdir= "center", 
                dotsize = 0.5, alpha = 0.8, binwidth = 0.25) +
   theme(legend.position = "right") +
+  theme_minimal() +
+  labs(fill = "Species Richness Level") +
   scale_fill_brewer(palette="Greens") +
   theme(axis.text.x = element_text(angle = 45,  hjust = 1, size =11)) +
   theme(axis.title.x = element_text(size = 15)) +

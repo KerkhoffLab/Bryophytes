@@ -2,6 +2,35 @@
 #Hailey  Napier
 #July 2020
 
+# THIS SCRIPT IS CONTINUED FROM Liu_et_al2019Trees.R
+
+
+#Load Packages
+library(ape)
+
+library(phytools)
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install("ggtree")
+BiocManager::install("treeio")
+BiocManager::install("rphast")
+library(ggtree)
+library(treeio)
+library(ggplot2)
+library(ggimage)
+
+library(tidyr)
+library(dplyr)
+library(tools)
+
+library(grid)
+library(gridExtra)
+
+library(png)
+
+library(RColorBrewer)
+library(wesanderson)
 
 # 6.0 Plot trees with new information --------------------
 test_F11Tree <- FigS11_FOG
@@ -474,3 +503,33 @@ for(i in 1:nrow(tree20index)){
 rl = lapply(sprintf("Figures/TreeMaps/Tree20FamMaps/treemap%i.png", 1:nrow(tree20index)), png::readPNG)
 gl = lapply(rl, grid::rasterGrob)
 gridExtra::grid.arrange(grobs=gl)
+
+
+
+
+
+
+##### 10/3/20 addition for presentation
+#Make moss only tree with highlighted order clade labels
+OrderNodes20 <- read.csv("./Data/OrderNodesS20.csv")
+MossOrderNames <- readRDS("./Data/MossOrderNames.rds")
+
+MossOrderNodes20 <- OrderNodes20 %>%
+  filter(Order %in% MossOrderNames)
+getPalette <- (wes_palette("Darjeeling1", 20, type = "continuous"))
+for(i in 1:nrow(MossOrderNodes20)){
+  MossOrderNodes20$hexcols[i] <- getPalette[i]
+}
+
+tree20 <- read.tree("Data/trees/aa-nu-RAxML-FigS20.tre")
+tree2 <- ggtree::groupClade(tree20, c(272, 197, 262, 231, 218, 249, 239, 261, 268, 269, 200))
+tree <- ggtree(tree2, branch.length = "none") + xlim(NA,38) 
+
+for(i in 1:nrow(MossOrderNodes20)){
+  n <- MossOrderNodes20$Node[i]
+  o <- MossOrderNodes20$Order[i]
+  c <- MossOrderNodes20$hexcols[i]
+  tree <- tree + geom_cladelabel(node=n, label=o, fontsize=3, col=c) + geom_hilight(n, fill=c)
+}
+tree
+

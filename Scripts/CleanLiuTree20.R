@@ -72,6 +72,7 @@ write.csv(FigS20_FOG, "Data/FamilyTrees/FigS20_FOG.csv")
 
 
 # 2.0 Group tip labels into families -------------------------------------
+FigS20_FOG <- read.csv("Data/FamilyTrees/FigS20_FOG.csv")
 
 # 2.1 Get family names for each tip label
 #I made this program in a different script than part 1, so the name of the tree is different, but it's the same tree

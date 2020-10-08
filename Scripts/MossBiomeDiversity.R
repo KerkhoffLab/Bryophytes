@@ -42,6 +42,8 @@ MossBiomeMountRichness <- readRDS("Data/MossBiomeMountRichness.rds")  #run throu
 MossRichBM <- readRDS("Data/MossRichBM.rds")
 MossRichBM2 <- readRDS("Data/MossRichBM2.rds")
 MossAllBiomeMount <- readRDS("Data/MossAllBiomeMount")
+MossBiomePanelRichness <- readRDS("Data/MossBiomePanelRichness.rds")
+
 
 
 # 0.2 Run for MossRichnessRaster -------------------------------------------
@@ -764,8 +766,8 @@ MossBiomePanelScatter <- ggplot(MossBiomePanelRichness,
   theme(axis.title.y = element_text(size=32),
         axis.title.x = element_text(size=32),
         axis.text = element_text(size=10)) +
+  #guides(alpha="none", color="none") +
   facet_wrap(~Biome)
-  #guides(alpha="none", color="none")
 MossBiomePanelScatter
 
 png("Figures/MossAlphaBiomePanel.png", width = 1500, height = 1000, pointsize = 20)

@@ -1,5 +1,6 @@
 # GAM
 # Testing out the moss generalized additive model
+# Hailey Napier and Kathryn Dawdy
 # October 2020
 
 # 0.0 FIRST -------------------------------------
@@ -14,10 +15,28 @@ RichnessVec <- readRDS("Data/RichnessVec.rds")
 BiomeCells <- readRDS("Data/BiomeCellsClean.rds")
 
 
-# 1.0 Get WorldClim aata ------------------------
+# 1.0 Get WorldClim data ------------------------
+# Adapted from WorldClim.R
+worldclim <- getData('worldclim', var='bio', res=10) 
+WC_layers <- do.call(brick, lapply(list.files(path = "wc10/", pattern = "*.bil$", full.names = TRUE), raster)) 
+WorldClim <- do.call(crop, c(WC_layers,extent(-175,-22,-56,74)))
+Bryophytecrs <- crs(RangeRaster) 
+  #creates a raster with resolution of the bryophyte range map
+WorldClim <- projectRaster(WorldClim, crs = Bryophytecrs) 
+WorldClim <- resample(WorldClim, RangeRaster) 
+  #fits WorldClim data on the BIEN 100 km^2 map by averaging variables across each cell
+
+#Precipitation data is in mm
+MAP <- getValues(WorldClim$bio12)
+
+#Temperature data is degrees Celsius * 10
+MAT <- getValues(WorldClim$bio1)
+#Divide by 10 to get degrees Celsius
+MAT <- MAT/10
+MAT
 
 
-# 2.0 Make biome vector
+# 2.0 Make biome vector --------------------------
 AllBiomeCells <- data.frame(CellID = rep(1:15038))
 AllBiomeCells$Biome <- NA
 for(i in BiomeCells$CellID){
@@ -28,16 +47,18 @@ for(i in BiomeCells$CellID){
 BiomeVec <- AllBiomeCells$Biome
 
 
-# 2.0 Create the dataframe ----------------------
-# 2.1 Make base dataframe
+# 3.0 Create the dataframe ----------------------
+# 3.1 Make base dataframe
 nrows <- 15038*22
 GAMDF <- data.frame(CellID = rep(1:15038, 22))
 GAMDF$TotalRichness <- rep(RichnessVec, 22)
 GAMDF$OrderName <- NA
 GAMDF$OrderRichness <- NA
 GAMDF$Biome <- rep(BiomeVec, 22)
+GAMDF$MAT <- rep(MAT, 22)
+GAMDF$MAP <- rep(MAP, 22)
 
-# 2.2 Add order names and order richness
+# 3.2 Add order names and order richness
 start <- 1
 end <- 15038
 for(i in 1:22){

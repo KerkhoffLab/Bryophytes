@@ -7,6 +7,7 @@
 # 0.1 Load Packages
 library(dplyr)
 library(raster)
+library(mgcv)
 
 # 0.2 Load Data
 MossOrderRichList <- readRDS("Data/MossOrderRichList.rds")

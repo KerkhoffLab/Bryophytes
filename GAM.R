@@ -1,6 +1,6 @@
 # GAM
 # Testing out the moss generalized additive model
-# Hailey Napier and Kathryn Dawdy
+# Hailey Napier
 # October 2020
 
 # 0.0 FIRST -------------------------------------
@@ -8,12 +8,14 @@
 library(dplyr)
 library(raster)
 library(mgcv)
+library(ggplot2)
 
 # 0.2 Load Data
 MossOrderRichList <- readRDS("Data/MossOrderRichList.rds")
 MossOrderNames <- readRDS("Data/MossOrderNames.rds")
 RichnessVec <- readRDS("Data/RichnessVec.rds")
 BiomeCells <- readRDS("Data/BiomeCellsClean.rds")
+LongLatDF <- readRDS("Data/LongLatDF.rds")
 
 
 # 1.0 Get WorldClim data ------------------------
@@ -71,6 +73,52 @@ for(i in 1:22){
   end = start + 15037
 }
 
+# 3.3 Add latitude
+Lat <- as.vector(LongLatDF$Latitude)
+GAMDF$Lat <- rep(Lat, 22)
+
+
+# 4.0 Test GAM function --------------------------
+# 4.1 One variable: MAP
+mossgam1 <- gam(TotalRichness ~ s(MAP), data = GAMDF, method = "REML")
+# number of basis functions
+coef(mossgam1)
+# smoothing parameter
+mossgam1$sp
+plot.gam(mossgam1, residuals = T, pch = 1)
+
+# 4.2 Two variables: MAP & MAT
+mossgam2 <- gam(TotalRichness~s(MAT) + s(MAP), data = GAMDF, method = "REML")
+plot.gam(mossgam2, residuals = T, pch = 1)
+
+mossgam2
+
+# 4.3 MAP, with MAP NAs removed so it will plot with data
+MAPDFnoNA <- GAMDF %>%
+  filter(is.na(MAP) == FALSE)
+MAPDFnoNA
+
+mossgam3 <- gam(TotalRichness~s(MAP), data = MAPDFnoNA, method = "REML")
+plot.gam(mossgam3, residuals = T, pch = 1)
+
+
+#plot using ggpplot
+p <- predict.gam(mossgam3, type="lpmatrix", na.action = na.pass)
+beta <- coef(mossgam3)[grepl("MAP", names(coef(mossgam3)))]
+s <- p[,grepl("MAP", colnames(p))] %*% beta
+ggplot(data=cbind.data.frame(s, MAPDFnoNA$MAP), aes(x=MAPDFnoNA$MAP, y=s)) + geom_line()
+
+ ggplot(data = cbind.data.frame(s,MAPDFnoNA), aes(Lat, TotalRichness)) + 
+  geom_point(shape = 16, 
+             size = 5, 
+             alpha=0.5, 
+             color = "gray40") +
+  geom_line(aes(y = s)) + 
+  ylab("Species Richness") + 
+  xlab("Latitude") + 
+  theme_minimal() 
+
+ 
 
 
 

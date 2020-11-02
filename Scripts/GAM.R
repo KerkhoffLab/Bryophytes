@@ -91,7 +91,7 @@ plot.gam(mossgam1, residuals = T, pch = 1)
 mossgam2 <- gam(TotalRichness~s(MAT) + s(MAP), data = GAMDF, method = "REML")
 plot.gam(mossgam2, residuals = T, pch = 1)
 
-mossgam2
+summary(mossgam2)
 
 # 4.3 MAP, with MAP NAs removed so it will plot with data
 MAPDFnoNA <- GAMDF %>%
@@ -118,7 +118,7 @@ ggplot(data=cbind.data.frame(s, MAPDFnoNA$MAP), aes(x=MAPDFnoNA$MAP, y=s)) + geo
   xlab("Latitude") + 
   theme_minimal() 
 
- 
-
-
+ # 4.4 Test MAP&MAT GAM with log link function
+mossgam4 <- gam(TotalRichness~s(MAP) + s(MAT), data = GAMDF, family = gaussian(link = "log"))
+summary(mossgam4)
 

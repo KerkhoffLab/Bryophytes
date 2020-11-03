@@ -20,7 +20,7 @@ LongLatDF <- readRDS("Data/LongLatDF.rds")
 
 # 1.0 Get WorldClim data ------------------------
 # Adapted from WorldClim.R
-worldclim <- getData('worldclim', var='bio', res=10) 
+worldclim <- raster::getData('worldclim', var='bio', res=10)
 WC_layers <- do.call(brick, lapply(list.files(path = "wc10/", pattern = "*.bil$", full.names = TRUE), raster)) 
 WorldClim <- do.call(crop, c(WC_layers,extent(-175,-22,-56,74)))
 Bryophytecrs <- crs(RangeRaster) 
@@ -85,6 +85,19 @@ mossgam1 <- gam(TotalRichness ~ s(MAP), data = GAMDF, method = "REML")
 coef(mossgam1)
 # smoothing parameter
 mossgam1$sp
+#plot
+  #standard error default is 95% confidence interval for the mean shape of the effect
+  #change standard error vis from dotted lines to shaded with shade = T
+  #you can also change the color of the shading with shade.col = "color"
+  #residuals plots the partial residuals (= the difference between the partial 
+    #effect and the data after all other partial effects have been accounted for)
+  #all.terms plots partial effects of linear and categorical variables (not sure how to interpret this yet)
+  #rug plots x-values along the bottom of the plot
+  #shift scale so intercept is included (shift scale to value of intercept) --
+    #changes y axis so partial effect plot shows the prediction of the output of the model, assuming
+    #the other variables are at their mean values
+  #seWithMean plots standard error of partial effect with standard error of model intercept
+    #I don't fully understand why this is useful
 plot.gam(mossgam1, residuals = T, pch = 1)
 
 # 4.2 Two variables: MAP & MAT
@@ -121,4 +134,12 @@ ggplot(data=cbind.data.frame(s, MAPDFnoNA$MAP), aes(x=MAPDFnoNA$MAP, y=s)) + geo
  # 4.4 Test MAP&MAT GAM with log link function
 mossgam4 <- gam(TotalRichness~s(MAP) + s(MAT), data = GAMDF, family = gaussian(link = "log"))
 summary(mossgam4)
+
+#plot
+plot(mossgam4, pages = 1)
+#with residuals
+plot(mossgam4, pages = 1, residuals = T)
+#with shift and seWithMean
+  #I think the y axis scale is average total richness (per cell)
+plot(mossgam4, pages = 1, shift = coef(mossgam4)[1], seWithMean = T)
 

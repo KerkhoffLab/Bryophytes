@@ -43,7 +43,7 @@ MAT <- MAT/10
 MAT
 
 
-# 2.0 Make biome vector --------------------------
+# 2.0 Make biome & mtn/lowland vectors -----------
 AllBiomeCells <- data.frame(CellID = rep(1:15038))
 AllBiomeCells$Biome <- NA
 for(i in BiomeCells$CellID){
@@ -81,6 +81,7 @@ for(i in 1:22){
 Lat <- as.vector(LongLatDF$Latitude)
 LMDF$Lat <- rep(Lat, 22)
 
+# 3.4 
 
 # 4.0 Make a histogram of richness values ----------
 # To see if we have a normal distribution of richness
@@ -88,6 +89,7 @@ NoZeroRichVec <- RichnessVec[RichnessVec != 0]
 NoZeroRichVec
 hist(NoZeroRichVec)
 # it's not a normal distribution (surprise surprise), so log transform 
+hist(log(NoZeroRichVec))
 
 
 # 5.0 Make linear models ---------------------------
@@ -101,3 +103,7 @@ mosslm2 <- lm(log1p(TotalRichness) ~ log1p(MAT) + log1p(MAP), data = LMDF)
 summary(mosslm2)
 plot(mosslm2)
 
+# 5.3 Linear model with log(MAT) + log(MAP) + Biomes
+mosslm3 <- lm(log1p(TotalRichness) ~ log1p(MAT) + log1p(MAP) + Biome, data = LMDF)
+summary(mosslm3)
+plot(mosslm3)

@@ -20,6 +20,7 @@ BiomeCells <- readRDS("Data/BiomeCellsClean.rds")
        # BiomeCells <- BiomeBetaCellsClean
 LongLatDF <- readRDS("Data/LongLatDF.rds")
   # Find in DataProcessing2020.R
+RangeRaster <- readRDS("Data/RangeRaster.rds")
 
 
 # 1.0 Get WorldClim data ------------------------

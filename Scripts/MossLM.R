@@ -21,6 +21,7 @@ BiomeCells <- readRDS("Data/BiomeCellsClean.rds")
 LongLatDF <- readRDS("Data/LongLatDF.rds")
   # Find in DataProcessing2020.R
 RangeRaster <- readRDS("Data/RangeRaster.rds")
+MossRichnessRaster <- readRDS("Data/MossRichnessRaster.rds")
 
 
 # 1.0 Get WorldClim data ------------------------
@@ -44,7 +45,7 @@ MAT <- MAT/10
 MAT
 
 
-# 2.0 Make biome & mtn/lowland vectors -----------
+# 2.0 Make biome vector --------------------------
 AllBiomeCells <- data.frame(CellID = rep(1:15038))
 AllBiomeCells$Biome <- NA
 for(i in BiomeCells$CellID){
@@ -82,7 +83,25 @@ for(i in 1:22){
 Lat <- as.vector(LongLatDF$Latitude)
 LMDF$Lat <- rep(Lat, 22)
 
-# 3.4 
+# 3.4 Extract and add mountain/lowland 
+#Extract cells in montane regions
+AlphaMountLM <- raster::extract(MossRichnessRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
+colnames(AlphaMountLM) <- c("Topo", "CellID", "Alpha")
+AlphaMountLM$Topo <-"Montane"
+AlphaMountLM$Alpha <- NULL
+
+#Join LMDF and AlphaMountLM by CellID
+LMDF2 <- full_join(LMDF, AlphaMountLM, by="CellID")
+
+#Make non-montane cells lowland
+LMDF2$Topo[is.na(LMDF2$Topo)] <- "Lowland"
+saveRDS(LMDF2, "Data/LMDF2.rds")
+
+#Make richness values of 0 into NAs
+LMDF3 <- LMDF2
+LMDF3$TotalRichness[which(LMDF3$TotalRichness==0)] <- NA
+saveRDS(LMDF3, "Data/LMDF3.rds")
+
 
 # 4.0 Make a histogram of richness values ----------
 # To see if we have a normal distribution of richness
@@ -108,3 +127,29 @@ plot(mosslm2)
 mosslm3 <- lm(log1p(TotalRichness) ~ log1p(MAT) + log1p(MAP) + Biome, data = LMDF)
 summary(mosslm3)
 plot(mosslm3)
+
+### ^^^ The LMs above use data with 0s instead of NAs, so not super accurate ^^^
+
+### vvv LMs below have NAs instead of 0s vvv
+
+# 5.4 Linear model with log(MAT) + log(MAP) + Biomes
+mosslm4 <- lm(log1p(TotalRichness) ~ log1p(MAT) + log1p(MAP) + Biome, data = LMDF3)
+summary(mosslm4)
+
+# 5.5 Linear model with interaction effect
+mosslm5 <- lm(log1p(TotalRichness) ~ log1p(MAT) + log1p(MAP) + 
+                 Biome*log1p(MAT) + Biome*log1p(MAP) +
+                 Topo*log1p(MAT) + Topo*log1p(MAP), data = LMDF3)
+#so many terms!
+summary(mosslm5)
+plot(mosslm5)
+
+# 5.6 Linear model with orders ~ MAT (log transform)
+mosslm6 <- lm(log1p(OrderRichness) ~ log1p(MAT), data = LMDF3)
+summary(mosslm6)
+
+# 5.7 Linear model with orders ~ MAT, MAP, Biomes, Topo (log transform and interaction effect)
+mosslm7 <- lm(log1p(OrderRichness) ~ log1p(MAT) + log1p(MAP) + 
+                Biome*log1p(MAT) + Biome*log1p(MAP) + 
+                Topo*log1p(MAT) + Topo*log1p(MAT), data = LMDF3)
+summary(mosslm7)

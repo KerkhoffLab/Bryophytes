@@ -7,6 +7,9 @@
 library(dplyr)
 library(raster)
 library(ggplot2)
+library(devtools)
+devtools::install_github("cardiomoon/ggiraphExtra", force = T)
+library(ggiraphExtra)
 
 # 0.2 Load Data
 MossOrderRichList <- readRDS("Data/MossOrderRichList.rds")
@@ -90,6 +93,8 @@ colnames(AlphaMountLM) <- c("Topo", "CellID", "Alpha")
 AlphaMountLM$Topo <-"Montane"
 AlphaMountLM$Alpha <- NULL
 
+AlphaMountLM
+
 #Join LMDF and AlphaMountLM by CellID
 LMDF2 <- full_join(LMDF, AlphaMountLM, by="CellID")
 
@@ -153,3 +158,13 @@ mosslm7 <- lm(log1p(OrderRichness) ~ log1p(MAT) + log1p(MAP) +
                 Biome*log1p(MAT) + Biome*log1p(MAP) + 
                 Topo*log1p(MAT) + Topo*log1p(MAT), data = LMDF3)
 summary(mosslm7)
+
+# 5.8 TotalRichness with MAT and MAP (log transformed)
+LMDF4 <- LMDF3 %>%
+  select(c(MAT, MAP, TotalRichness))
+
+mosslm8 <- lm(log1p(TotalRichness) ~ log1p(MAT) + log1p(MAP), data = LMDF4)
+
+
+# 6.0 Try plotting with ggPredict
+ggPredict(mosslm1, interactive = T)

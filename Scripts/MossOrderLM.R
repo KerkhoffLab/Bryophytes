@@ -9,7 +9,7 @@ library(dplyr)
 library(raster)
 
 # 0.2 Load data 
-LMDF2 <- readRDS("Data/LMDF2.rds")
+LMDF <- readRDS("Data/LMDF.rds")
   # find in MossLM.R
 RichnessVec <- readRDS("Data/RichnessVec.rds")
 # Find in DataProcessing.R
@@ -26,18 +26,10 @@ RichnessDFNoNA <- RichnessDFNoNA %>%
 nrow(RichnessDFNoNA)
 
 RichnessTopoDFNoNA <- left_join(RichnessDFNoNA, AlphaMountLM, by = "CellID")
-nrow(RichnessTopoDFNoNA)
-range(RichnessDFNoNA$CellID)
 
-(RichnessTopoDFNoNA$CellID)
 
-# 1.2 Replace TotalRichness column in LMDF2 with RichnessVecNA(repeated 22 times)
+# 1.2 Replace TotalRichness column in LMDF2 with RichnessVecNA (repeated 22 times)
 LMDF2$TotalRichness <- rep(RichnessVecNA, 22)
 
-nrow(LMDF)
-nrow(LMDF2)
 
-range(AlphaMountLM$CellID)
-nrow(AlphaMountLM)
 
-LMDF2 <- right_join(LMDF, AlphaMountLM, by="CellID")

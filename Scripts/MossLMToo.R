@@ -2,49 +2,55 @@
 # Kathryn Dawdy
 # November 2020
 
-# Load packages
-library(dplyr)
+# 0.0 Load packages ------------------------------------------------------------
+devtools::install_github("AckerDWM/gg3D")
+library(gg3D)
 library(raster)
 library(ggplot2)
+require(ggiraph)
+require(ggiraphExtra)
+require(plyr)
+library(dplyr)
+require(plotly)
 
-# Load data
+# 0.1 Load data ----------------------------------------------------------------
 LMDF <- readRDS("Data/LMDF.rds")
 LMDF2 <- readRDS("Data/LMDF2.rds")
 LMDF3 <- readRDS("Data/LMDF3.rds")
 MossRichnessRaster <- readRDS("Data/MossRichnessRaster.rds")
 nw_mount <- shapefile("Data/MapOutlines/Mountains/Koeppen-Geiger_biomes.shp")
 
-#Make LMDF with montane/lowland column
-#First run MossLM.R (as it is on 11/6/2020 !)
+# 1.0 Make LMDF with montane/lowland column ------------------------------------
+# 1.1 First run MossLM.R (as it is on 11/6/2020 !)
 saveRDS(LMDF, "Data/LMDF.rds")
 LMDF <- readRDS("Data/LMDF.rds")
   
-#Extract cells in montane regions
+# 1.3 Extract cells in montane regions
 AlphaMountLM <- raster::extract(MossRichnessRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
 colnames(AlphaMountLM) <- c("Topo", "CellID", "Alpha")
 AlphaMountLM$Topo <-"Montane"
 AlphaMountLM$Alpha <- NULL
 
-#Join LMDF and AlphaMountLM by CellID
+# 1.4 Join LMDF and AlphaMountLM by CellID
 LMDF2 <- full_join(LMDF, AlphaMountLM, by="CellID")
 
-#Make non-montane cells lowland
+# 1.5 Make non-montane cells lowland
 LMDF2$Topo[is.na(LMDF2$Topo)] <- "Lowland"
 saveRDS(LMDF2, "Data/LMDF2.rds")
 
-#Make richness values of 0 into NAs
+# 1.6 Make richness values of 0 into NAs
 LMDF3 <- LMDF2
 LMDF3$TotalRichness[which(LMDF3$TotalRichness==0)] <- NA
 saveRDS(LMDF3, "Data/LMDF3.rds")
 
 
-#Playing around to get comfortable + comparing LMDF2 and LMDF3
-#Simple plots of richness as a function of predictor variables
+# 2.0 Playing around to get comfortable + comparing LMDF2 and LMDF3 ------------
+# 2.1 Simple plots of richness as a function of predictor variables ----
 Rich_by_MAT_2 <- plot(TotalRichness~MAT, data=LMDF2)
 Rich_by_MAT <- plot(TotalRichness~MAT, data=LMDF3) #Yeah, I'm gonna use LMDF3 since it removes richness values of 0
 Rich_by_MAP <- plot(TotalRichness~MAP, data=LMDF3)
 
-#Log transform axes
+# 2.2 Log transform axes ----
 logRich_by_MAT <- plot(log1p(TotalRichness)~MAT, data=LMDF3)
 logRich_by_MAP <- plot(log1p(TotalRichness)~MAP, data=LMDF3)
 
@@ -54,7 +60,7 @@ Rich_by_logMAP <- plot(TotalRichness~log1p(MAP), data=LMDF3)
 logRich_by_logMAT <- plot(log1p(TotalRichness)~log1p(MAT), data=LMDF3)
 logRich_by_logMAP <- plot(log1p(TotalRichness)~log1p(MAP), data=LMDF3)
 
-#Generate linear regressions for each variable
+# 2.3 Generate linear regressions for each variable ----
 lm_Rich_by_MAT <- lm(TotalRichness~MAT, data=LMDF3)
 summary(lm_Rich_by_MAT)
 plot(TotalRichness~MAT, data=LMDF3)
@@ -86,13 +92,99 @@ lm_Biome_Topo_multiplied <- lm(log1p(TotalRichness) ~ log1p(MAT) + log1p(MAP) +
                                data = LMDF3)
 summary(lm_Biome_Topo_multiplied) #Adjusted R-squared:  0.5012 
 
-#Now try order richness
+# 2.4 Now try order richness ----
 lm_OrdRich_by_MAT_MAP <- lm(OrderRichness~MAT + MAP, data=LMDF3)
 summary(lm_OrdRich_by_MAT_MAP) #Adjusted R-squared:  0.005792
 
 
 
-#Truly not sure if anything below works
+# 3.0 Plotting lms with ggplot2 ------------------------------------------------
+ggplot(LMDF3,aes(y=TotalRichness,x=MAT))+geom_point()+geom_smooth(method="lm")
+#ggPredict(lm_Rich_by_MAT,se=TRUE,interactive=TRUE)   #make it interactive!
+
+ggplot(LMDF3,aes(y=TotalRichness,x=MAP))+geom_point()+geom_smooth(method="lm")
+
+# 3.1 use gg3D to make 3D scatter plots! ..... not working :(
+ggplot(LMDF3, aes(x=(MAT), y=(MAP), z=(TotalRichness)
+                  #, color=Biome
+                  )) + 
+  theme_void() +
+  axes_3D() +
+  stat_3D()
+
+
+
+# 4.0 3D Plots -----------------------------------------------------------------
+# 4.1 Richness by MAT by MAP colored by biome scatterplot ----------------------
+fig <- plot_ly(x=LMDF3$MAP, y=LMDF3$MAT, z=LMDF3$TotalRichness, 
+        type="scatter3d", mode="markers", color=LMDF3$Biome, 
+        marker=list(size=5))
+axx <- list(
+  #backgroundcolor="rgb(200, 200, 230",
+  #gridcolor="rgb(255,255,255)",
+  #showbackground=TRUE,
+  #zerolinecolor="rgb(255,255,255",
+  title = "MAP"
+)
+
+axy <- list(
+  #backgroundcolor="rgb(230, 200,230)",
+  #gridcolor="rgb(255,255,255)",
+  #showbackground=TRUE,
+  #zerolinecolor="rgb(255,255,255",
+  title = "MAT"
+)
+
+axz <- list(
+  #backgroundcolor="rgb(230, 230,200)",
+  #gridcolor="rgb(255,255,255)",
+  #showbackground=TRUE,
+  #zerolinecolor="rgb(255,255,255",
+  title = "Total Richness"
+)
+#fig <- fig %>% add_trace(x=~LMDF3$MAP, z=lm(LMDF3$TotalRichness~LMDF3$MAT), mode="lines")
+fig <- fig %>% layout(scene = list(xaxis=axx,yaxis=axy,zaxis=axz))
+fig
+
+# 4.2 Richness by MAT by MAP colored by topography -----------------------------
+fig1 <- plot_ly(x=LMDF3$MAP, y=LMDF3$MAT, z=LMDF3$TotalRichness, 
+               type="scatter3d", mode="markers", color=LMDF3$Topo, 
+               marker=list(size=5))
+axx <- list(
+  title = "MAP"
+)
+
+axy <- list(
+  title = "MAT"
+)
+
+axz <- list(
+  title = "Total Richness"
+)
+fig1 <- fig1 %>% layout(scene = list(xaxis=axx,yaxis=axy,zaxis=axz))
+fig1
+
+
+# 4.3 Richness by MAT and Biome ------------------------------------------------
+fig2 <- plot_ly(x=LMDF3$Biome, y=LMDF3$MAT, z=LMDF3$TotalRichness, 
+                type="scatter3d", mode="markers", color=LMDF3$Topo, 
+                marker=list(size=5))
+axx <- list(
+  title = "Biome",
+  nticks=11
+)
+
+axy <- list(
+  title = "MAT"
+)
+
+axz <- list(
+  title = "Total Richness"
+)
+fig2 <- fig2 %>% layout(scene = list(xaxis=axx,yaxis=axy,zaxis=axz))
+fig2
+
+# ?.? Truly not sure if anything below works ----
 #LM with biomes + topo (not interaction terms)
 mosslm_1 <- lm(log1p(TotalRichness) ~ log1p(MAT) + log1p(MAP) + Biome + 
                          Topo, data = LMDF2)
@@ -105,3 +197,5 @@ mosslm_2 <- lm(log1p(TotalRichness) ~ log1p(MAT) + log1p(MAP) +
                   Topo*log1p(MAT) + Topo*log1p(MAP), data = LMDF2)
 summary(mosslm_2)
 plot(mosslm_2)
+
+

@@ -533,8 +533,52 @@ MossRichBMScatter
 dev.off()
 
 
+# 4.5.3 3-D Biome and mountainous richness scatterplot ---------------------
+#Code adapted from MossLMToo.R
+#Load packages
+require(plotly)
+#Load data
+LMDF3 <- readRDS("Data/LMDF3.rds")
 
-# 4.5.3 Biome and mountainous richness scatterplot w/ more control ---------
+# Biome categories, colored by topography
+f <- plot_ly(x=LMDF3$Biome, y=LMDF3$Lat, z=LMDF3$TotalRichness, 
+                type="scatter3d", mode="markers", color=LMDF3$Topo, 
+                marker=list(size=5))
+axx <- list(
+  title = "Biome",
+  nticks=11
+)
+
+axy <- list(
+  title = "Latitude"
+)
+
+axz <- list(
+  title = "Total Richness"
+)
+f <- f %>% layout(scene = list(xaxis=axx,yaxis=axy,zaxis=axz))
+f
+
+# Topography categories, colored by biome
+f1 <- plot_ly(x=LMDF3$Topo, y=LMDF3$Lat, z=LMDF3$TotalRichness, 
+             type="scatter3d", mode="markers", color=LMDF3$Biome, 
+             marker=list(size=5))
+axx <- list(
+  title = "Topography",
+  nticks=11
+)
+
+axy <- list(
+  title = "Latitude"
+)
+
+axz <- list(
+  title = "Total Richness"
+)
+f1 <- f1 %>% layout(scene = list(xaxis=axx,yaxis=axy,zaxis=axz))
+f1
+
+# 4.5.4 Biome and mountainous richness scatterplot w/ more control ---------
 #Not really working - probably scrap DF
 MossRichBMScatter2 <- ggplot(show.legend=TRUE) +
   geom_point(data=MossRichBM2, aes(Latitude1, Alpha1, color=Type), 
@@ -575,7 +619,7 @@ MossRichBMScatter2 <- ggplot(show.legend=TRUE) +
 MossRichBMScatter2
 
 
-# 4.5.4 Trying again to get more control over shapes + colors --------------
+# 4.5.5 Trying again to get more control over shapes + colors --------------
 #Grr this is also not working
 MountVec <- vector(mode="character", length=1133)
 MountVec[1:260] <- "#000000"

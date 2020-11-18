@@ -109,6 +109,4 @@ for(i in 1:length(MossOrdRich10to100)){
 saveRDS(OrderLMCoefDF, "Data/OrderLMCoefDF.rds")
 
 # download csv
- write.csv(OrderLMCoefDF, "/Users/haileynapier/Desktop/OrderLMCoefDF.csv")
-
-summary(order_lm("Spahgnales"))
+# write.csv(OrderLMCoefDF, "/Users/haileynapier/Desktop/OrderLMCoefDF.csv")

@@ -58,12 +58,12 @@ order_lm <- function(order = "all"){
              data = LMDF2)
   }else if(order %in% LMDF2$OrderName){
     tempdf <- LMDF2 %>%
-      filter(LMDF$OrderName == order)
+      filter(LMDF2$OrderName == order)
     
     lm <- lm(log1p(OrderRichness) ~ log1p(MAT) + log1p(MAP) + 
                      Biome*log1p(MAT) + Biome*log1p(MAP) +
                      Topo*log1p(MAT) + Topo*log1p(MAP), 
-                   data = LMDF2)
+                   data = tempdf)
   }else{
     lm <- "Invalid order name, please try again"
   }
@@ -109,5 +109,6 @@ for(i in 1:length(MossOrdRich10to100)){
 saveRDS(OrderLMCoefDF, "Data/OrderLMCoefDF.rds")
 
 # download csv
-# write.csv(OrderLMCoefDF, "/Users/haileynapier/Desktop/OrderLMCoefDF.csv")
+ write.csv(OrderLMCoefDF, "/Users/haileynapier/Desktop/OrderLMCoefDF.csv")
 
+summary(order_lm("Spahgnales"))

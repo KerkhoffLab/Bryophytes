@@ -1,5 +1,5 @@
 # Moss Linear Regression Models
-# Kathryn Dawdy
+# Kathryn Dawdy and Hailey Napier
 # November 2020
 
 # 0.0 Load packages ------------------------------------------------------------
@@ -19,6 +19,9 @@ LMDF2 <- readRDS("Data/LMDF2.rds")
 LMDF3 <- readRDS("Data/LMDF3.rds")
 MossRichnessRaster <- readRDS("Data/MossRichnessRaster.rds")
 nw_mount <- shapefile("Data/MapOutlines/Mountains/Koeppen-Geiger_biomes.shp")
+cols <- c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
+           "#446455", "#FDD262", "#D3DDDC", "#C7B19C",
+           "#798E87", "#C27D38")
 
 # 1.0 Make LMDF with montane/lowland column ------------------------------------
 # 1.1 First run MossLM.R (as it is on 11/6/2020 !)
@@ -31,14 +34,30 @@ colnames(AlphaMountLM) <- c("Topo", "CellID", "Alpha")
 AlphaMountLM$Topo <-"Montane"
 AlphaMountLM$Alpha <- NULL
 
-# 1.4 Join LMDF and AlphaMountLM by CellID
+# 1.4 Remove duplicated entries in AlphaMountLM
+dupes <- AlphaMountLM$CellID[which(duplicated(AlphaMountLM) == T)]
+dupes <- unique(dupes)
+
+for(i in dupes){
+  dupedcells <- which(AlphaMountLM$CellID == i)
+  if(length(dupedcells) == 2){
+    AlphaMountLM$CellID[dupedcells[1]] <- NA
+  }else if(length(dupedcells) == 3)
+    AlphaMountLM$CellID[dupedcells[2]] <- NA
+  AlphaMountLM$CellID[dupedcells[1]] <- NA
+}
+
+AlphaMountLM <- AlphaMountLM %>%
+  filter(!is.na(AlphaMountLM$CellID))
+
+# 1.5 Join LMDF and AlphaMountLM by CellID
 LMDF2 <- full_join(LMDF, AlphaMountLM, by="CellID")
 
-# 1.5 Make non-montane cells lowland
+# 1.6 Make non-montane cells lowland
 LMDF2$Topo[is.na(LMDF2$Topo)] <- "Lowland"
 saveRDS(LMDF2, "Data/LMDF2.rds")
 
-# 1.6 Make richness values of 0 into NAs
+# 1.7 Make richness values of 0 into NAs
 LMDF3 <- LMDF2
 LMDF3$TotalRichness[which(LMDF3$TotalRichness==0)] <- NA
 saveRDS(LMDF3, "Data/LMDF3.rds")
@@ -116,8 +135,8 @@ ggplot(LMDF3, aes(x=(MAT), y=(MAP), z=(TotalRichness)
 
 # 4.0 3D Plots -----------------------------------------------------------------
 # 4.1 Richness by MAT by MAP colored by biome scatterplot ----------------------
-fig <- plot_ly(x=LMDF3$MAP, y=LMDF3$MAT, z=LMDF3$TotalRichness, 
-        type="scatter3d", mode="markers", color=LMDF3$Biome, 
+fig <- plot_ly(LMDF3, x=~MAP, y=~MAT, z=~TotalRichness, 
+        type="scatter3d", mode="markers", color=~Biome, colors=cols,
         marker=list(size=5))
 axx <- list(
   #backgroundcolor="rgb(200, 200, 230",

@@ -86,6 +86,8 @@ for(i in 1:22){
 Lat <- as.vector(LongLatDF$Latitude)
 LMDF$Lat <- rep(Lat, 22)
 
+saveRDS(LMDF, "Data/LMDF.rds")
+
 # 3.4 Extract and add mountain/lowland 
 #Extract cells in montane regions
 AlphaMountLM <- raster::extract(MossRichnessRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
@@ -94,6 +96,23 @@ AlphaMountLM$Topo <-"Montane"
 AlphaMountLM$Alpha <- NULL
 
 AlphaMountLM
+
+#Get rid of duplicate cells in AlphaMountLM
+dupes <- AlphaMountLM$CellID[which(duplicated(AlphaMountLM) == T)]
+dupes <- unique(dupes)
+
+for(i in dupes){
+  dupedcells <- which(AlphaMountLM$CellID == i)
+  if(length(dupedcells) == 2){
+    AlphaMountLM$CellID[dupedcells[1]] <- NA
+  }else if(length(dupedcells) == 3)
+    AlphaMountLM$CellID[dupedcells[2]] <- NA
+  AlphaMountLM$CellID[dupedcells[1]] <- NA
+}
+
+AlphaMountLM <- AlphaMountLM %>%
+  filter(!is.na(AlphaMountLM$CellID))
+
 
 #Join LMDF and AlphaMountLM by CellID
 LMDF2 <- full_join(LMDF, AlphaMountLM, by="CellID")

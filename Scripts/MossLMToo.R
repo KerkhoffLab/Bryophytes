@@ -203,6 +203,15 @@ axz <- list(
 fig2 <- fig2 %>% layout(scene = list(xaxis=axx,yaxis=axy,zaxis=axz))
 fig2
 
+
+# 5.0 AIC ----------------------------------------------------------------------
+testlm <- lm(TotalRichness~MAT, data=LMDF3)
+
+testlm2 <- lm(TotalRichness~MAT + MAP, data=LMDF3)
+
+AIC(testlm, testlm2)
+
+
 # ?.? Truly not sure if anything below works ----
 #LM with biomes + topo (not interaction terms)
 mosslm_1 <- lm(log1p(TotalRichness) ~ log1p(MAT) + log1p(MAP) + Biome + 

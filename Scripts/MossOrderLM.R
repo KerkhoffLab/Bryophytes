@@ -110,3 +110,58 @@ saveRDS(OrderLMCoefDF, "Data/OrderLMCoefDF.rds")
 
 # download csv
 # write.csv(OrderLMCoefDF, "/Users/haileynapier/Desktop/OrderLMCoefDF.csv")
+
+
+# TEST AICS FOR EACH ORDER FOR LMS WITH DIFFERENT NUMBERS OF PARAMETERS
+# 4.0 Write a new function that that alters the lm and the order -------------
+# 4.1 Make a new dataframe with log transformed variables
+LogTransLMDF <- LMDF2
+LogTransLMDF$LogMAP <- log1p(LogTransLMDF$MAP)
+LogTransLMDF$LogMAT <- log1p(LogTransLMDF$MAT)
+LogTransLMDF$LogOrdRich <- log1p(LogTransLMDF$OrderRichness)
+  
+# 4.2 Make a vector of all lm parameters
+lm_parameters <- c("LogOrdRich", "LogMAT", "LogMAP", "Biome*LogMAT + Biome*LogMAP", "Topo*LogMAT + Topo*LogMAP")
+
+# 4.3 Write the function
+# input: str, name of order, default = total richness
+      #  int, vector of indexes for parameters to include in null model
+      #       1: LogOrdRich
+      #       2: LogMAT
+      #       3: LogMAP
+      #       4: Biome*LogMAT + Biome*LogMAP
+      #       5: Topo*LogMAT + Topo*LogMAP
+# output: linear model using input order's data and parameters specified in input
+
+order_any_lm <- function(order = "Hypnales", parameter_index_vector = 2:5){
+  if(order %in% LMDF2$OrderName){
+    tempdf <- LogTransLMDF %>%
+      filter(LogTransLMDF$OrderName == order)
+    lm <- lm(as.formula(paste(lm_parameters[1], "~", paste(lm_parameters[parameter_index_vector], collapse="+"))), data=tempdf)
+  }else{
+    lm <- "Invalid order name, please try again"
+  }
+  return(lm)
+}
+
+# 4.4 Make a list of vectors of all of the possible parameter index combinations of any length
+parameter_index <- c(2,3,4,5)
+parameter_index
+parameter_comb_list <- list()
+index <- 0
+for(i in 1:5){
+  combs <- combn(parameter_index, i)
+  ncombs <- ncol(combs)
+  for(j in 1:ncombs){
+    index <- index + 1
+    parameter_comb_list[[index]] <- combs[,j]
+  }
+}
+
+# 4.5 Make a dataframe for loop output
+
+
+
+
+
+   

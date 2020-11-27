@@ -46,6 +46,7 @@ mossrichnesslm <- lm(log1p(TotalRichness) ~ log1p(MAT) + log1p(MAP) +
 # 3.0 Loop to test lm for orders ---------------
 # 3.1 Make vector of moss order names that doesn't include the least diverse orders
 MossOrdRich10to100 <- c(MossOrdRichAbove100, MossOrdRich25to100, MossOrdRich10to25)
+saveRDS(MossOrdRich10to100, "Data/MossOrdRich10to100.rds")
 
 # 3.4 Linear model function for orders
 # input: str, name of order, default = total richness
@@ -159,9 +160,72 @@ for(i in 1:5){
 }
 
 # 4.5 Make a dataframe for loop output
+parameters <- c("MAT", 
+                "MAP", 
+                "Biome_int", 
+                "Topo_int", 
+                "MAT + MAP", 
+                "MAT + Biome_int", 
+                "MAT + Topo_int",
+                "MAP + Biome_int",
+                "MAP + Topo_int", 
+                "Biome_int + Topo_int", 
+                "MAT + MAP + Biome_int", 
+                "MAT + MAP + Topo_int", 
+                "MAT + Biome_int + Topo_int", 
+                "MAP + Biome_int + Topo_int",
+                "MAT + MAP + Biome_int + Topo_int")
+
+OrderLM_AIC_DF <- NULL
+OrderLM_AIC_DF<- data.frame(
+  "Parameters" = parameters,
+  "Dicranales_AICs" = rep(NA, length(parameters)), 
+  "Dicranales_adjR2" = rep(NA, length(parameters)), 
+  "Hypnales_AICs" = rep(NA, length(parameters)),
+  "Hypnales_adjR2" = rep(NA, length(parameters)),
+  "Bartramiales_AICs" = rep(NA, length(parameters)),
+  "Bartramiales_adjR2" = rep(NA, length(parameters)),
+  "Bryales_AICs" = rep(NA, length(parameters)),
+  "Bryales_adjR2" = rep(NA, length(parameters)),
+  "Grimmiales_AICs" = rep(NA, length(parameters)),
+  "Grimmiales_adjR2" = rep(NA, length(parameters)),
+  "Hookeriales_AICs" = rep(NA, length(parameters)),
+  "Hookeriales_adjR2" = rep(NA, length(parameters)),
+  "Orthotrichales_AICs" = rep(NA, length(parameters)),
+  "Orthotrichales_adjR2" = rep(NA, length(parameters)),
+  "Pottiales_AICs" = rep(NA, length(parameters)),
+  "Pottiales_adjR2" = rep(NA, length(parameters)),
+  "Funariales_AICs" = rep(NA, length(parameters)),
+  "Funariales_adjR2" = rep(NA, length(parameters)),
+  "Hedwigiales_AICs" = rep(NA, length(parameters)),
+  "Hedwigiales_adjR2" = rep(NA, length(parameters)),
+  "Polytrichales_AICs" = rep(NA, length(parameters)),
+  "Polytrichales_adjR2" = rep(NA, length(parameters)),
+  "Sphagnales_AICs" = rep(NA, length(parameters)), 
+  "Sphagnales_adjR2" = rep(NA, length(parameters))) 
+
+# 4.6 Loop
+# Loop through each order
+  # for each order, loop through each parameter combination and make lm
+    # store AIC and R2 values for each lm in dataframe
+
+for(i in 1:length(MossOrdRich10to100)){
+  order <- MossOrdRich10to100[i]
+  AIC_colname <- paste(order, "_AICs", sep = "")  
+  adjR2_colname <- paste(order, "_adjR2", sep = "")
+  for(j in 1: length(parameter_comb_list)){
+    par_vec <- parameter_comb_list[[j]]
+    lm <- order_any_lm(order, parameter_vector = par_vec)
+    AIC <- AIC(lm)
+    adjR2 <- summary(lm)$adj.r.squared
+    OrderLM_AIC_DF[j, AIC_colname] <- AIC
+    OrderLM_AIC_DF[j, adjR2_colname] <- adjR2
+  }
+}
+
+saveRDS(OrderLM_AIC_DF, "Data/OrderLM_AIC_DF.rds")
+
+#download csv
+write.csv(OrderLM_AIC_DF, "/Users/haileynapier/Desktop/OrderLM_AIC_DF.csv")
 
 
-
-
-
-   

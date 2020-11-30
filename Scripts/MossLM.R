@@ -96,6 +96,7 @@ AlphaMountLM$Topo <-"Montane"
 AlphaMountLM$Alpha <- NULL
 
 AlphaMountLM
+saveRDS(AlphaMountLM, "Data/AlphaMountLM.rds")
 
 #Get rid of duplicate cells in AlphaMountLM
 dupes <- AlphaMountLM$CellID[which(duplicated(AlphaMountLM) == T)]

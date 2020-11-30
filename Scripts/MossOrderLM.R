@@ -10,12 +10,14 @@ library(raster)
 
 # 0.2 Load data 
 LMDF2 <- readRDS("Data/LMDF2.rds")
+AlphaMountLM <- readRDS("Data/AlphaMountLM.rds")
   # find in MossLM.R
 RichnessVec <- readRDS("Data/RichnessVec.rds")
   # find in DataProcessing.R
 MossOrdRichAbove100 <- readRDS("Data/MossOrdRichAbove100.rds")
 MossOrdRich25to100 <- readRDS("Data/MossOrdRich25to100.rds")
 MossOrdRich10to25 <- readRDS("Data/MossOrdRich10to25.rds")
+
 
 
 # 1.0 Add NAs for 0s in TotalRichness ------
@@ -35,11 +37,14 @@ RichnessTopoDFNoNA <- left_join(RichnessDFNoNA, AlphaMountLM, by = "CellID")
 # 1.2 Replace TotalRichness column in LMDF2 with RichnessVecNA (repeated 22 times)
 LMDF2$TotalRichness <- rep(RichnessVecNA, 22)
 
+# 1.3 Fix up MAT
+LMDF2$MAT_Kelvin <- (LMDF2$MAT) + 273.15
+
 
 # 2.0 Make lm for total richness ---------------
-mossrichnesslm <- lm(log1p(TotalRichness) ~ log1p(MAT) + log1p(MAP) + 
-                                 Biome*log1p(MAT) + Biome*log1p(MAP) +
-                                 Topo*log1p(MAT) + Topo*log1p(MAP), 
+mossrichnesslm <- lm(log1p(TotalRichness) ~ log1p(MAT_Kelvin) + log1p(MAP) + 
+                                 Biome*log1p(MAT_Kelvin) + Biome*log1p(MAP) +
+                                 Topo*log1p(MAT_Kelvin) + Topo*log1p(MAP), 
                                data = LMDF2)
 
 
@@ -53,17 +58,17 @@ saveRDS(MossOrdRich10to100, "Data/MossOrdRich10to100.rds")
 # output: linear model using input order's data
 order_lm <- function(order = "all"){
   if(order == "all"){
-    lm <- lm(log1p(TotalRichness) ~ log1p(MAT) + log1p(MAP) + 
-               Biome*log1p(MAT) + Biome*log1p(MAP) +
-               Topo*log1p(MAT) + Topo*log1p(MAP), 
+    lm <- lm(log1p(TotalRichness) ~ log1p(MAT_Kelvin) + log1p(MAP) + 
+               Biome*log1p(MAT_Kelvin) + Biome*log1p(MAP) +
+               Topo*log1p(MAT_Kelvin) + Topo*log1p(MAP), 
              data = LMDF2)
   }else if(order %in% LMDF2$OrderName){
     tempdf <- LMDF2 %>%
       filter(LMDF2$OrderName == order)
     
-    lm <- lm(log1p(OrderRichness) ~ log1p(MAT) + log1p(MAP) + 
-                     Biome*log1p(MAT) + Biome*log1p(MAP) +
-                     Topo*log1p(MAT) + Topo*log1p(MAP), 
+    lm <- lm(log1p(OrderRichness) ~ log1p(MAT_Kelvin) + log1p(MAP) + 
+                     Biome*log1p(MAT_Kelvin) + Biome*log1p(MAP) +
+                     Topo*log1p(MAT_Kelvin) + Topo*log1p(MAP), 
                    data = tempdf)
   }else{
     lm <- "Invalid order name, please try again"
@@ -71,7 +76,7 @@ order_lm <- function(order = "all"){
   return(lm)
 }
 
-# 3.3 Make a vector of coefficint names
+# 3.3 Make a vector of coefficient names
 test <- order_lm("Hypnales")
 coef_names <- c(names(test$coefficients),"AdjRSquared")
 
@@ -110,7 +115,7 @@ for(i in 1:length(MossOrdRich10to100)){
 saveRDS(OrderLMCoefDF, "Data/OrderLMCoefDF.rds")
 
 # download csv
-# write.csv(OrderLMCoefDF, "/Users/haileynapier/Desktop/OrderLMCoefDF.csv")
+ write.csv(OrderLMCoefDF, "/Users/haileynapier/Desktop/OrderLMCoefDF.csv")
 
 
 # TEST AICS FOR EACH ORDER FOR LMS WITH DIFFERENT NUMBERS OF PARAMETERS
@@ -118,8 +123,9 @@ saveRDS(OrderLMCoefDF, "Data/OrderLMCoefDF.rds")
 # 4.1 Make a new dataframe with log transformed variables
 LogTransLMDF <- LMDF2
 LogTransLMDF$LogMAP <- log1p(LogTransLMDF$MAP)
-LogTransLMDF$LogMAT <- log1p(LogTransLMDF$MAT)
+LogTransLMDF$LogMAT <- log1p(LogTransLMDF$MAT_Kelvin)
 LogTransLMDF$LogOrdRich <- log1p(LogTransLMDF$OrderRichness)
+LogTransLMDF$LogTotRich <- log1p(LogTransLMDF$TotalRichness)
   
 # 4.2 Make a vector of all lm parameters
 lm_parameters <- c("LogOrdRich", "LogMAT", "LogMAP", "Biome*LogMAT + Biome*LogMAP", "Topo*LogMAT + Topo*LogMAP")
@@ -139,6 +145,8 @@ order_any_lm <- function(order = "Hypnales", parameter_index_vector = 2:5){
     tempdf <- LogTransLMDF %>%
       filter(LogTransLMDF$OrderName == order)
     lm <- lm(as.formula(paste(lm_parameters[1], "~", paste(lm_parameters[parameter_index_vector], collapse="+"))), data=tempdf)
+  }else if(order == "AllOrders"){
+    lm <- lm(as.formula(paste("LogTotRich", "~", paste(lm_parameters[parameter_index_vector], collapse="+"))), data=LogTransLMDF)
   }else{
     lm <- "Invalid order name, please try again"
   }
@@ -150,7 +158,7 @@ parameter_index <- c(2,3,4,5)
 parameter_index
 parameter_comb_list <- list()
 index <- 0
-for(i in 1:5){
+for(i in 1:4){
   combs <- combn(parameter_index, i)
   ncombs <- ncol(combs)
   for(j in 1:ncombs){
@@ -215,7 +223,7 @@ for(i in 1:length(MossOrdRich10to100)){
   adjR2_colname <- paste(order, "_adjR2", sep = "")
   for(j in 1: length(parameter_comb_list)){
     par_vec <- parameter_comb_list[[j]]
-    lm <- order_any_lm(order, parameter_vector = par_vec)
+    lm <- order_any_lm(order, par_vec)
     AIC <- AIC(lm)
     adjR2 <- summary(lm)$adj.r.squared
     OrderLM_AIC_DF[j, AIC_colname] <- AIC
@@ -227,5 +235,7 @@ saveRDS(OrderLM_AIC_DF, "Data/OrderLM_AIC_DF.rds")
 
 #download csv
 write.csv(OrderLM_AIC_DF, "/Users/haileynapier/Desktop/OrderLM_AIC_DF.csv")
+
+
 
 

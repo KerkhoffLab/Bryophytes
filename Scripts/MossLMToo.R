@@ -303,9 +303,98 @@ testDF$LogMAT <- log1p(testDF$MAT)
 testDF$LogMAP <- log1p(testDF$MAP)
 testDF$LogTotalRich <- log1p(testDF$TotalRichness)
 
-lm_fx_test
 
 
+# Trying to use Hailey's code (from MossOrderLM.R) to make two DFs: one w/ parameter coefficients and one w/ AIC values
+# 4.1 Make a new dataframe with log transformed variables
+LogTransLMDF <- LMDF4
+LogTransLMDF$LogMAT <- LogTransLMDF$LogMAT_Kelvin
+LogTransLMDF$LogMAT_Kelvin <- NULL
+LogTransLMDF$LogTotRich <- LogTransLMDF$LogTotalRich
+LogTransLMDF$LogTotalRich <- NULL
+
+# 4.2 Make a vector of all lm parameters
+lm_parameters <- c("LogOrdRich", "LogMAT", "LogMAP", "Biome*LogMAT + Biome*LogMAP", "Topo*LogMAT + Topo*LogMAP")
+
+# 4.3 Write the function
+# input: str, name of order, default = total richness
+#  int, vector of indexes for parameters to include in null model
+#       1: LogOrdRich
+#       2: LogMAT
+#       3: LogMAP
+#       4: Biome*LogMAT + Biome*LogMAP
+#       5: Topo*LogMAT + Topo*LogMAP
+# output: linear model using input order's data and parameters specified in input
+
+order_any_lm <- function(order = "Hypnales", parameter_index_vector = 2:5){
+  if(order %in% LMDF2$OrderName){
+    tempdf <- LogTransLMDF %>%
+      filter(LogTransLMDF$OrderName == order)
+    lm <- lm(as.formula(paste(lm_parameters[1], "~", paste(lm_parameters[parameter_index_vector], collapse="+"))), data=tempdf)
+  }else if(order == "AllOrders"){
+    lm <- lm(as.formula(paste("LogTotRich", "~", paste(lm_parameters[parameter_index_vector], collapse="+"))), data=LogTransLMDF)
+  }else{
+    lm <- "Invalid order name, please try again"
+  }
+  return(lm)
+}
+
+# 4.4 Make a list of vectors of all of the possible parameter index combinations of any length
+parameter_index <- c(2,3,4,5)
+parameter_index
+parameter_comb_list <- list()
+index <- 0
+for(i in 1:4){
+  combs <- combn(parameter_index, i)
+  ncombs <- ncol(combs)
+  for(j in 1:ncombs){
+    index <- index + 1
+    parameter_comb_list[[index]] <- combs[,j]
+  }
+}
+
+# 4.5 Make a dataframe for loop output
+parameters <- c("MAT", 
+                "MAP", 
+                "Biome_int", 
+                "Topo_int", 
+                "MAT + MAP", 
+                "MAT + Biome_int", 
+                "MAT + Topo_int",
+                "MAP + Biome_int",
+                "MAP + Topo_int", 
+                "Biome_int + Topo_int", 
+                "MAT + MAP + Biome_int", 
+                "MAT + MAP + Topo_int", 
+                "MAT + Biome_int + Topo_int", 
+                "MAP + Biome_int + Topo_int",
+                "MAT + MAP + Biome_int + Topo_int")
+
+TotRichLM_AIC_DF <- data.frame(
+  "Parameters" = parameters,
+  "AllOrders_AICs" = rep(NA, length(parameters)),
+  "AllOrders_adjR2" = rep(NA, length(parameters))
+)
+
+# 4.6 Loop
+# for all orders, loop through each parameter combination and make lm
+# store AIC and R2 values for each lm in dataframe
+
+order <- "AllOrders"
+#AIC_colname <- paste(order, "_AICs", sep = "")  
+#adjR2_colname <- paste(order, "_adjR2", sep = "")
+for(j in 1: length(parameter_comb_list)){
+  par_vec <- parameter_comb_list[[j]]
+  lm <- order_any_lm(order, par_vec)
+  AIC <- AIC(lm)
+  adjR2 <- summary(lm)$adj.r.squared
+  TotRichLM_AIC_DF[j, "AllOrders_AICs"] <- AIC
+  TotRichLM_AIC_DF[j, "AllOrders_adjR2"] <- adjR2}
+
+saveRDS(TotRichLM_AIC_DF, "Data/TotRichLM_AIC_DF.rds")
+
+#download csv
+write.csv(TotRichLM_AIC_DF, "C:/Users/kathr/Desktop/TotRichLM_AIC_DF.csv")
 
 
 # ?.? Truly not sure if anything below works ----

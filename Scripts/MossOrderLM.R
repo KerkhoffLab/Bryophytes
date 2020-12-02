@@ -7,6 +7,7 @@
 # 0.1 Load packages
 library(dplyr)
 library(raster)
+library(ggplot2)
 
 # 0.2 Load data 
 LMDF2 <- readRDS("Data/LMDF2.rds")
@@ -333,5 +334,96 @@ write.csv(OrderLMCoefStatsDF, "/Users/haileynapier/Desktop/OrderLMCoefStatsDF.cs
 
 
 # 6.0 DATA VIZ
+# plot that shows coefficients and confidence intervals for each order for any parameter
 
+# 6.1 Make a dataframe for data viz
+# column for order
+# column for parameter
+# column for coefficient
+# column for lower limit of confidence interval (LowLim)
+# column for upper limit of confidence intercal (UpperLim)
 
+test <- order_lm("Hypnales")
+parameters <- c(names(test$coefficients))
+
+nrow <- length(MossOrdRich10to100NoHook)*length(parameters)
+OrderCoefPlotDF <- data.frame(
+  "Parameter" = rep(parameters, length(MossOrdRich10to100NoHook)),
+  "Order" = rep(NA,nrow),
+  "Coefficient" = rep(NA, nrow), 
+  "LowLim" = rep(NA, nrow), 
+  "UpperLim" = rep(NA, nrow))
+
+end <- 0
+for(i in 1:length(MossOrdRich10to100NoHook)){
+  start <- end + 1
+  end <-  start + length(parameters) - 1
+  
+  order <- MossOrdRich10to100NoHook[i]
+  lower_lim_name <- paste(order, "confint_lower", sep = "_")
+  upper_lim_name <- paste(order, "confint_upper", sep = "_")
+  
+  coef_vec <- OrderLMCoefStatsDF[[order]]
+  lower_lim_vec <- OrderLMCoefStatsDF[[lower_lim_name]]
+  upper_lim_vec <- OrderLMCoefStatsDF[[upper_lim_name]]
+  
+  OrderCoefPlotDF$Order[start:end] <- order
+  OrderCoefPlotDF$Coefficient[start:end] <- coef_vec
+  OrderCoefPlotDF$LowLim[start:end] <- lower_lim_vec
+  OrderCoefPlotDF$UpperLim[start:end] <- upper_lim_vec
+}
+
+# 6.2 Plot 
+MATdf <-OrderCoefPlotDF %>%
+  filter(OrderCoefPlotDF$Parameter == "log1p(MAT_Kelvin)")
+
+OrdCoefPlot_MAT <- ggplot() + 
+  geom_pointrange(data = MATdf, 
+                aes(x = Order, 
+                    y = Coefficient, 
+                    ymin = LowLim, 
+                    ymax = UpperLim), 
+                col = "black") +
+  geom_errorbar(data = MATdf, 
+                aes(x = Order, 
+                    y = Coefficient, 
+                    ymin = LowLim, 
+                    ymax = UpperLim), 
+                width = 0.5, 
+                col = "black")  +
+  geom_hline(aes(yintercept = 0), linetype = "dashed", col = "blue") +
+  ylab("β log(MAT)") +
+  ggtitle("Temperature Coefficients") + 
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5)) 
+
+OrdCoefPlot_MAT
+  
+  
+MAPdf <- OrderCoefPlotDF %>%
+  filter(OrderCoefPlotDF$Parameter == "log1p(MAP)")
+  
+OrdCoefPlot_MAP <- ggplot() + 
+  geom_pointrange(data = MAPdf, 
+                  aes(x = Order, 
+                      y = Coefficient, 
+                      ymin = LowLim, 
+                      ymax = UpperLim), 
+                  col = "black") +
+  geom_errorbar(data = MAPdf, 
+                aes(x = Order, 
+                    y = Coefficient, 
+                    ymin = LowLim, 
+                    ymax = UpperLim), 
+                width = 0.5, 
+                col = "black")  +
+  geom_hline(aes(yintercept = 0), linetype = "dashed", col = "blue") +
+  ylab("β log(MAP)") +
+  ggtitle("Precipitation Coefficients") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),  
+        plot.title = element_text(hjust = 0.5))
+
+OrdCoefPlot_MAP
+  

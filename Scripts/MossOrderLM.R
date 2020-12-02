@@ -85,7 +85,7 @@ MossOrdRich10to100
 OrderLMCoefDF <- NULL
 OrderLMCoefDF <- data.frame(
   "Coefficient" = coef_names,
-  "Dicranales" = rep(NA, length(coef_names)),    
+  "Dicranales" = rep(NA, length(coef_names)),
   "Hypnales" = rep(NA, length(coef_names)),
   "Bartramiales" = rep(NA, length(coef_names)),
   "Bryales" = rep(NA, length(coef_names)),
@@ -96,14 +96,16 @@ OrderLMCoefDF <- data.frame(
   "Funariales" = rep(NA, length(coef_names)),
   "Hedwigiales" = rep(NA, length(coef_names)),
   "Polytrichales" = rep(NA, length(coef_names)),
-  "Sphagnales" = rep(NA, length(coef_names))) 
+  "Sphagnales" = rep(NA, length(coef_names)))
 
 # 3.5 Loop
 # Loop output is a dataframe with coefficients and adjusted r squared for lm for each order
 for(i in 1:length(MossOrdRich10to100)){
   order <- MossOrdRich10to100[i]
   lm <- order_lm(order)
+  confints <- confint(lm)
   for(j in 1:(length(coef_names) - 1)){
+    #coefficient
     coef <- summary(lm)$coefficients[j]
     OrderLMCoefDF[j, order] <- coef
   }
@@ -237,5 +239,99 @@ saveRDS(OrderLM_AIC_DF, "Data/OrderLM_AIC_DF.rds")
 write.csv(OrderLM_AIC_DF, "/Users/haileynapier/Desktop/OrderLM_AIC_DF.csv")
 
 
+# COEFFICIENT STATISTICS
+# 5.0 Make a dataframe with coefficient statistics --------------------------------
+#left Hookeriales out of this one because it's weird, not sure what's going on there
+
+# 5.1 Make a vector of moss names minus Hookeriales
+MossOrdRich10to100NoHook <- MossOrdRich10to100[which(MossOrdRich10to100 != "Hookeriales")]
+MossOrdRich10to100NoHook
+
+# 5.2 Make a dataframe for loop output
+OrderLMCoefStatsDF <- NULL
+OrderLMCoefStatsDF <- data.frame(
+  "Coefficient" = coef_names,
+  "Dicranales" = rep(NA, length(coef_names)),
+  "Dicranales_pval" = rep(NA, length(coef_names)),
+  "Dicranales_confint_lower" = rep(NA, length(coef_names)),
+  "Dicranales_confint_upper" = rep(NA, length(coef_names)),
+  "Hypnales" = rep(NA, length(coef_names)),
+  "Hypnales_pval" = rep(NA, length(coef_names)), 
+  "Hypnales_confint_lower" = rep(NA, length(coef_names)),
+  "Hypnales_confint_upper" = rep(NA, length(coef_names)),
+  "Bartramiales" = rep(NA, length(coef_names)),
+  "Bartramiales_pval" = rep(NA, length(coef_names)),
+  "Bartramiales_confint_lower" = rep(NA, length(coef_names)),
+  "Bartramiales_confint_upper" = rep(NA, length(coef_names)),
+  "Bryales" = rep(NA, length(coef_names)),
+  "Bryales_pval" = rep(NA, length(coef_names)),
+  "Bryales_confint_lower" = rep(NA, length(coef_names)),
+  "Bryales_confint_upper" = rep(NA, length(coef_names)),
+  "Grimmiales" = rep(NA, length(coef_names)),
+  "Grimmiales_pval" = rep(NA, length(coef_names)),
+  "Grimmiales_confint_lower" = rep(NA, length(coef_names)),
+  "Grimmiales_confint_upper" = rep(NA, length(coef_names)),
+  "Orthotrichales" = rep(NA, length(coef_names)),
+  "Orthotrichales_pval" = rep(NA, length(coef_names)),
+  "Orthotrichales_confint_lower" = rep(NA, length(coef_names)),
+  "Orthotrichales_confint_upper" = rep(NA, length(coef_names)),
+  "Pottiales" = rep(NA, length(coef_names)),
+  "Pottiales_pval" = rep(NA, length(coef_names)),
+  "Pottiales_confint_lower" = rep(NA, length(coef_names)),
+  "Pottiales_confint_upper" = rep(NA, length(coef_names)),
+  "Funariales" = rep(NA, length(coef_names)),
+  "Funariales_pval" = rep(NA, length(coef_names)),
+  "Funariales_confint_lower" = rep(NA, length(coef_names)),
+  "Funariales_confint_upper" = rep(NA, length(coef_names)),
+  "Hedwigiales" = rep(NA, length(coef_names)),
+  "Hedwigiales_pval" = rep(NA, length(coef_names)),
+  "Hedwigiales_confint_lower" = rep(NA, length(coef_names)),
+  "Hedwigiales_confint_upper" = rep(NA, length(coef_names)),
+  "Polytrichales" = rep(NA, length(coef_names)),
+  "Polytrichales_pval" = rep(NA, length(coef_names)),
+  "Polytrichales_confint_lower" = rep(NA, length(coef_names)),
+  "Polytrichales_confint_upper" = rep(NA, length(coef_names)),
+  "Sphagnales" = rep(NA, length(coef_names)),
+  "Sphagnales_pval" = rep(NA, length(coef_names)),
+  "Sphagnales_confint_lower" = rep(NA, length(coef_names)),
+  "Sphagnales_confint_upper" = rep(NA, length(coef_names)))
+
+# 5.3 Loop
+# Loop output is a dataframe with coefficients and adjusted r squared for lm for each order
+# Also includes p values and 95% confidence intervals for each coefficient
+for(i in 1:length(MossOrdRich10to100NoHook)){
+  order <- MossOrdRich10to100NoHook[i]
+  lm <- order_lm(order)
+  confints <- confint(lm)
+  for(j in 1:(length(coef_names) - 1)){
+    #coefficient
+    coef <- summary(lm)$coefficients[j]
+    OrderLMCoefStatsDF[j, order] <- coef
+    
+    #confidence interval for each coefficient
+    lower_lim_name <- paste(order, "confint_lower", sep = "_")
+    lower_lim <- confints[j,1]
+    OrderLMCoefStatsDF[j,lower_lim_name] <- lower_lim
+    upper_lim_name <- paste(order, "confint_upper", sep = "_")
+    upper_lim <- confints[j,2]
+    OrderLMCoefStatsDF[j, upper_lim_name] <- upper_lim
+    
+    #p value for each coefficient
+    pval_name <- paste(order, "pval", sep = "_")
+    pval <- summary(lm)$coefficients[j,4]
+    OrderLMCoefStatsDF[j, pval_name] <- pval
+  }
+  adjrsquared <- summary(lm)$adj.r.squared
+  lastindex <- length(coef_names)
+  OrderLMCoefStatsDF[lastindex, order] <- adjrsquared
+}
+
+saveRDS(OrderLMCoefStatsDF, "Data/OrderLMCoefDF.rds")
+
+#download csv
+write.csv(OrderLMCoefStatsDF, "/Users/haileynapier/Desktop/OrderLMCoefStatsDF.csv")
+
+
+# 6.0 DATA VIZ
 
 

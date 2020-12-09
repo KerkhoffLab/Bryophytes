@@ -89,19 +89,22 @@ biome_coef_pointrange_plot <- function(biome = "Coniferous_Forests"){
                           y = Coefficient, 
                           ymin = LowLim, 
                           ymax = UpLim), 
-                      col = biome_col) +
+                      col = biome_col,
+                      size = 1) +
       geom_errorbar(data = plotdf, 
                     aes(x = Order, 
                         y = Coefficient, 
                         ymin = LowLim, 
                         ymax = UpLim), 
+                    size = 1,
                     width = 0.5, 
                     col = biome_col)  +
       geom_hline(aes(yintercept = 0), linetype = "dashed", col = "black") +
       ylab(y_axis_title) +
       ggtitle(plot_title) +
       theme_minimal() + 
-      theme(axis.text.x = element_text(angle = 45, hjust = 1),  
+      theme(text = element_text(size = 25),
+            axis.text.x = element_text(angle = 45, hjust = 1),  
             plot.title = element_text(hjust = 0.5))
     
   }else{

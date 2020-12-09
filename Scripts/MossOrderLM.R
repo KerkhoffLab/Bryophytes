@@ -366,6 +366,8 @@ for(i in 1:length(MossOrdRich10to100NoHook)){
 
 saveRDS(OrderLMAdjBiomeCoefDF, "Data/OrdAdjBiomeLMCoefDF.rds")
 
+write.csv(OrderLMAdjBiomeCoefDF, "/Users/haileynapier/Desktop/AdjustedBiomeCoefDF.csv")
+
 # 6.0 DATA VIZ -------------------------------------
 # plot that shows coefficients and confidence intervals for each order for any parameter
 

@@ -17,22 +17,29 @@ OrdCoefPlot_MAT <- ggplot() +
                       y = Coefficient, 
                       ymin = LowLim, 
                       ymax = UpperLim), 
+                  size = 1,
                   col = "black") +
   geom_errorbar(data = MATdf, 
                 aes(x = Order, 
                     y = Coefficient, 
                     ymin = LowLim, 
                     ymax = UpperLim), 
+                size = 1,
                 width = 0.5, 
                 col = "black")  +
-  geom_hline(aes(yintercept = 0), linetype = "dashed", col = "blue") +
-  ylab("β log(MAT)") +
+  geom_hline(aes(yintercept = 0), linetype = "dashed", col = "black") +
+  ylab("βlog(MAT)") +
   ggtitle("Temperature Coefficients") + 
   theme_minimal() + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        text = element_text(size = 25),
         plot.title = element_text(hjust = 0.5)) 
 
 OrdCoefPlot_MAT
+
+png("Figures/MAT_CoefPlot.png", width = 1500, height = 1000, pointsize = 20)
+OrdCoefPlot_MAT
+dev.off()
 
 
 MAPdf <- OrderCoefPlotDF %>%
@@ -44,22 +51,29 @@ OrdCoefPlot_MAP <- ggplot() +
                       y = Coefficient, 
                       ymin = LowLim, 
                       ymax = UpperLim), 
-                  col = "black") +
+                  col = "black", 
+                  size = 1) +
   geom_errorbar(data = MAPdf, 
                 aes(x = Order, 
                     y = Coefficient, 
                     ymin = LowLim, 
                     ymax = UpperLim), 
                 width = 0.5, 
+                size = 1,
                 col = "black")  +
-  geom_hline(aes(yintercept = 0), linetype = "dashed", col = "blue") +
-  ylab("β log(MAP)") +
+  geom_hline(aes(yintercept = 0), linetype = "dashed", col = "black") +
+  ylab("βlog(MAP)") +
   ggtitle("Precipitation Coefficients") +
   theme_minimal() + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),  
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+        text = element_text(size = 25),
         plot.title = element_text(hjust = 0.5))
 
 OrdCoefPlot_MAP
+
+png("Figures/MAP_CoefPlot.png", width = 1500, height = 1000, pointsize = 20)
+OrdCoefPlot_MAP
+dev.off()
 
 
 # 2.0 Plots each for biome -------

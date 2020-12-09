@@ -19,6 +19,8 @@ MossOrdRichAbove100 <- readRDS("Data/MossOrdRichAbove100.rds")
 MossOrdRich25to100 <- readRDS("Data/MossOrdRich25to100.rds")
 MossOrdRich10to25 <- readRDS("Data/MossOrdRich10to25.rds")
 
+BiomeNames <- readRDS("Data/BiomeNames.rds")
+
 
 
 # 1.0 Add NAs for 0s in TotalRichness ------
@@ -329,9 +331,40 @@ for(i in 1:length(MossOrdRich10to100NoHook)){
 
 saveRDS(OrderLMCoefStatsDF, "Data/OrderLMCoefDF.rds")
 
-#download csv
-write.csv(OrderLMCoefStatsDF, "/Users/haileynapier/Desktop/OrderLMCoefStatsDF.csv")
+# 5.4 Adjust coefficients for biomes (intercept is coniferous forest)
+# Make dataframe for loop output 
+nrows <- length(BiomeNames)*length(MossOrdRich10to100NoHook)
+OrderLMAdjBiomeCoefDF <- data.frame("Biome" = rep(BiomeNames, length(MossOrdRich10to100NoHook)), 
+                                    "Order" = rep(NA, nrows), 
+                                    "Coefficient"  = rep(NA, nrows), 
+                                    "LowLim" = rep(NA, nrows), 
+                                    "UpLim" = rep(NA, nrows)) 
 
+# Loop that adjusts biome coefficients and puts data into correct format for plotting
+end <- 0
+for(i in 1:length(MossOrdRich10to100NoHook)){
+  start <- end + 1
+  end <- start + length(BiomeNames) - 1
+  
+  order <- MossOrdRich10to100NoHook[i]
+  lowlim_name <- paste(order, "_confint_lower", sep = "")
+  uplim_name <- paste(order, "_confint_upper", sep = "")
+  
+  intercept <- OrderLMCoefStatsDF[1,order]
+  lowlim_intercept <- OrderLMCoefStatsDF[1,lowlim_name]
+  uplim_intercept <- OrderLMCoefStatsDF[1,uplim_name]
+  
+  coefvec <- c(intercept, OrderLMCoefStatsDF[4:13, order])
+  lowlim_vec <- c(lowlim_intercept, OrderLMCoefStatsDF[4:13, lowlim_name])
+  uplim_vec <- c(uplim_intercept, OrderLMCoefStatsDF[4:13, uplim_name])
+  
+  OrderLMAdjBiomeCoefDF$Order[start:end] <- order
+  OrderLMAdjBiomeCoefDF$Coefficient[start:end] <- coefvec
+  OrderLMAdjBiomeCoefDF$LowLim[start:end] <- lowlim_vec
+  OrderLMAdjBiomeCoefDF$UpLim[start:end] <- uplim_vec
+}
+
+saveRDS(OrderLMAdjBiomeCoefDF, "Data/OrdAdjBiomeLMCoefDF.rds")
 
 # 6.0 DATA VIZ
 # plot that shows coefficients and confidence intervals for each order for any parameter
@@ -373,57 +406,6 @@ for(i in 1:length(MossOrdRich10to100NoHook)){
   OrderCoefPlotDF$UpperLim[start:end] <- upper_lim_vec
 }
 
-# 6.2 Plot 
-MATdf <-OrderCoefPlotDF %>%
-  filter(OrderCoefPlotDF$Parameter == "log1p(MAT_Kelvin)")
+saveRDS(OrderCoefPlotDF, "Data/OrderCoefPlotDF.rds")
 
-OrdCoefPlot_MAT <- ggplot() + 
-  geom_pointrange(data = MATdf, 
-                aes(x = Order, 
-                    y = Coefficient, 
-                    ymin = LowLim, 
-                    ymax = UpperLim), 
-                col = "black") +
-  geom_errorbar(data = MATdf, 
-                aes(x = Order, 
-                    y = Coefficient, 
-                    ymin = LowLim, 
-                    ymax = UpperLim), 
-                width = 0.5, 
-                col = "black")  +
-  geom_hline(aes(yintercept = 0), linetype = "dashed", col = "blue") +
-  ylab("β log(MAT)") +
-  ggtitle("Temperature Coefficients") + 
-  theme_minimal() + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        plot.title = element_text(hjust = 0.5)) 
-
-OrdCoefPlot_MAT
-  
-  
-MAPdf <- OrderCoefPlotDF %>%
-  filter(OrderCoefPlotDF$Parameter == "log1p(MAP)")
-  
-OrdCoefPlot_MAP <- ggplot() + 
-  geom_pointrange(data = MAPdf, 
-                  aes(x = Order, 
-                      y = Coefficient, 
-                      ymin = LowLim, 
-                      ymax = UpperLim), 
-                  col = "black") +
-  geom_errorbar(data = MAPdf, 
-                aes(x = Order, 
-                    y = Coefficient, 
-                    ymin = LowLim, 
-                    ymax = UpperLim), 
-                width = 0.5, 
-                col = "black")  +
-  geom_hline(aes(yintercept = 0), linetype = "dashed", col = "blue") +
-  ylab("β log(MAP)") +
-  ggtitle("Precipitation Coefficients") +
-  theme_minimal() + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),  
-        plot.title = element_text(hjust = 0.5))
-
-OrdCoefPlot_MAP
-  
+# See MossOrderLMPlots.R for plotting code

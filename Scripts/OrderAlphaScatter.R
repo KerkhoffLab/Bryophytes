@@ -233,28 +233,32 @@ LeastDiverseMoss <- MossOrdLogAlphaDF %>%
 MossOrderMostRich <- ggplot(MostDiverseMoss, 
                              aes(Latitude, Alpha, color=Order), 
                              show.legend=TRUE) +
-  geom_point(shape=16, size=1.5, alpha=0.6) +
+  geom_point(shape=16, size=5, alpha=0.6) +
   xlab("Latitude") +
-  ylab("Alpha Diversity") +
+  ylab("α Diversity") +
   theme_minimal() +
   scale_color_manual(values=c("Hypnales" = mossorderpal[7],
                               "Dicranales" = mossorderpal[10])) + 
-  theme(axis.title.y = element_text(size=16),
-        axis.title.x = element_text(size=16),
-        axis.text = element_text(size=15),
-        plot.title = element_text(size=17, hjust=0.5),
-        legend.title = element_text(size=13),
-        legend.text = element_text(size = 10)) + 
+  theme(axis.title.y = element_text(size=29),
+        axis.title.x = element_text(size=29),
+        axis.text = element_text(size=20),
+        plot.title = element_text(size=32, hjust=0.5),
+        legend.title = element_text(size=29),
+        legend.text = element_text(size = 20)) + 
   labs(title = "Most Diverse (greater than 100 species)")
 MossOrderMostRich
+
+png("Figures/MossOrderMostRich_AlphaScatter.png", width = 1500, height = 1000,pointsize = 20)
+MossOrderMostRich
+dev.off()
 
 # More diverse orders
 MossOrderMoreRich <- ggplot(MoreDiverseMoss, 
                             aes(Latitude, Alpha, color=Order), 
                             show.legend=TRUE) +
-  geom_point(shape=16, size=1.5, alpha=0.6) +
+  geom_point(shape=16, size=5, alpha=0.6) +
   xlab("Latitude") +
-  ylab("Alpha Diversity") +
+  ylab("α Diversity") +
   theme_minimal() +
   scale_color_manual(values=c("Bartramiales" = mossorderpal[6],
                               "Bryales" = mossorderpal[7],
@@ -262,44 +266,52 @@ MossOrderMoreRich <- ggplot(MoreDiverseMoss,
                               "Hookeriales" = mossorderpal[9],
                               "Orthotrichales" = mossorderpal[4],
                               "Pottiales" = mossorderpal[2])) +
-  theme(axis.title.y = element_text(size=16),
-        axis.title.x = element_text(size=16),
-        axis.text = element_text(size=15),
-        plot.title = element_text(size=17, hjust=0.5),
-        legend.title = element_text(size=13),
-        legend.text = element_text(size = 10)) +
+  theme(axis.title.y = element_text(size=29),
+        axis.title.x = element_text(size=29),
+        axis.text = element_text(size=20),
+        plot.title = element_text(size=32, hjust=0.5),
+        legend.title = element_text(size=29),
+        legend.text = element_text(size = 20)) +
   labs(title = "More Diverse (26 - 100 species)")
 MossOrderMoreRich
+
+png("Figures/MossOrderMoreRich_AlphaScatter.png", width = 1500, height = 1000, pointsize = 20)
+MossOrderMoreRich
+dev.off()
 
 #Less diverse orders
 MossOrderLessRich <- ggplot(LessDiverseMoss, 
                             aes(Latitude, Alpha, color=Order), 
                             show.legend=TRUE) +
-  geom_point(shape=16, size=1.5, alpha=0.6) +
+  geom_point(shape=16, size=5, alpha=0.6) +
   xlab("Latitude") +
-  ylab("Alpha Diversity") +
+  ylab("α Diversity") +
   #geom_jitter(height = 0.3) +
   theme_minimal() +
   scale_color_manual(values=c("Funariales" = mossorderpal[1],
                               "Hedwigiales" = mossorderpal[2],
                               "Polytrichales" = mossorderpal[3],
                               "Sphagnales" = mossorderpal[11])) +
-  theme(axis.title.y = element_text(size=16),
-        axis.title.x = element_text(size=16),
-        axis.text = element_text(size=15),
-        plot.title = element_text(size=17, hjust=0.5),
-        legend.title = element_text(size=13),
-        legend.text = element_text(size = 10)) +
+  theme(axis.title.y = element_text(size=29),
+        axis.title.x = element_text(size=29),
+        axis.text = element_text(size=20),
+        plot.title = element_text(size=32, hjust=0.5),
+        legend.title = element_text(size=29),
+        legend.text = element_text(size = 20)) +
   labs(title = "Less Diverse (11-25 species)")
 MossOrderLessRich
+
+png("Figures/MossOrderLessRich_AlphaScatter.png", width = 1500, height = 1000, pointsize = 20)
+MossOrderLessRich
+dev.off()
 
 #Least diverse orders
 MossOrderLeastRich <- ggplot(LeastDiverseMoss, 
                                 aes(Latitude, Alpha, color=Order), 
                                 show.legend=TRUE) +
-  geom_point(shape=16, size=1.5, alpha=0.6) +
+  geom_point(shape=16, size=5, alpha=0.6) +
   xlab("Latitude") +
-  ylab("Alpha Diversity") +
+  ylab("α Diversity") +
   #geom_jitter(0.3) +
   theme_minimal() +
   scale_color_manual(values=c("Andreaeaeales" = mossorderpal[1],
@@ -312,17 +324,24 @@ MossOrderLeastRich <- ggplot(LeastDiverseMoss,
                               "Ptychomniales" = mossorderpal[8],
                               "Rhizogoniales" = mossorderpal[9],
                               "Splachnales" = mossorderpal[10])) +
-  theme(axis.title.y = element_text(size=16),
-        axis.title.x = element_text(size=16),
-        axis.text = element_text(size=15),
-        plot.title = element_text(size=17, hjust=0.5),
-        legend.title = element_text(size=13),
-        legend.text = element_text(size = 10)) +
+  theme(axis.title.y = element_text(size=29),
+        axis.title.x = element_text(size=29),
+        axis.text = element_text(size=20),
+        plot.title = element_text(size=32, hjust=0.5),
+        legend.title = element_text(size=29),
+        legend.text = element_text(size = 20)) +
   labs(title = "Least Diverse (10 or fewer species)")
 MossOrderLeastRich
 
-grid.arrange(MossOrderMostRich, MossOrderMoreRich, MossOrderLessRich, MossOrderLeastRich, nrow = 2)
+png("Figures/MossOrderLeastRich_AlphaScatter.png", width = 1500, height = 1000, pointsize = 20)
+MossOrderLeastRich
+dev.off()
 
+OrderAlphaScatter_Grid <- grid.arrange(MossOrderMostRich, MossOrderMoreRich, MossOrderLessRich, MossOrderLeastRich, nrow = 2)
+
+png("Figures/OrderAlphaScatter_Grid.png", width = 1500, height = 1000, pointsize = 20)
+plot(OrderAlphaScatter_Grid)
+dev.off()
 
 # 2.3 Percent Total Species Richness
 # 2.3.1 Percent total species richness (in each cell)

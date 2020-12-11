@@ -1,6 +1,7 @@
 # Biome order circle plot
 # Hailey Napier, July 2020
 # DO NOT USE THIS SCRIPT
+# Final circle plot code for moss in FINALMossCirclePlot.R
 
 # 0.1 Load packages -------------------------------------------------------------
 library(dplyr)
@@ -87,6 +88,8 @@ for(i in 1:length(SpeciesNames)){
     SpBiMat[species, biome] <- ab
   }
 }
+
+saveRDS(SpBiMat, "Data/SpBiMat.rds")
 
 # Make OrderSpeciesList
 OrderSpeciesList <- list()

@@ -15,11 +15,13 @@ MossPresence <- readRDS("Data/MossPresence.rds")
 MossOrderNames <- readRDS("Data/MossOrderNames.rds")
 BiomeNames <- readRDS("Data/BiomeNames.rds")
 # From BiomeBetaCellsClean.R
-BiomeBetaCellsClean <- readRDS("Data/BiomeBetaCellsClean.rds")
+BiomeCellsClean <- readRDS("Data/BiomeCellsClean.rds")
 # From BiomeCirclePlot.R
 CircleMatAllMoss <- readRDS("Data/CircleMatAllMoss.rds")
 
 MossOrderSpeciesList <- readRDS("Data/MossOrderSpeciesList.rds")
+
+SpBiMat <- readRDS("Data/SpBiMat.rds")
 
 MossOrdRich25to100 <- readRDS("Data/MossOrdRich25to100.rds")
 MossOrdRichAbove100 <- readRDS("Data/MossOrdRichAbove100.rds")
@@ -130,6 +132,8 @@ for(i in 1:NumberOrders){
   }
 }
 
+# Save matrix
+saveRDS(MOBPerMatSpecies, "Data/MOBPerMatSpecies.rds")
 
 # 4.0 Null model for stat analysis -------------------------------------------------
 # Assign each species a new order

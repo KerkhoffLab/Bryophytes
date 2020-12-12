@@ -1111,7 +1111,8 @@ OrderLMAdjBiomeCoefDF <- data.frame("Biome" = rep(BiomeNames, length(MossOrdRich
                                     "Order" = rep(NA, nrows), 
                                     "Coefficient"  = rep(NA, nrows), 
                                     "LowLim" = rep(NA, nrows), 
-                                    "UpLim" = rep(NA, nrows)) 
+                                    "UpLim" = rep(NA, nrows), 
+                                    "PVal" = rep(NA, nrows)) 
 
 # Loop that adjusts biome coefficients and puts data into correct format for plotting
 end <- 0
@@ -1122,24 +1123,42 @@ for(i in 1:length(MossOrdRich10to100NoHook)){
   order <- MossOrdRich10to100NoHook[i]
   lowlim_name <- paste(order, "_confint_lower", sep = "")
   uplim_name <- paste(order, "_confint_upper", sep = "")
+  pval_name <- paste(order, "_pval", sep="")
   
   intercept <- OrderLMCoefStatsDF[1,order]
   lowlim_intercept <- OrderLMCoefStatsDF[1,lowlim_name]
   uplim_intercept <- OrderLMCoefStatsDF[1,uplim_name]
+  pval_intercept <- OrderLMCoefStatsDF[1, pval_name]
   
   coefvec <- c(intercept, OrderLMCoefStatsDF[4:13, order])
   lowlim_vec <- c(lowlim_intercept, OrderLMCoefStatsDF[4:13, lowlim_name])
   uplim_vec <- c(uplim_intercept, OrderLMCoefStatsDF[4:13, uplim_name])
+  pval_vec <- c(pval_intercept, OrderLMCoefStatsDF[4:13, pval_name])
   
   OrderLMAdjBiomeCoefDF$Order[start:end] <- order
   OrderLMAdjBiomeCoefDF$Coefficient[start:end] <- coefvec
   OrderLMAdjBiomeCoefDF$LowLim[start:end] <- lowlim_vec
   OrderLMAdjBiomeCoefDF$UpLim[start:end] <- uplim_vec
+  OrderLMAdjBiomeCoefDF$PVal[start:end] <- pval_vec
 }
 
 saveRDS(OrderLMAdjBiomeCoefDF, "Data/OrdAdjBiomeLMCoefDF.rds")
 
 write.csv(OrderLMAdjBiomeCoefDF, "/Users/haileynapier/Desktop/AdjustedBiomeCoefDF.csv")
+
+# 5.5 Quick analysis of mean coefficients for each order
+mean_biome_coef_df <- data.frame(
+  "Biome" = BiomeNames,
+  "MeanCoefficient" = rep(NA, length(BiomeNames))
+)
+for(i in 1:length(BiomeNames)){
+  biome <- BiomeNames[i]
+  df <- OrderLMAdjBiomeCoefDF %>%
+    filter(OrderLMAdjBiomeCoefDF$Biome == biome)
+  mean_coef <- mean(df$Coefficient)
+  
+  mean_biome_coef_df$MeanCoefficient[which(mean_biome_coef_df$Biome == biome)] <- mean_coef
+}
 
 # 6.0 Data Manipulatio for plots -------------------------------------
 # plot that shows coefficients and confidence intervals for each order for any parameter

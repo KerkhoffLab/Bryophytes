@@ -188,6 +188,9 @@ MossOrdSpecBioDF <- bind_rows(MossOrdSpecBioDF, tempDF)
 #Omit species where biome == NA
 MossOrdSpecBioDF <- MossOrdSpecBioDF[complete.cases(MossOrdSpecBioDF), ]
 
+#Save MossOrdSpecBioDF
+saveRDS(MossOrdSpecBioDF, "Data/MossOrdSpecBioDF.rds")
+
 # 4.2 Make null model to repeat
 NullMOBMat <- matrix(NA, 22, 12)
 rownames(NullMOBMat) <- MossOrderNames
@@ -297,7 +300,6 @@ for(i in 1:NumberOrders){
     MOBZMatBiomeSD[order, biome] <- zscore
   }
 }
-
 
 MOBZMatAllSD <- CircleMatAllMoss
 obssd <- sd(MOBPerMatSpecies)

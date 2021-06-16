@@ -94,7 +94,7 @@ betamat <- betadiver(SpeciesCellMatrix, method = "j", order = FALSE, help = FALS
 saveRDS(SpeciesCellMatrix, file="Data/SpeciesCellMatrix.rds")
 saveRDS(betamat, file="Data/BetaMat.rds")
 
-#Stop for Bryophytes.rmd --------------------------------------------------------------
+#Stop Bryophytes.rmd (all necessary information is loaded) --------------------------------------------------------------
 
 
 ##Bryophytes.rmd##
@@ -157,7 +157,7 @@ saveRDS(RangeRaster, "Data/RangeRaster.rds")
 #Stop for NullModelWithWorldClimData.R & SpreadingDye.R-------------------------------
 
 
-#ONLY NEEDED FOR MAPPING & SHAPEFILE EXTRACTION
+#CODE BELOW IS ONLY NEEDED FOR MAPPING & SHAPEFILE EXTRACTION ----
 
 ##Bryophytes.Rmd##
 Cell8 <- CellID[which(bryneighborvect==8)]

@@ -1,6 +1,7 @@
 # Bryophytes 2020 Data Processing
 # Hailey Napier, August 2020
 # Adapted from DataProcessing.R
+# Use to generate data necessary for Bryophytes2020.rmd
 
 # Load packages ----------------------------------------------------------------------
 require(BIEN)

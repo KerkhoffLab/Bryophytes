@@ -3,6 +3,9 @@
 #Input: range = str,  biome/mountain range
 #Input: cont =  str, continent ("both", "North America", "South America"); default is both
 #Input: cells = str, cell count type; "center", "clean", "weight"; default is clean
+        # center counts the cell if the biome overlaps the center of the cell
+        # clean counts the cell in the biome that covers the majority of the cell (weighted, but selects one biome per cell)
+        # weight gives the proportion of the cell the biome polygon covers
 #Output: vector of length 15038 containing only alpha diversity values for cells inside specified biome/mountain range area, else NA
 #Hailey Napier
 #July 16, 2020

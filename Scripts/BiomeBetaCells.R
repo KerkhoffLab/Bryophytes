@@ -10,7 +10,7 @@
 
 #FIRST -----------------------------------------------------------------
   # Run DataProcessing.R Bryophytes.rmd section under "ONLY NEEDED FOR MAPPING AND SHAPEFILE EXRACTION" (~ln. 160)
-  # Run BiomeDiversity.R to laod in biome shapefile data
+  # Run BiomeDiversity.R to load in biome shapefile data
 
 #Load packages -----------------------------------------------------------
 library(raster)
@@ -120,6 +120,7 @@ for(i in BiomeBetaCellID){
     BiomeBetaCellsClean <- BiomeBetaCellsClean[-drop,]
   }
 }
+
 
 #Save dataframes ----------------------------------------------------------
 #All cells, including repeats where a cell is covered by multiple biomes

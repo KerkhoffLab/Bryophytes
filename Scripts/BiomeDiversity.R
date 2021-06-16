@@ -606,3 +606,4 @@ BiomeMap
 png("Figures/BiomeMap.png", width = 1000, height = 1000, pointsize = 30)
 BiomeMap
 dev.off()
+

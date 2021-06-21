@@ -299,7 +299,6 @@ lm_parameters <- c("LogOrdRich", "LogMAT", "LogMAP", "Biome*LogMAT + Biome*LogMA
 #       4: Biome*LogMAT + Biome*LogMAP
 #       5: Topo*LogMAT + Topo*LogMAP
 # output: linear model using input order's data and parameters specified in input
-
 order_any_lm <- function(order = "Hypnales", parameter_index_vector = 2:5){
   if(order %in% LMDF2$OrderName){
     tempdf <- LogTransLMDF %>%

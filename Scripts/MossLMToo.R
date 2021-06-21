@@ -17,6 +17,7 @@ require(plotly)
 LMDF <- readRDS("Data/LMDF.rds")
 LMDF2 <- readRDS("Data/LMDF2.rds")
 LMDF3 <- readRDS("Data/LMDF3.rds")
+LMDF4 <- readRDS("Data/LMDF4.rds")
 MossRichnessRaster <- readRDS("Data/MossRichnessRaster.rds")
 nw_mount <- shapefile("Data/MapOutlines/Mountains/Koeppen-Geiger_biomes.shp")
 cols <- c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
@@ -70,6 +71,8 @@ LMDF4$MAT_Kelvin <- (LMDF4$MAT) + 273.15
 LMDF4$LogMAT_Kelvin <- log1p(LMDF4$MAT_Kelvin)
 LMDF4$LogMAP <- log1p(LMDF4$MAP)
 LMDF4$LogTotalRich <- log1p(LMDF4$TotalRichness)
+
+saveRDS(LMDF4, "Data/LMDF4.rds")
 
 
 # 2.0 Playing around to get comfortable + comparing LMDF2 and LMDF3 ------------
@@ -213,7 +216,7 @@ fig2 <- fig2 %>% layout(scene = list(xaxis=axx,yaxis=axy,zaxis=axz))
 fig2
 
 
-#4.4 Log(TotalRichness) by log(MAP) by MAT colored by biome --------------------
+# 4.4 Log(TotalRichness) by log(MAP) by MAT colored by biome -------------------
 fig3 <- plot_ly(LMDF3, x=~log1p(MAP), y=~MAT, z=~log1p(TotalRichness), 
                type="scatter3d", mode="markers", color=~Biome, colors=cols,
                marker=list(size=5))
@@ -243,6 +246,45 @@ axz <- list(
 #fig <- fig %>% add_trace(x=~LMDF3$MAP, z=lm(LMDF3$TotalRichness~LMDF3$MAT), mode="lines")
 fig3 <- fig3 %>% layout(scene = list(xaxis=axx,yaxis=axy,zaxis=axz))
 fig3
+
+
+# 4.5 Log(TotalRichness) by log(MAP) by log(MAT_Kelvin) colored by biome -------
+fig4 <- plot_ly(LMDF4, x=~LogMAP, y=~LogMAT_Kelvin, z=~LogTotalRich, 
+                type="scatter3d", mode="markers", color=~Biome, colors=cols,
+                marker=list(size=5))
+axx <- list(
+  title = "log(MAP)"
+)
+
+axy <- list(
+  title = "log(MAT)"
+)
+
+axz <- list(
+  title = "log(Total Richness)"
+)
+fig4 <- fig4 %>% layout(scene = list(xaxis=axx,yaxis=axy,zaxis=axz))
+fig4
+
+
+# 4.6 Log(TotalRichness) by log(MAP) by log(MAT_Kelvin) colored by topo --------
+fig5 <- plot_ly(LMDF4, x=~LogMAP, y=~LogMAT_Kelvin, z=~LogTotalRich, 
+                type="scatter3d", mode="markers", color=~Topo,
+                marker=list(size=5))
+axx <- list(
+  title = "log(MAP)"
+)
+
+axy <- list(
+  title = "log(MAT)"
+)
+
+axz <- list(
+  title = "log(Total Richness)"
+)
+fig5 <- fig5 %>% layout(scene = list(xaxis=axx,yaxis=axy,zaxis=axz))
+fig5
+
 
 # Star map :)
 funcols <- c()
@@ -412,3 +454,11 @@ summary(mosslm_2)
 plot(mosslm_2)
 
 
+
+
+# Stuff for BIOL 385 presentation - organize later!
+
+good_lm <- lm(LogTotalRich ~ LogMAT_Kelvin + LogMAP + LogMAP + 
+                Biome*LogMAT_Kelvin + Biome*LogMAP +
+                Topo*LogMAT_Kelvin + Topo*LogMAP, data=LMDF4)
+summary(good_lm)

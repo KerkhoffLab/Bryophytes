@@ -1,0 +1,1367 @@
+---
+title: "Napier Fall 2020 Bryophyte Project Code"
+author: Hailey Napier '22
+date: December 2020
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r Load Packages}
+library(dplyr)
+library(ape)
+library(phangorn)
+library(phytools)
+library(rphast)
+library(raster)
+library(circlize)
+library(ggplot2)
+library(wesanderson)
+library(grid)
+library(gridExtra)
+library(RColorBrewer)
+
+```
+
+```{r Load Data}
+## For order alpha diversity scatterplot
+  # find in DataProcessing2020.R
+MossPresence <- readRDS("Data/MossPresence.rds")
+OrderNames <- readRDS("Data/OrderNames.rds")
+MossOrderNames <- readRDS("Data/MossOrderNames.rds")
+  # find in OneScaleFamRichMaps.R
+OrderRichList <- readRDS("Data/OrderRichList.rds")
+  # find in OrderBiomePercentSpRich.R
+MOBPerMatSpecies <- readRDS("Data/MOBPerMatSpecies.rds")
+LongLatDF <- readRDS("Data/LongLatDF.rds")
+
+
+## For circle plot
+BryophytePresence <- readRDS("Data/BryophytePresence.rds") 
+BiomeNames <- readRDS("Data/BiomeNames.rds")
+BiomeRichness <- readRDS("Data/BiomeRichness.rds")
+OrderNames <- readRDS("Data/OrderNames.rds")
+tree20 <- read.tree("Data/trees/aa-nu-RAxML-FigS20.tre")
+FigS20_FOG <- read.csv("Data/FamilyTrees/FigS20_FOG.csv")
+OrderNodesS20 <- read.csv("Data/OrderNodesS20.csv")
+  # find in MossPlotData.R
+MossPresence <- readRDS("Data/MossPresence.rds") 
+MossOrderNames <- unique(MossPresence$Order)
+MossSpeciesNames <- unique(MossPresence$Species)
+  # Colors
+biome_cols_11 <- c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
+                   "#446455", "#FDD262", "#D3DDDC", "#C7B19C", "#798E87", 
+                   "#C27D38")
+grid.col <- c(Coniferous_Forests = "#D8B70A", Dry_Forest = "#972D15", 
+              Mediterranean_Woodlands = "#A2A475", Moist_Forest = "#81A88D", 
+              Savannas = "#02401B", Taiga = "#446455", Temperate_Grasslands = "#FDD262", 
+              Temperate_Mixed = "#D3DDDC", Tropical_Grasslands = "#C7B19C", Tundra = "#798E87", 
+              Xeric_Woodlands = "#C27D38", Hypnales = "grey", Porellales = "grey",  
+              Pottiales = "grey", Hookeriales  = "grey", Bryales = "grey", Jungermanniales = "grey", 
+              Andreaeaeales = "grey", Splachnales = "grey", Orthotrichales  =  "grey",  
+              Bartramiales = "grey", Metzgeriales = "grey", Dicranales = "grey", Anthocerotales = "grey",
+              Funariales = "grey", Treubiales = "grey", Archidiales = "grey", Marchantiales = "grey", 
+              Polytrichales = "grey", Aulacomniales = "grey", Fossombroniales = "grey", 
+              Grimmiales = "grey", Hedwigiales = "grey", Bryoxiphiales = "grey", Buxbaumiales  = "grey",
+              Ptychomniales = "grey", Gigaspermales = "grey", Dendrocerotales  = "grey", 
+              Pleuroziales = "grey", Rhizogoniales = "grey", Haplomitriales = "grey", Hypnodendrales  = "grey", 
+              Pallaviciniales = "grey",  Pelliales = "grey", Notothyladales = "grey", Ricciales = "grey", 
+              Ptilidiales = "grey", Sphaerocarpales = "grey", Sphagnales = "grey")
+
+
+## For null modeling 
+  # find in DataProcessing2020.R
+MossPresence <- readRDS("Data/MossPresence.rds")
+MossOrderNames <- readRDS("Data/MossOrderNames.rds")
+BiomeNames <- readRDS("Data/BiomeNames.rds")
+  # find in BiomeBetaCellsClean.R
+BiomeCellsClean <- readRDS("Data/BiomeCellsClean.rds")
+  # find in BiomeCirclePlot.R
+CircleMatAllMoss <- readRDS("Data/CircleMatAllMoss.rds")
+MossOrderSpeciesList <- readRDS("Data/MossOrderSpeciesList.rds")
+SpBiMat <- readRDS("Data/SpBiMat.rds")
+MossOrdRich25to100 <- readRDS("Data/MossOrdRich25to100.rds")
+MossOrdRichAbove100 <- readRDS("Data/MossOrdRichAbove100.rds")
+MossOrdRich10to25 <- readRDS("Data/MossOrdRich10to25.rds")
+MossOrdRichBelow10 <- readRDS("Data/MossOrdRichBelow10.rds")
+
+
+## For linear modeling
+LMDF2 <- readRDS("Data/LMDF2.rds")
+AlphaMountLM <- readRDS("Data/AlphaMountLM.rds")
+  # find in MossLM.R
+RichnessVec <- readRDS("Data/RichnessVec.rds")
+  # find in DataProcessing.R
+MossOrdRichAbove100 <- readRDS("Data/MossOrdRichAbove100.rds")
+MossOrdRich25to100 <- readRDS("Data/MossOrdRich25to100.rds")
+MossOrdRich10to25 <- readRDS("Data/MossOrdRich10to25.rds")
+BiomeNames <- readRDS("Data/BiomeNames.rds")
+
+```
+
+
+```{r Order Alpha Diverstiy Scatterplots Data Manipulation}
+# 1.0 Data Manipulation ----------------------------------------------------
+# 1.1 Select mosses from OrderRichList
+mossindex <- match(MossOrderNames, OrderNames)
+MossOrderRichList <-list()
+for(i in 1:length(MossOrderNames)){
+  index <- mossindex[i]
+  list <- OrderRichList[index]
+  MossOrderRichList[i] <- list
+}
+
+# 1.3 Make dataframe for plotting
+Lat <- as.vector(LongLatDF$Latitude)
+MossOrdLogAlphaDF <- data.frame("Order" = rep(NA, 330836), 
+                                "Alpha" = rep(NA, 330836),
+                                "LogAlpha" = rep(NA, 330836),
+                                "LogTen" = rep(NA, 330836),
+                                "Percent"  = rep(NA, 330836),
+                                "CellID" = rep((1:15038), 22), 
+                                "Latitude" = rep(Lat, 22))
+
+for(i in 1:length(MossOrderNames)){
+  order <- MossOrderNames[i]
+  totalrich <- MOBMat[order, "Total"]
+  if(order %in% MossOrdRichBelow10){
+    group <- "Least diverse (10 or fewer species)"
+  }else if(order %in% MossOrdRich10to25){
+    group <- "Less diverse (11 - 25 species)"
+  }else if(order %in% MossOrdRich25to100){
+    group <- "More diverse (26 - 100 species)"
+  }else if(order %in% MossOrdRichAbove100){
+    group <- "Most diverse (greater than 100 species)"
+  }
+  list <- MossOrderRichList[[i]]
+  start <- (i-1) * 15038 + 1
+  end <- start + 15037
+  MossOrdLogAlphaDF$Order[start:end] <- order
+  MossOrdLogAlphaDF$Group[start:end] <- group
+  for(j in 1:15038){
+    index <- (i-1)*15038+j
+    alpha <- as.numeric(list[j])
+    log <- log(alpha)
+    logten <- log10(alpha)
+    percent <- (alpha/totalrich) * 100
+    MossOrdLogAlphaDF$LogAlpha[index] <- log
+    MossOrdLogAlphaDF$Alpha[index] <- alpha
+    MossOrdLogAlphaDF$LogTen[index] <- logten
+    MossOrdLogAlphaDF$Percent[index] <- percent
+  }
+}
+
+MossOrdLogAlphaDF$Percet <- NULL
+
+# Add percentage
+MOLA_Percent <- MossOrdLogAlphaDF
+for(i in 1:nrow(MOLA_Percent)){
+  order <- MOLA_Percent$Order[i]
+  totalrich <- MOBPerMatSpecies[order, "Total"]
+  alpha <- MOLA_Percent$Alpha[i]
+  percent <- (alpha/totalrich) * 100
+  MOLA_Percent$Percent[i] <- percent
+}
+
+
+# 1.4 Omit NA Values
+MOLADF_NoNA <- MossOrdLogAlphaDF
+MOLADF_NoNA <- MOLADF_NoNA[complete.cases(MOLADF_NoNA[ , 2]),]
+
+
+# 2.0 Plot Dataframes ----------------------------------------------------------
+# 2.0.1 Make color palette
+mostdivcols <- c("#2c8200","#edd13f")
+moredivcols <- c("#004fab",
+                  "#2d9e66",
+                  "#3a3177",
+                  "#5398ff",
+                  "#003d81",
+                  "#b09eec")
+lessdivcols <- c("#6c006d","#c894ff","#00246a","#d85f8a")
+leastdivcols <- c("#732832","#da7533","#d73f65","#a17235",
+                  "#dca33a","#dbab83","#724529","#d37f80",
+                  "#f84a11","#c14234")
+
+
+
+pal1 <- wes_palette("Darjeeling1")
+pal2 <- wes_palette("Chevalier1")
+mossorderpal <- c(pal1, pal2, wes_palette("IsleofDogs1")[1],
+                  wes_palette("Cavalcanti1")[5])
+
+
+# 2.2 Alpha Diversity Plots
+# 2.2.1 Plot each order richness group in its own plot with a new y-axis scale
+#Quick data manipulation
+MostDiverseMoss <- MossOrdLogAlphaDF %>%
+  filter(Group == "Most diverse (greater than 100 species)")
+
+MoreDiverseMoss <- MossOrdLogAlphaDF %>%
+  filter(Group == "More diverse (26 - 100 species)")
+
+LessDiverseMoss <- MossOrdLogAlphaDF %>%
+  filter(Group == "Less diverse (11 - 25 species)")
+
+LeastDiverseMoss <- MossOrdLogAlphaDF %>%
+  filter(Group == "Least diverse (10 or fewer species)")
+```
+
+```{r Most Diverse Orders Alpha Diverstiy Scatterplot}
+# Most diverse orders
+MossOrderMostRich <- ggplot(MostDiverseMoss, 
+                             aes(Latitude, Alpha, color=Order), 
+                             show.legend=TRUE) +
+  geom_point(shape=16, size=5, alpha=0.6) +
+  xlab("Latitude") +
+  ylab("α Diversity") +
+  theme_minimal() +
+  scale_color_manual(values=c("Hypnales" = mossorderpal[7],
+                              "Dicranales" = mossorderpal[10])) + 
+  theme(axis.title.y = element_text(size=29),
+        axis.title.x = element_text(size=29),
+        axis.text = element_text(size=20),
+        plot.title = element_text(size=32, hjust=0.5),
+        legend.title = element_text(size=29),
+        legend.text = element_text(size = 20)) + 
+  labs(title = "Most Diverse (greater than 100 species)")
+MossOrderMostRich
+
+png("Figures/MossOrderMostRich_AlphaScatter.png", width = 1500, height = 1000,pointsize = 20)
+MossOrderMostRich
+dev.off()
+```
+
+
+```{r More Diverse Orders Alpha Diverstiy Scatterplot}
+# More diverse orders
+MossOrderMoreRich <- ggplot(MoreDiverseMoss, 
+                            aes(Latitude, Alpha, color=Order), 
+                            show.legend=TRUE) +
+  geom_point(shape=16, size=5, alpha=0.6) +
+  xlab("Latitude") +
+  ylab("α Diversity") +
+  theme_minimal() +
+  scale_color_manual(values=c("Bartramiales" = mossorderpal[6],
+                              "Bryales" = mossorderpal[7],
+                              "Grimmiales" = mossorderpal[8],
+                              "Hookeriales" = mossorderpal[9],
+                              "Orthotrichales" = mossorderpal[4],
+                              "Pottiales" = mossorderpal[2])) +
+  theme(axis.title.y = element_text(size=29),
+        axis.title.x = element_text(size=29),
+        axis.text = element_text(size=20),
+        plot.title = element_text(size=32, hjust=0.5),
+        legend.title = element_text(size=29),
+        legend.text = element_text(size = 20)) +
+  labs(title = "More Diverse (26 - 100 species)")
+MossOrderMoreRich
+
+png("Figures/MossOrderMoreRich_AlphaScatter.png", width = 1500, height = 1000, pointsize = 20)
+MossOrderMoreRich
+dev.off()
+```
+
+```{r Less Diverse Orders Alpha Diverstiy Scatterplot}
+# Less diverse orders
+MossOrderLessRich <- ggplot(LessDiverseMoss, 
+                            aes(Latitude, Alpha, color=Order), 
+                            show.legend=TRUE) +
+  geom_point(shape=16, size=5, alpha=0.6) +
+  xlab("Latitude") +
+  ylab("α Diversity") +
+  #geom_jitter(height = 0.3) +
+  theme_minimal() +
+  scale_color_manual(values=c("Funariales" = mossorderpal[1],
+                              "Hedwigiales" = mossorderpal[2],
+                              "Polytrichales" = mossorderpal[3],
+                              "Sphagnales" = mossorderpal[11])) +
+  theme(axis.title.y = element_text(size=29),
+        axis.title.x = element_text(size=29),
+        axis.text = element_text(size=20),
+        plot.title = element_text(size=32, hjust=0.5),
+        legend.title = element_text(size=29),
+        legend.text = element_text(size = 20)) +
+  labs(title = "Less Diverse (11-25 species)")
+MossOrderLessRich
+
+png("Figures/MossOrderLessRich_AlphaScatter.png", width = 1500, height = 1000, pointsize = 20)
+MossOrderLessRich
+dev.off()
+```
+
+```{r Least Diverse Orders Alpha Diverstiy Scatterplot}
+# Least diverse orders
+MossOrderLeastRich <- ggplot(LeastDiverseMoss, 
+                                aes(Latitude, Alpha, color=Order), 
+                                show.legend=TRUE) +
+  geom_point(shape=16, size=5, alpha=0.6) +
+  xlab("Latitude") +
+  ylab("α Diversity") +
+  #geom_jitter(0.3) +
+  theme_minimal() +
+  scale_color_manual(values=c("Andreaeaeales" = mossorderpal[1],
+                              "Archidiales" = mossorderpal[2],
+                              "Aulacomniales" = mossorderpal[3],
+                              "Bryoxiphales" = mossorderpal[4],
+                              "Buxbaumiales" = mossorderpal[5],
+                              "Gigaspermales" = mossorderpal[6],
+                              "Hypnodendrales" = mossorderpal[7],
+                              "Ptychomniales" = mossorderpal[8],
+                              "Rhizogoniales" = mossorderpal[9],
+                              "Splachnales" = mossorderpal[10])) +
+  theme(axis.title.y = element_text(size=29),
+        axis.title.x = element_text(size=29),
+        axis.text = element_text(size=20),
+        plot.title = element_text(size=32, hjust=0.5),
+        legend.title = element_text(size=29),
+        legend.text = element_text(size = 20)) +
+  labs(title = "Least Diverse (10 or fewer species)")
+MossOrderLeastRich
+
+png("Figures/MossOrderLeastRich_AlphaScatter.png", width = 1500, height = 1000, pointsize = 20)
+MossOrderLeastRich
+dev.off()
+```
+
+```{r Orders Alpha Diverstiy Scatterplot Grid}
+# Arrange plots in grid
+OrderAlphaScatter_Grid <- grid.arrange(MossOrderMostRich, MossOrderMoreRich, MossOrderLessRich, MossOrderLeastRich, nrow = 2)
+
+png("Figures/OrderAlphaScatter_Grid.png", width = 1500, height = 1000, pointsize = 20)
+plot(OrderAlphaScatter_Grid)
+dev.off()
+```
+
+
+```{r Moss Biome Circle Plot Data Manipulation}
+# 1.0 Make order/species/biome dataframe ----------------------------------------
+MossOrdSpecBioDF <- data.frame("Species" = rep(NA, 2976), "Order" = rep(NA, 2976))
+end <- 0
+for(i in 1:NumberOrders){
+  order <- MossOrderNames[i]
+  species_list <- MossOrderSpeciesList[[i]]
+  number_species <- length(species_list)
+  start <- end + 1
+  end <- end + number_species
+  MossOrdSpecBioDF$Species[start:end] <- species_list
+  MossOrdSpecBioDF$Order[start:end] <- order
+}
+
+# 1.1 Add biome column for the biome where each species is most abundant
+MossOrdSpecBioDF$Biome <- NA
+tempDF <- data.frame(Species = NA, Order = NA, Biome = NA)
+for(i in 1:nrow(MossOrdSpecBioDF)){
+  order <- MossOrdSpecBioDF$Order[i]
+  species <- MossOrdSpecBioDF$Species[i]
+  biomenumcells <- vector()
+  for(j in 1:length(BiomeNames)){
+    biome <- BiomeNames[j]
+    ab <- SpBiMat[species,biome]
+    if(ab == 0){
+      ab = NA
+    }
+    biomenumcells[j] <- ab
+  }
+  if(sum(biomenumcells, na.rm = T) > 0){
+    biomeindex <- which(biomenumcells == max(biomenumcells, na.rm = T))
+    maxbiome <- BiomeNames[biomeindex]
+    if(length(maxbiome) == 1){
+      MossOrdSpecBioDF$Biome[which(MossOrdSpecBioDF$Species == species)] <- maxbiome
+    }else if(length(maxbiome) > 1){
+      print(species)
+      multimax <- maxbiome[1]
+      MossOrdSpecBioDF$Biome[which(MossOrdSpecBioDF$Species == species)] <- multimaxone
+      multimaxtwo <- maxbiome[2]
+      tempDF <- tempDF %>% add_row(Species = species, Order = order, Biome = multimaxtwo)
+    }
+  }
+}
+
+# 1.2 Add in species that have the same max abundance value in multiple biomes
+MossOrdSpecBioDF <- bind_rows(MossOrdSpecBioDF, tempDF)
+
+# 1.3 Omit species where biome == NA
+MossOrdSpecBioDF <- MossOrdSpecBioDF[complete.cases(MossOrdSpecBioDF), ]
+
+
+# 2.0 Make matrix for plotting --------------------------------------------------
+CircleMatAllMoss <- matrix(NA, 22, 11)
+rownames(CircleMatAllMoss) <- MossOrderNames
+colnames(CircleMatAllMoss) <- BiomeNames
+
+SortedMossOrderNames <- sort(MossOrderNames)
+tallytable <- table(MossOrdSpecBioDF$Order, MossOrdSpecBioDF$Biome)
+
+for(j in 1:NumberOrders){
+  order <- SortedMossOrderNames[j]
+  for(k in 1:NumberBiomes){
+    biome <- BiomeNames[k]
+    richness <- tallytable[j,k]
+    CircleMatAllMoss[order, biome] <-  richness
+  }
+}
+
+# Save matrix for quantitative analysis
+saveRDS(CircleMatAllMoss, "Data/CircleMatAllMoss.rds")
+```
+
+```{r Moss Biome Circle Plot}
+# Plot -----------------------------------------------------------------------
+circos.clear()
+
+png("Figures/CircleMoss.png", width = 1000, height = 1000, pointsize = 20)
+
+circos.par(start.degree = 0)
+chordDiagram(CircleMatAllMoss, grid.col = grid.col, column.col = biome_cols_11, 
+             directional = 1, direction.type = "arrows", link.arr.type = "big.arrow", 
+             link.arr.length = 0.05, link.largest.ontop = T, annotationTrack = c("grid"), 
+             preAllocateTracks = 1, big.gap = 20, small.gap = 2)
+circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
+  xlim = get.cell.meta.data("xlim")
+  ylim = get.cell.meta.data("ylim")
+  sector.name = get.cell.meta.data("sector.index")
+  circos.text(mean(xlim), ylim[1], sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex=0.5)
+}, bg.border = NA)
+
+dev.off()
+```
+
+
+```{r Null Modeling and Z-Score Data Manipulation}
+# 1.0 Make CellID/biome data frames for each order -------------------------
+NumberOrders <- length(MossOrderNames)
+MossOrderBiomeList <- list()
+
+for(i in 1:NumberOrders){
+  order <- MossOrderNames[i]
+  CellID <- MossPresence %>%
+    dplyr::filter(Order == order) %>%
+    dplyr::select(CellID)
+  CellID <- unique(as.vector(CellID$CellID))
+  DF <- data.frame(CellID)
+  DF$Biome <- NA
+  for(j in CellID){
+    cell <- j
+    biome <- BiomeCellsClean$Type[which(BiomeBetaCellsClean$CellID == cell)]
+    if(length(biome) > 0){
+      DF$Biome[which(DF$CellID == cell)] <- biome
+    }
+  }
+  DF$Order <- order
+  MossOrderBiomeList[[i]] <- DF
+}
+
+
+# 2.0 Find percentage of cells with biome for biomes in each order --------------
+# 2.1 Make a matrix with total cell counts for each order within each biome
+NumberBiomes <- 11
+BiomeNamesAndTotal <- c(BiomeNames, "Total")
+
+#MossOrderBiome = MOB
+MOBMat <- matrix(NA, 22, 12)
+rownames(MOBMat) <- MossOrderNames
+colnames(MOBMat) <- BiomeNamesAndTotal
+
+for(i in 1:NumberOrders){
+  order <- MossOrderNames[i]
+  
+  DF <- MossOrderBiomeList[[i]]
+  DF <- DF %>%
+    dplyr::filter(!is.na(DF$Biome))
+  
+  total <- nrow(DF)
+  biome = "Total"
+  MOBMat[order, biome] <- total
+  
+  biomes <- DF %>%
+    dplyr::select(Biome)
+  biomes <- unique(as.vector(biomes$Biome))
+  print(order)
+  print(biomes)
+  
+  for(j in 1:length(biomes)){
+    biome = biomes[j]
+    nbiome <- DF %>%
+      dplyr::filter(DF$Biome == biome)
+    nbiome <- nrow(nbiome)
+    
+    MOBMat[order, biome] <- nbiome
+  }
+}
+
+#save matrix
+saveRDS(MOBMat, "Data/MOBMat.rds")
+
+# 2.2 Find percentages and put into a DF
+MOBPercentMat <- MOBMat
+for(i in 1:NumberOrders){
+  order <- MossOrderNames[i]
+  total <- MOBPercentMat[order, "Total"]
+  for(j in 1:NumberBiomes){
+    biome <- BiomeNames[j]
+    biome_total <- MOBPercentMat[order, biome]
+    percent <- biome_total/total*100
+    MOBPercentMat[order, biome] <- percent
+  }
+}
+
+
+# 3.0 Percent matrix for species composition (not range area) -----------------
+# Use circle plot matrix
+MOBPerMatSpecies <- CircleMatAllMoss
+MOBPerMatSpecies <- cbind(MOBPerMatSpecies, NA)
+colnames(MOBPerMatSpecies)[12] <- "Total"
+
+totals <- rowSums(MOBPerMatSpecies, na.rm = T)
+
+for(i in 1:NumberOrders){
+  order <- MossOrderNames[i]
+  total <- totals[[i]]
+  MOBPerMatSpecies[order, "Total"] <- total
+}
+
+for(i in 1:NumberOrders){
+  order <- MossOrderNames[i]
+  total <- MOBPerMatSpecies[order, "Total"]
+  for(j in 1:NumberBiomes){
+    biome <- BiomeNames[j]
+    biome_abundance <- MOBPerMatSpecies[order, biome]
+    percent <- biome_abundance/total*100
+    MOBPerMatSpecies[order, biome] <- percent
+  }
+}
+
+# Save matrix
+saveRDS(MOBPerMatSpecies, "Data/MOBPerMatSpecies.rds")
+
+# 4.0 Null model for stat analysis -------------------------------------------------
+# Assign each species a new order
+# Repeat 100-500 times depending on how long it takes
+
+# 4.1.1 Make moss order/species dataframe
+MossOrdSpecBioDF <- data.frame("Species" = rep(NA, 2976), "Order" = rep(NA, 2976))
+end <- 0
+for(i in 1:NumberOrders){
+  order <- MossOrderNames[i]
+  species_list <- MossOrderSpeciesList[[i]]
+  number_species <- length(species_list)
+  start <- end + 1
+  end <- end + number_species
+  MossOrdSpecBioDF$Species[start:end] <- species_list
+  MossOrdSpecBioDF$Order[start:end] <- order
+}
+
+# 4.1.2 Add biome column for the biome where each species is most abundant
+MossOrdSpecBioDF$Biome <- NA
+tempDF <- data.frame(Species = NA, Order = NA, Biome = NA)
+for(i in 1:nrow(MossOrdSpecBioDF)){
+  order <- MossOrdSpecBioDF$Order[i]
+  species <- MossOrdSpecBioDF$Species[i]
+  biomenumcells <- vector()
+  for(j in 1:length(BiomeNames)){
+    biome <- BiomeNames[j]
+    ab <- SpBiMat[species,biome]
+    if(ab == 0){
+      ab = NA
+    }
+    biomenumcells[j] <- ab
+  }
+  if(sum(biomenumcells, na.rm = T) > 0){
+    biomeindex <- which(biomenumcells == max(biomenumcells, na.rm = T))
+    maxbiome <- BiomeNames[biomeindex]
+    if(length(maxbiome) == 1){
+      MossOrdSpecBioDF$Biome[which(MossOrdSpecBioDF$Species == species)] <- maxbiome
+    }else if(length(maxbiome) > 1){
+      print(species)
+      multimax <- maxbiome[1]
+      MossOrdSpecBioDF$Biome[which(MossOrdSpecBioDF$Species == species)] <- multimaxone
+      multimaxtwo <- maxbiome[2]
+      tempDF <- tempDF %>% add_row(Species = species, Order = order, Biome = multimaxtwo)
+    }
+  }
+}
+
+#Add in species that have the same max abundance value in multiple biomes
+MossOrdSpecBioDF <- bind_rows(MossOrdSpecBioDF, tempDF)
+
+#Omit species where biome == NA
+MossOrdSpecBioDF <- MossOrdSpecBioDF[complete.cases(MossOrdSpecBioDF), ]
+
+# 4.2 Make null model to repeat
+NullMOBMat <- matrix(NA, 22, 12)
+rownames(NullMOBMat) <- MossOrderNames
+colnames(NullMOBMat) <- BiomeNamesAndTotal
+
+SortedMossOrderNames <- sort(MossOrderNames)
+NumberReps <- 1000
+
+for(i in 1:NumberReps){
+  # 4.2.1: Use transform to shuffle order column (assign random order to each species)
+  DF <- transform(MossOrdSpecBioDF, Order = sample(Order))
+  # 4.2.2 Tally species in each order by biome
+  tallytable <- table(DF$Order, DF$Biome)
+  # 4.2.3 Store species richness values for each biome by order in a matrix
+  for(j in 1:NumberOrders){
+    order <- SortedMossOrderNames[j]
+    for(k in 1:NumberBiomes){
+      biome <- BiomeNames[k]
+      richness <- tallytable[j,k]
+      NullMOBMat[order, biome] <- sum(NullMOBMat[order, biome], richness, na.rm = T)
+    }
+  }
+}
+
+# 4.2.4 Calculate totals for each order 
+totals <- rowSums(NullMOBMat, na.rm = T)
+for(i in 1:NumberOrders){
+  order <- MossOrderNames[i]
+  total <- totals[[i]]
+  NullMOBMat[order, "Total"] <- total
+}
+
+# 4.3 Make a percentage matrix for null data
+NullMOBPerMat <- NullMOBMat
+
+for(i in 1:NumberOrders){
+  order <- MossOrderNames[i]
+  total <- NullMOBMat[order, "Total"]
+  for(j in 1:NumberBiomes){
+    biome <- BiomeNames[j]
+    biome_abundance <- NullMOBPerMat[order, biome]
+    percent <- biome_abundance/total*100
+    NullMOBPerMat[order, biome] <- percent
+  }
+}
+
+
+# 5.0 Analysis ---------------------------------------------------------------------
+# 5.1 Biomes
+# 5.1.1 Raw Richness Numbers
+# Divide each cell by number of reps to get null mean
+NullMOBMat <- NullMOBMat/NumberReps
+NullMeanTable <- apply(NullMOBMat, 2, mean)
+
+# Observed data -- number of species in each biome
+ObsMeanTable <- colMeans(CircleMatAllMoss)
+ObsSDTable <- apply(CircleMatAllMoss, 2, sd)
+
+# Make a matrix for comparing means and SDs
+MOBStats <- matrix(NA, 11, 4)
+rownames(MOBStats) <- BiomeNames
+colnames(MOBStats) <- c("ObsMean", "ObsSD", "NullMean", "ZScore")
+
+for(i in 1:NumberBiomes){
+  biome <- BiomeNames[i]
+  MOBStats[biome, "ObsMean"] <- ObsMeanTable[[i]]
+  MOBStats[biome, "ObsSD"]<- ObsSDTable[[i]]
+  MOBStats[biome, "NullMean"]<- NullMeanTable[[i]]
+  zscore <- ((MOBStats[biome, "ObsMean"] - MOBStats[biome, "NullMean"])/MOBStats[biome, "ObsSD"])
+  MOBStats[biome, "ZScore"] <- zscore
+}
+
+# 5.1.2 Percentages
+NullPerMeanTable <- apply(NullMOBPerMat, 2, mean)
+
+ObsPerMeanTable <- apply(MOBPerMatSpecies, 2, mean)
+ObsPerSDTable <- apply(MOBPerMatSpecies, 2, sd)
+
+PerMOBStats <- matrix(NA, 11, 4)
+rownames(PerMOBStats) <- BiomeNames
+colnames(PerMOBStats) <- c("ObsMean", "ObsSD", "NullMean", "ZScore")
+
+for(i in 1:NumberBiomes){
+  biome <- BiomeNames[i]
+  PerMOBStats[biome, "ObsMean"] <- ObsPerMeanTable[[i]]
+  PerMOBStats[biome, "ObsSD"]<- ObsPerSDTable[[i]]
+  PerMOBStats[biome, "NullMean"]<- NullPerMeanTable[[i]]
+  zscore <- ((MOBStats[biome, "ObsMean"] - PerMOBStats[biome, "NullMean"])/PerMOBStats[biome, "ObsSD"])
+  PerMOBStats[biome, "ZScore"] <- zscore
+}
+
+# 5.2 Orders
+#Is this (single) order overrepresented in this biome?
+#Make a zscore matrix
+#Not sure which SD to use, so I did two iterations here
+BiomeSD <- apply(CircleMatAllMoss, 2, sd)
+
+MOBZMatBiomeSD <- CircleMatAllMoss
+for(i in 1:NumberOrders){
+  order <- MossOrderNames[i]
+  for(j in 1:NumberBiomes){
+    biome <- BiomeNames[j]
+    sd <- BiomeSD[j]
+    nullpercent <- NullMOBPerMat[order, biome]
+    obspercent <- MOBPerMatSpecies[order, biome]
+    zscore <- ((nullpercent - obspercent)/sd)
+    MOBZMatBiomeSD[order, biome] <- zscore
+  }
+}
+
+
+MOBZMatAllSD <- CircleMatAllMoss
+obssd <- sd(MOBPerMatSpecies)
+for(i in 1:NumberOrders){
+  order <- MossOrderNames[i]
+  for(j in 1:NumberBiomes){
+    biome <- BiomeNames[j]
+    nullpercent <- NullMOBPerMat[order, biome]
+    obspercent <- MOBPerMatSpecies[order, biome]
+    zscore <- ((nullpercent - obspercent)/obssd)
+    MOBZMatAllSD[order, biome] <- zscore
+  }
+}
+
+# 6.0 Plotting Z-Scores -------------------------------------------------------------
+# 6.1 Make a dataframe for plotting
+MOBZScoreDFBiomeSD <- data.frame(Order = rep(NA, 242), Biome = rep(NA, 242), ZScore = rep(NA, 242), Group = rep(NA, 242))
+rownumber <- 0
+for(i in 1:NumberOrders){
+  order <- MossOrderNames[i]
+  if(order %in% MossOrdRichBelow10){
+    group <- "Least diverse (10 or fewer species)"
+  }else if(order %in% MossOrdRich10to25){
+    group <- "Less diverse (11 - 25 species)"
+  }else if(order %in% MossOrdRich25to100){
+    group <- "More diverse (26 - 100 species)"
+  }else if(order %in% MossOrdRichAbove100){
+    group <- "Most diverse (greater than 100 species)"
+  }
+  for(j in 1:NumberBiomes){
+    biome <- BiomeNames[j]
+    zscore <- MOBZMatBiomeSD[order,biome]
+    rownumber <- rownumber + 1
+    MOBZScoreDFBiomeSD$Order[rownumber] <- order
+    MOBZScoreDFBiomeSD$Biome[rownumber] <- biome
+    MOBZScoreDFBiomeSD$ZScore[rownumber] <- zscore
+    MOBZScoreDFBiomeSD$Species_Richness[rownumber] <- group
+  }
+}
+
+MOBZScoreDFAllSD <- data.frame(Order = rep(NA, 242), Biome = rep(NA, 242), ZScore = rep(NA, 242), Group = rep(NA, 242))
+rownumber <- 0
+for(i in 1:NumberOrders){
+  order <- MossOrderNames[i]
+  if(order %in% MossOrdRichBelow10){
+    group <- "Least diverse (10 or fewer species)"
+  }else if(order %in% MossOrdRich10to25){
+    group <- "Less diverse (11 - 25 species)"
+  }else if(order %in% MossOrdRich25to100){
+    group <- "More diverse (26 - 100 species)"
+  }else if(order %in% MossOrdRichAbove100){
+    group <- "Most diverse (greater than 100 species)"
+  }
+  for(j in 1:NumberBiomes){
+    biome <- BiomeNames[j]
+    zscore <- MOBZMat[order,biome]
+    rownumber <- rownumber + 1
+    MOBZScoreDFAllSD$Order[rownumber] <- order
+    MOBZScoreDFAllSD$Biome[rownumber] <- biome
+    MOBZScoreDFAllSD$ZScore[rownumber] <- zscore
+    MOBZScoreDFAllSD$Species_Richness[rownumber] <- group
+  }
+}
+```
+
+```{r Plot Null Model Z-Scores}
+# Plot
+ZScoreDotBiomeSD <- ggplot(data = MOBZScoreDFBiomeSD, aes(x = Biome, y = ZScore, fill = Species_Richness)) +
+  geom_dotplot(binaxis = "y", stackdir= "center", 
+               dotsize = 0.5, alpha = 0.8, binwidth = 0.25) +
+  theme(legend.position = "right") +
+  theme_minimal() +
+  labs(fill = "Species Richness Level") +
+  scale_fill_brewer(palette="Greens") +
+  theme(axis.text.x = element_text(angle = 45,  hjust = 1, size =11)) +
+  theme(axis.title.x = element_text(size = 15)) +
+  theme(axis.title.y = element_text(size = 15)) + 
+  theme(legend.title = element_text(size = 15)) + 
+  theme(legend.text = element_text(size = 11)) +
+  geom_hline(yintercept = -2, color = "darkblue", linetype = "dashed")
+ZScoreDotBiomeSD
+
+
+ZScoreDotAllSD <- ggplot(data = MOBZScoreDFAllSD, aes(x = Biome, y = ZScore, fill = Species_Richness)) +
+  geom_dotplot(binaxis = "y", stackdir= "center", 
+               dotsize = 0.5, alpha = 0.8, binwidth = 0.05) +
+  theme(legend.position = "right") +
+  scale_fill_brewer(palette="Greens") +
+  theme(axis.text.x = element_text(angle = 45,  hjust = 1, size =11)) +
+  theme(axis.title.x = element_text(size = 15)) +
+  theme(axis.title.y = element_text(size = 15)) + 
+  theme(legend.title = element_text(size = 15)) + 
+  theme(legend.text = element_text(size = 11)) 
+  
+ZScoreDotAllSD
+```
+
+```{r Linear Modeling}
+# 1.0 Add NAs for 0s in TotalRichness ------
+# 1.1 Replace 0s in RichnessVec with NAs
+RichnessVecNA <- RichnessVec
+RichnessVecNA[RichnessVecNA == 0] <- NA
+RichnessVecNA
+
+# 1.2 Make a DF with no NAs, just for fun
+RichnessDFNoNA <- data.frame(Alpha = RichnessVecNA, CellID = 1:15038)
+RichnessDFNoNA <- RichnessDFNoNA %>%
+  filter(!is.na(RichnessDFNoNA$Alpha))
+nrow(RichnessDFNoNA)
+
+RichnessTopoDFNoNA <- left_join(RichnessDFNoNA, AlphaMountLM, by = "CellID")
+
+# 1.2 Replace TotalRichness column in LMDF2 with RichnessVecNA (repeated 22 times)
+LMDF2$TotalRichness <- rep(RichnessVecNA, 22)
+
+# 1.3 Fix up MAT
+LMDF2$MAT_Kelvin <- (LMDF2$MAT) + 273.15
+
+
+# 2.0 Make lm for total richness ---------------
+mossrichnesslm <- lm(log1p(TotalRichness) ~ log1p(MAT_Kelvin) + log1p(MAP) + 
+                                 Biome*log1p(MAT_Kelvin) + Biome*log1p(MAP) +
+                                 Topo*log1p(MAT_Kelvin) + Topo*log1p(MAP), 
+                               data = LMDF2)
+
+
+# 3.0 Loop to test lm for orders ---------------
+# 3.1 Make vector of moss order names that doesn't include the least diverse orders
+MossOrdRich10to100 <- c(MossOrdRichAbove100, MossOrdRich25to100, MossOrdRich10to25)
+saveRDS(MossOrdRich10to100, "Data/MossOrdRich10to100.rds")
+
+# 3.4 Linear model function for orders
+# input: str, name of order, default = total richness
+# output: linear model using input order's data
+order_lm <- function(order = "all"){
+  if(order == "all"){
+    lm <- lm(log1p(TotalRichness) ~ log1p(MAT_Kelvin) + log1p(MAP) + 
+               Biome*log1p(MAT_Kelvin) + Biome*log1p(MAP) +
+               Topo*log1p(MAT_Kelvin) + Topo*log1p(MAP), 
+             data = LMDF2)
+  }else if(order %in% LMDF2$OrderName){
+    tempdf <- LMDF2 %>%
+      filter(LMDF2$OrderName == order)
+    
+    lm <- lm(log1p(OrderRichness) ~ log1p(MAT_Kelvin) + log1p(MAP) + 
+                     Biome*log1p(MAT_Kelvin) + Biome*log1p(MAP) +
+                     Topo*log1p(MAT_Kelvin) + Topo*log1p(MAP), 
+                   data = tempdf)
+  }else{
+    lm <- "Invalid order name, please try again"
+  }
+  return(lm)
+}
+
+# 3.3 Make a vector of coefficient names
+test <- order_lm("Hypnales")
+coef_names <- c(names(test$coefficients),"AdjRSquared")
+
+# 3.4 Make a dataframe for loop output
+MossOrdRich10to100
+OrderLMCoefDF <- NULL
+OrderLMCoefDF <- data.frame(
+  "Coefficient" = coef_names,
+  "Dicranales" = rep(NA, length(coef_names)),
+  "Hypnales" = rep(NA, length(coef_names)),
+  "Bartramiales" = rep(NA, length(coef_names)),
+  "Bryales" = rep(NA, length(coef_names)),
+  "Grimmiales" = rep(NA, length(coef_names)),
+  "Hookeriales" = rep(NA, length(coef_names)),
+  "Orthotrichales" = rep(NA, length(coef_names)),
+  "Pottiales" = rep(NA, length(coef_names)),
+  "Funariales" = rep(NA, length(coef_names)),
+  "Hedwigiales" = rep(NA, length(coef_names)),
+  "Polytrichales" = rep(NA, length(coef_names)),
+  "Sphagnales" = rep(NA, length(coef_names)))
+
+# 3.5 Loop
+# Loop output is a dataframe with coefficients and adjusted r squared for lm for each order
+for(i in 1:length(MossOrdRich10to100)){
+  order <- MossOrdRich10to100[i]
+  lm <- order_lm(order)
+  confints <- confint(lm)
+  for(j in 1:(length(coef_names) - 1)){
+    #coefficient
+    coef <- summary(lm)$coefficients[j]
+    OrderLMCoefDF[j, order] <- coef
+  }
+  adjrsquared <- summary(lm)$adj.r.squared
+  lastindex <- length(coef_names)
+  OrderLMCoefDF[lastindex, order] <- adjrsquared
+}
+
+saveRDS(OrderLMCoefDF, "Data/OrderLMCoefDF.rds")
+
+# download csv
+ write.csv(OrderLMCoefDF, "/Users/haileynapier/Desktop/OrderLMCoefDF.csv")
+
+
+# TEST AICS FOR EACH ORDER FOR LMS WITH DIFFERENT NUMBERS OF PARAMETERS
+# 4.0 Write a new function that that alters the lm and the order -------------
+# 4.1 Make a new dataframe with log transformed variables
+LogTransLMDF <- LMDF2
+LogTransLMDF$LogMAP <- log1p(LogTransLMDF$MAP)
+LogTransLMDF$LogMAT <- log1p(LogTransLMDF$MAT_Kelvin)
+LogTransLMDF$LogOrdRich <- log1p(LogTransLMDF$OrderRichness)
+LogTransLMDF$LogTotRich <- log1p(LogTransLMDF$TotalRichness)
+  
+# 4.2 Make a vector of all lm parameters
+lm_parameters <- c("LogOrdRich", "LogMAT", "LogMAP", "Biome*LogMAT + Biome*LogMAP", "Topo*LogMAT + Topo*LogMAP")
+
+# 4.3 Write the function
+# input: str, name of order, default = total richness
+      #  int, vector of indexes for parameters to include in null model
+      #       1: LogOrdRich
+      #       2: LogMAT
+      #       3: LogMAP
+      #       4: Biome*LogMAT + Biome*LogMAP
+      #       5: Topo*LogMAT + Topo*LogMAP
+# output: linear model using input order's data and parameters specified in input
+
+order_any_lm <- function(order = "Hypnales", parameter_index_vector = 2:5){
+  if(order %in% LMDF2$OrderName){
+    tempdf <- LogTransLMDF %>%
+      filter(LogTransLMDF$OrderName == order)
+    lm <- lm(as.formula(paste(lm_parameters[1], "~", paste(lm_parameters[parameter_index_vector], collapse="+"))), data=tempdf)
+  }else if(order == "AllOrders"){
+    lm <- lm(as.formula(paste("LogTotRich", "~", paste(lm_parameters[parameter_index_vector], collapse="+"))), data=LogTransLMDF)
+  }else{
+    lm <- "Invalid order name, please try again"
+  }
+  return(lm)
+}
+
+# 4.4 Make a list of vectors of all of the possible parameter index combinations of any length
+parameter_index <- c(2,3,4,5)
+parameter_index
+parameter_comb_list <- list()
+index <- 0
+for(i in 1:4){
+  combs <- combn(parameter_index, i)
+  ncombs <- ncol(combs)
+  for(j in 1:ncombs){
+    index <- index + 1
+    parameter_comb_list[[index]] <- combs[,j]
+  }
+}
+
+# 4.5 Make a dataframe for loop output
+parameters <- c("MAT", 
+                "MAP", 
+                "Biome_int", 
+                "Topo_int", 
+                "MAT + MAP", 
+                "MAT + Biome_int", 
+                "MAT + Topo_int",
+                "MAP + Biome_int",
+                "MAP + Topo_int", 
+                "Biome_int + Topo_int", 
+                "MAT + MAP + Biome_int", 
+                "MAT + MAP + Topo_int", 
+                "MAT + Biome_int + Topo_int", 
+                "MAP + Biome_int + Topo_int",
+                "MAT + MAP + Biome_int + Topo_int")
+
+OrderLM_AIC_DF <- NULL
+OrderLM_AIC_DF<- data.frame(
+  "Parameters" = parameters,
+  "Dicranales_AICs" = rep(NA, length(parameters)), 
+  "Dicranales_adjR2" = rep(NA, length(parameters)), 
+  "Hypnales_AICs" = rep(NA, length(parameters)),
+  "Hypnales_adjR2" = rep(NA, length(parameters)),
+  "Bartramiales_AICs" = rep(NA, length(parameters)),
+  "Bartramiales_adjR2" = rep(NA, length(parameters)),
+  "Bryales_AICs" = rep(NA, length(parameters)),
+  "Bryales_adjR2" = rep(NA, length(parameters)),
+  "Grimmiales_AICs" = rep(NA, length(parameters)),
+  "Grimmiales_adjR2" = rep(NA, length(parameters)),
+  "Hookeriales_AICs" = rep(NA, length(parameters)),
+  "Hookeriales_adjR2" = rep(NA, length(parameters)),
+  "Orthotrichales_AICs" = rep(NA, length(parameters)),
+  "Orthotrichales_adjR2" = rep(NA, length(parameters)),
+  "Pottiales_AICs" = rep(NA, length(parameters)),
+  "Pottiales_adjR2" = rep(NA, length(parameters)),
+  "Funariales_AICs" = rep(NA, length(parameters)),
+  "Funariales_adjR2" = rep(NA, length(parameters)),
+  "Hedwigiales_AICs" = rep(NA, length(parameters)),
+  "Hedwigiales_adjR2" = rep(NA, length(parameters)),
+  "Polytrichales_AICs" = rep(NA, length(parameters)),
+  "Polytrichales_adjR2" = rep(NA, length(parameters)),
+  "Sphagnales_AICs" = rep(NA, length(parameters)), 
+  "Sphagnales_adjR2" = rep(NA, length(parameters))) 
+
+# 4.6 Loop
+# Loop through each order
+  # for each order, loop through each parameter combination and make lm
+    # store AIC and R2 values for each lm in dataframe
+
+for(i in 1:length(MossOrdRich10to100)){
+  order <- MossOrdRich10to100[i]
+  AIC_colname <- paste(order, "_AICs", sep = "")  
+  adjR2_colname <- paste(order, "_adjR2", sep = "")
+  for(j in 1: length(parameter_comb_list)){
+    par_vec <- parameter_comb_list[[j]]
+    lm <- order_any_lm(order, par_vec)
+    AIC <- AIC(lm)
+    adjR2 <- summary(lm)$adj.r.squared
+    OrderLM_AIC_DF[j, AIC_colname] <- AIC
+    OrderLM_AIC_DF[j, adjR2_colname] <- adjR2
+  }
+}
+
+saveRDS(OrderLM_AIC_DF, "Data/OrderLM_AIC_DF.rds")
+
+#download csv
+write.csv(OrderLM_AIC_DF, "/Users/haileynapier/Desktop/OrderLM_AIC_DF.csv")
+
+
+# COEFFICIENT STATISTICS
+# 5.0 Make a dataframe with coefficient statistics --------------------------------
+#left Hookeriales out of this one because it's weird, not sure what's going on there
+
+# 5.1 Make a vector of moss names minus Hookeriales
+MossOrdRich10to100NoHook <- MossOrdRich10to100[which(MossOrdRich10to100 != "Hookeriales")]
+MossOrdRich10to100NoHook
+
+# 5.2 Make a dataframe for loop output
+OrderLMCoefStatsDF <- NULL
+OrderLMCoefStatsDF <- data.frame(
+  "Coefficient" = coef_names,
+  "Dicranales" = rep(NA, length(coef_names)),
+  "Dicranales_pval" = rep(NA, length(coef_names)),
+  "Dicranales_confint_lower" = rep(NA, length(coef_names)),
+  "Dicranales_confint_upper" = rep(NA, length(coef_names)),
+  "Hypnales" = rep(NA, length(coef_names)),
+  "Hypnales_pval" = rep(NA, length(coef_names)), 
+  "Hypnales_confint_lower" = rep(NA, length(coef_names)),
+  "Hypnales_confint_upper" = rep(NA, length(coef_names)),
+  "Bartramiales" = rep(NA, length(coef_names)),
+  "Bartramiales_pval" = rep(NA, length(coef_names)),
+  "Bartramiales_confint_lower" = rep(NA, length(coef_names)),
+  "Bartramiales_confint_upper" = rep(NA, length(coef_names)),
+  "Bryales" = rep(NA, length(coef_names)),
+  "Bryales_pval" = rep(NA, length(coef_names)),
+  "Bryales_confint_lower" = rep(NA, length(coef_names)),
+  "Bryales_confint_upper" = rep(NA, length(coef_names)),
+  "Grimmiales" = rep(NA, length(coef_names)),
+  "Grimmiales_pval" = rep(NA, length(coef_names)),
+  "Grimmiales_confint_lower" = rep(NA, length(coef_names)),
+  "Grimmiales_confint_upper" = rep(NA, length(coef_names)),
+  "Orthotrichales" = rep(NA, length(coef_names)),
+  "Orthotrichales_pval" = rep(NA, length(coef_names)),
+  "Orthotrichales_confint_lower" = rep(NA, length(coef_names)),
+  "Orthotrichales_confint_upper" = rep(NA, length(coef_names)),
+  "Pottiales" = rep(NA, length(coef_names)),
+  "Pottiales_pval" = rep(NA, length(coef_names)),
+  "Pottiales_confint_lower" = rep(NA, length(coef_names)),
+  "Pottiales_confint_upper" = rep(NA, length(coef_names)),
+  "Funariales" = rep(NA, length(coef_names)),
+  "Funariales_pval" = rep(NA, length(coef_names)),
+  "Funariales_confint_lower" = rep(NA, length(coef_names)),
+  "Funariales_confint_upper" = rep(NA, length(coef_names)),
+  "Hedwigiales" = rep(NA, length(coef_names)),
+  "Hedwigiales_pval" = rep(NA, length(coef_names)),
+  "Hedwigiales_confint_lower" = rep(NA, length(coef_names)),
+  "Hedwigiales_confint_upper" = rep(NA, length(coef_names)),
+  "Polytrichales" = rep(NA, length(coef_names)),
+  "Polytrichales_pval" = rep(NA, length(coef_names)),
+  "Polytrichales_confint_lower" = rep(NA, length(coef_names)),
+  "Polytrichales_confint_upper" = rep(NA, length(coef_names)),
+  "Sphagnales" = rep(NA, length(coef_names)),
+  "Sphagnales_pval" = rep(NA, length(coef_names)),
+  "Sphagnales_confint_lower" = rep(NA, length(coef_names)),
+  "Sphagnales_confint_upper" = rep(NA, length(coef_names)))
+
+# 5.3 Loop
+# Loop output is a dataframe with coefficients and adjusted r squared for lm for each order
+# Also includes p values and 95% confidence intervals for each coefficient
+for(i in 1:length(MossOrdRich10to100NoHook)){
+  order <- MossOrdRich10to100NoHook[i]
+  lm <- order_lm(order)
+  confints <- confint(lm)
+  for(j in 1:(length(coef_names) - 1)){
+    #coefficient
+    coef <- summary(lm)$coefficients[j]
+    OrderLMCoefStatsDF[j, order] <- coef
+    
+    #confidence interval for each coefficient
+    lower_lim_name <- paste(order, "confint_lower", sep = "_")
+    lower_lim <- confints[j,1]
+    OrderLMCoefStatsDF[j,lower_lim_name] <- lower_lim
+    upper_lim_name <- paste(order, "confint_upper", sep = "_")
+    upper_lim <- confints[j,2]
+    OrderLMCoefStatsDF[j, upper_lim_name] <- upper_lim
+    
+    #p value for each coefficient
+    pval_name <- paste(order, "pval", sep = "_")
+    pval <- summary(lm)$coefficients[j,4]
+    OrderLMCoefStatsDF[j, pval_name] <- pval
+  }
+  adjrsquared <- summary(lm)$adj.r.squared
+  lastindex <- length(coef_names)
+  OrderLMCoefStatsDF[lastindex, order] <- adjrsquared
+}
+
+saveRDS(OrderLMCoefStatsDF, "Data/OrderLMCoefDF.rds")
+
+# 5.4 Adjust coefficients for biomes (intercept is coniferous forest)
+# Make dataframe for loop output 
+nrows <- length(BiomeNames)*length(MossOrdRich10to100NoHook)
+OrderLMAdjBiomeCoefDF <- data.frame("Biome" = rep(BiomeNames, length(MossOrdRich10to100NoHook)), 
+                                    "Order" = rep(NA, nrows), 
+                                    "Coefficient"  = rep(NA, nrows), 
+                                    "LowLim" = rep(NA, nrows), 
+                                    "UpLim" = rep(NA, nrows), 
+                                    "PVal" = rep(NA, nrows)) 
+
+# Loop that adjusts biome coefficients and puts data into correct format for plotting
+end <- 0
+for(i in 1:length(MossOrdRich10to100NoHook)){
+  start <- end + 1
+  end <- start + length(BiomeNames) - 1
+  
+  order <- MossOrdRich10to100NoHook[i]
+  lowlim_name <- paste(order, "_confint_lower", sep = "")
+  uplim_name <- paste(order, "_confint_upper", sep = "")
+  pval_name <- paste(order, "_pval", sep="")
+  
+  intercept <- OrderLMCoefStatsDF[1,order]
+  lowlim_intercept <- OrderLMCoefStatsDF[1,lowlim_name]
+  uplim_intercept <- OrderLMCoefStatsDF[1,uplim_name]
+  pval_intercept <- OrderLMCoefStatsDF[1, pval_name]
+  
+  coefvec <- c(intercept, OrderLMCoefStatsDF[4:13, order])
+  lowlim_vec <- c(lowlim_intercept, OrderLMCoefStatsDF[4:13, lowlim_name])
+  uplim_vec <- c(uplim_intercept, OrderLMCoefStatsDF[4:13, uplim_name])
+  pval_vec <- c(pval_intercept, OrderLMCoefStatsDF[4:13, pval_name])
+  
+  OrderLMAdjBiomeCoefDF$Order[start:end] <- order
+  OrderLMAdjBiomeCoefDF$Coefficient[start:end] <- coefvec
+  OrderLMAdjBiomeCoefDF$LowLim[start:end] <- lowlim_vec
+  OrderLMAdjBiomeCoefDF$UpLim[start:end] <- uplim_vec
+  OrderLMAdjBiomeCoefDF$PVal[start:end] <- pval_vec
+}
+
+saveRDS(OrderLMAdjBiomeCoefDF, "Data/OrdAdjBiomeLMCoefDF.rds")
+
+write.csv(OrderLMAdjBiomeCoefDF, "/Users/haileynapier/Desktop/AdjustedBiomeCoefDF.csv")
+
+# 5.5 Quick analysis of mean coefficients for each order
+mean_biome_coef_df <- data.frame(
+  "Biome" = BiomeNames,
+  "MeanCoefficient" = rep(NA, length(BiomeNames))
+)
+for(i in 1:length(BiomeNames)){
+  biome <- BiomeNames[i]
+  df <- OrderLMAdjBiomeCoefDF %>%
+    filter(OrderLMAdjBiomeCoefDF$Biome == biome)
+  mean_coef <- mean(df$Coefficient)
+  
+  mean_biome_coef_df$MeanCoefficient[which(mean_biome_coef_df$Biome == biome)] <- mean_coef
+}
+
+# 6.0 Data Manipulatio for plots -------------------------------------
+# plot that shows coefficients and confidence intervals for each order for any parameter
+
+# 6.1 Make a dataframe for data viz
+# column for order
+# column for parameter
+# column for coefficient
+# column for lower limit of confidence interval (LowLim)
+# column for upper limit of confidence intercal (UpperLim)
+
+test <- order_lm("Hypnales")
+parameters <- c(names(test$coefficients))
+
+nrow <- length(MossOrdRich10to100NoHook)*length(parameters)
+OrderCoefPlotDF <- data.frame(
+  "Parameter" = rep(parameters, length(MossOrdRich10to100NoHook)),
+  "Order" = rep(NA,nrow),
+  "Coefficient" = rep(NA, nrow), 
+  "LowLim" = rep(NA, nrow), 
+  "UpperLim" = rep(NA, nrow))
+
+end <- 0
+for(i in 1:length(MossOrdRich10to100NoHook)){
+  start <- end + 1
+  end <-  start + length(parameters) - 1
+  
+  order <- MossOrdRich10to100NoHook[i]
+  lower_lim_name <- paste(order, "confint_lower", sep = "_")
+  upper_lim_name <- paste(order, "confint_upper", sep = "_")
+  
+  coef_vec <- OrderLMCoefStatsDF[[order]]
+  lower_lim_vec <- OrderLMCoefStatsDF[[lower_lim_name]]
+  upper_lim_vec <- OrderLMCoefStatsDF[[upper_lim_name]]
+  
+  OrderCoefPlotDF$Order[start:end] <- order
+  OrderCoefPlotDF$Coefficient[start:end] <- coef_vec
+  OrderCoefPlotDF$LowLim[start:end] <- lower_lim_vec
+  OrderCoefPlotDF$UpperLim[start:end] <- upper_lim_vec
+}
+
+saveRDS(OrderCoefPlotDF, "Data/OrderCoefPlotDF.rds")
+```
+
+```{r Linear Modeling Plots}
+# 1.0 Plot MAT and MAP pointrange plots -------
+MATdf <-OrderCoefPlotDF %>%
+  filter(OrderCoefPlotDF$Parameter == "log1p(MAT_Kelvin)")
+
+OrdCoefPlot_MAT <- ggplot() + 
+  geom_pointrange(data = MATdf, 
+                  aes(x = Order, 
+                      y = Coefficient, 
+                      ymin = LowLim, 
+                      ymax = UpperLim), 
+                  size = 1,
+                  col = "black") +
+  geom_errorbar(data = MATdf, 
+                aes(x = Order, 
+                    y = Coefficient, 
+                    ymin = LowLim, 
+                    ymax = UpperLim), 
+                size = 1,
+                width = 0.5, 
+                col = "black")  +
+  geom_hline(aes(yintercept = 0), linetype = "dashed", col = "black") +
+  ylab("βlog(MAT)") +
+  ggtitle("Temperature Coefficients") + 
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        text = element_text(size = 25),
+        plot.title = element_text(hjust = 0.5)) 
+
+OrdCoefPlot_MAT
+
+png("Figures/MAT_CoefPlot.png", width = 1500, height = 1000, pointsize = 20)
+OrdCoefPlot_MAT
+dev.off()
+
+
+MAPdf <- OrderCoefPlotDF %>%
+  filter(OrderCoefPlotDF$Parameter == "log1p(MAP)")
+
+OrdCoefPlot_MAP <- ggplot() + 
+  geom_pointrange(data = MAPdf, 
+                  aes(x = Order, 
+                      y = Coefficient, 
+                      ymin = LowLim, 
+                      ymax = UpperLim), 
+                  col = "black", 
+                  size = 1) +
+  geom_errorbar(data = MAPdf, 
+                aes(x = Order, 
+                    y = Coefficient, 
+                    ymin = LowLim, 
+                    ymax = UpperLim), 
+                width = 0.5, 
+                size = 1,
+                col = "black")  +
+  geom_hline(aes(yintercept = 0), linetype = "dashed", col = "black") +
+  ylab("βlog(MAP)") +
+  ggtitle("Precipitation Coefficients") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+        text = element_text(size = 25),
+        plot.title = element_text(hjust = 0.5))
+
+OrdCoefPlot_MAP
+
+png("Figures/MAP_CoefPlot.png", width = 1500, height = 1000, pointsize = 20)
+OrdCoefPlot_MAP
+dev.off()
+
+
+# 2.0 Plots each for biome -------
+
+# Function to make plots
+#Input: str; biome name
+#Output: pointrange plot with coefficient values and error bars for each order for the selected biome
+
+biome_coef_pointrange_plot <- function(biome = "Coniferous_Forests"){
+  biome_cols_11 <- c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
+                     "#446455", "#FDD262", "#D3DDDC", "#C7B19C", "#798E87", 
+                     "#C27D38")
+  
+  if(biome %in% BiomeNames){
+    plotdf <- OrderLMAdjBiomeCoefDF %>%
+      filter(OrderLMAdjBiomeCoefDF$Biome == biome)
+    
+    plot_title <- paste(biome, "Coefficients", sep = " ")
+    y_axis_title <- paste("β", biome, sep = "")
+    
+    biome_index <- which(biome == BiomeNames)[[1]]
+    biome_col <- biome_cols_11[biome_index]
+    
+    plot <- ggplot() + 
+      geom_pointrange(data = plotdf, 
+                      aes(x = Order, 
+                          y = Coefficient, 
+                          ymin = LowLim, 
+                          ymax = UpLim), 
+                      col = "black",
+                      size = 1) +
+      geom_errorbar(data = plotdf, 
+                    aes(x = Order, 
+                        y = Coefficient, 
+                        ymin = LowLim, 
+                        ymax = UpLim), 
+                    size = 1,
+                    width = 0.5, 
+                    col = "black")  +
+      geom_hline(aes(yintercept = 0), linetype = "dashed", col = "black") +
+      ylab(y_axis_title) +
+      ggtitle(plot_title) +
+      theme_minimal() + 
+      theme(text = element_text(size = 25),
+            axis.text.x = element_text(angle = 45, hjust = 1),  
+            plot.title = element_text(hjust = 0.5))
+    
+  }else{
+    plot <- "Please make sure the biome you entered is in BiomeNames"
+  }
+  return(plot)
+}
+
+# Loop through and make a folder of biome coefficient plots
+dir.create("Figures/BiomeCoefPlots")
+for(i in 1:length(BiomeNames)){
+  biome <- BiomeNames[i]
+  plot_name <- paste("Figures/BiomeCoefPlots/", biome,"_CoefPlot.png", sep = "")
+  plot <- biome_coef_pointrange_plot(biome)
+
+  png(plot_name, width = 1500, height = 1000, pointsize = 20)
+  print({plot})
+  dev.off()
+}
+
+
+# Plot all biomes on one plot
+biome_cols_11 <- c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
+                   "#446455", "#FDD262", "#D3DDDC", "#C7B19C", "#798E87", 
+                   "#C27D38")
+plot <- ggplot() + 
+  geom_pointrange(data = OrderLMAdjBiomeCoefDF, 
+                  aes(x = Order, 
+                      y = Coefficient, 
+                      ymin = LowLim, 
+                      ymax = UpLim, 
+                      color = Biome)) +
+  geom_errorbar(data = OrderLMAdjBiomeCoefDF, 
+                aes(x = Order, 
+                    y = Coefficient, 
+                    ymin = LowLim, 
+                    ymax = UpLim,
+                    color = Biome), 
+                width = 0.5)  +
+  geom_hline(aes(yintercept = 0), linetype = "dashed", col = "black") +
+  ylab("β") +
+  ggtitle("Biome Coefficients") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),  
+        plot.title = element_text(hjust = 0.5)) 
+plot
+
+```
+

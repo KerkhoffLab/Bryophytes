@@ -59,7 +59,10 @@ LMDF4$MAT_Kelvin <- (LMDF4$MAT) + 273.15
 LMDF4$LogMAT_Kelvin <- log1p(LMDF4$MAT_Kelvin)
 LMDF4$LogMAP <- log1p(LMDF4$MAP)
 LMDF4$LogTotalRich <- log1p(LMDF4$TotalRichness)
+
 saveRDS(LMDF4, "Data/LMDF4.rds")
+
+
 # 2.0 Playing around to get comfortable + comparing LMDF2 and LMDF3 ------------
 # 2.1 Simple plots of richness as a function of predictor variables ----
 Rich_by_MAT_2 <- plot(TotalRichness~MAT, data=LMDF2)
@@ -171,6 +174,9 @@ axz <- list(
 )
 fig2 <- fig2 %>% layout(scene = list(xaxis=axx,yaxis=axy,zaxis=axz))
 fig2
+
+
+
 # 4.4 Log(TotalRichness) by log(MAP) by MAT colored by biome -------------------
 fig3 <- plot_ly(LMDF3, x=~log1p(MAP), y=~MAT, z=~log1p(TotalRichness), 
                 type="scatter3d", mode="markers", color=~Biome, colors=cols,
@@ -199,6 +205,9 @@ axz <- list(
 #fig <- fig %>% add_trace(x=~LMDF3$MAP, z=lm(LMDF3$TotalRichness~LMDF3$MAT), mode="lines")
 fig3 <- fig3 %>% layout(scene = list(xaxis=axx,yaxis=axy,zaxis=axz))
 fig3
+
+
+
 # 4.5 Log(TotalRichness) by log(MAP) by log(MAT_Kelvin) colored by biome -------
 fig4 <- plot_ly(LMDF4, x=~LogMAP, y=~LogMAT_Kelvin, z=~LogTotalRich, 
                 type="scatter3d", mode="markers", color=~Biome, colors=cols,
@@ -206,14 +215,20 @@ fig4 <- plot_ly(LMDF4, x=~LogMAP, y=~LogMAT_Kelvin, z=~LogTotalRich,
 axx <- list(
   title = "log(MAP)"
 )
+
 axy <- list(
   title = "log(MAT)"
 )
+
+
 axz <- list(
   title = "log(Total Richness)"
 )
 fig4 <- fig4 %>% layout(scene = list(xaxis=axx,yaxis=axy,zaxis=axz))
 fig4
+
+
+
 # 4.6 Log(TotalRichness) by log(MAP) by log(MAT_Kelvin) colored by topo --------
 fig5 <- plot_ly(LMDF4, x=~LogMAP, y=~LogMAT_Kelvin, z=~LogTotalRich, 
                 type="scatter3d", mode="markers", color=~Topo,
@@ -221,14 +236,20 @@ fig5 <- plot_ly(LMDF4, x=~LogMAP, y=~LogMAT_Kelvin, z=~LogTotalRich,
 axx <- list(
   title = "log(MAP)"
 )
+
+
 axy <- list(
   title = "log(MAT)"
 )
+
+
 axz <- list(
   title = "log(Total Richness)"
 )
 fig5 <- fig5 %>% layout(scene = list(xaxis=axx,yaxis=axy,zaxis=axz))
 fig5
+
+
 # Star map :)
 funcols <- c()
 funfig <- plot_ly(LMDF3, x=~log1p(MAP), y=~MAT, z=~log1p(TotalRichness), 
@@ -373,6 +394,10 @@ mosslm_2 <- lm(log1p(TotalRichness) ~ log1p(MAT) + log1p(MAP) +
                  Topo*log1p(MAT) + Topo*log1p(MAP), data = LMDF2)
 summary(mosslm_2)
 plot(mosslm_2)
+
+
+
+
 # Stuff for BIOL 385 presentation - organize later!
 good_lm <- lm(LogTotalRich ~ LogMAT_Kelvin + LogMAP + LogMAP + 
                 Biome*LogMAT_Kelvin + Biome*LogMAP +

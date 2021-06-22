@@ -120,7 +120,7 @@ for(i in 1:length(FigS20order)){
 }
 
 #UNFINISHED STARTING HERE -------------
-# NEED
+# NEED (for OrderAlphaScatter.R)
   # From DataProcessing2020.R
     # MossPresence 
     # OrderNames

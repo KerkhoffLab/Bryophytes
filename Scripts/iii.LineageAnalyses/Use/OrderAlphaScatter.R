@@ -75,7 +75,7 @@ for(i in 1:length(MossOrderNames)){
   }
 }
 
-MossOrdLogAlphaDF$Percet <- NULL
+#MossOrdLogAlphaDF$Percet <- NULL
 
 # Add percentage
 MOLA_Percent <- MossOrdLogAlphaDF

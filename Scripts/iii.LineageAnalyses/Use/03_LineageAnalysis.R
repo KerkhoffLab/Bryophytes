@@ -1,30 +1,43 @@
-#03 Lineage Analysis
-#Lineage Analysis Code for Moss Manuscript
-#Compiled by Hailey Napier, June 2021
+# 03 Lineage Analysis
+# Lineage Analysis Code for Moss Manuscript
+# Compiled by Hailey Napier, June 2021
 
-# 0.0 Load Packages -----
-library(ape)
-library(phytools)
+# 0.0 Load Data and Packages -----
+## 0.1 Load packages ----
+#if (!requireNamespace("BiocManager", quietly = TRUE))
+  #install.packages("BiocManager")
+#BiocManager::install("ggtree")
+#BiocManager::install("treeio")
+#BiocManager::install("rphast")
+install.packages("ggplot2")
+install.packages("ggimage")
+install.packages("tidyr")
+install.packages("dplyr")
+install.packages("gridExtra")
+install.packages("png")
+install.packages("phytools")
+install.packages("ape")
+install.packages("tools")
 
-if (!requireNamespace("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")
 
-BiocManager::install("ggtree")
-BiocManager::install("treeio")
-BiocManager::install("rphast")
 library(ggtree)
 library(treeio)
 library(ggplot2)
 library(ggimage)
-
+library(ape)
+library(phytools)
 library(tidyr)
 library(dplyr)
 library(tools)
-
 library(grid)
 library(gridExtra)
-
 library(png)
+
+## 0.2 Load data (generated in data processing script ***not yet finished***) ----
+# From DataProcessing2020.R
+MossPresence <- readRDS("Data/MossPresence.rds")
+OrderNames <- readRDS("Data/OrderNames.rds")
+MossOrderNames <- readRDS("Data/MossOrderNames.rds")
 
 # 1.0 Read and process Liu et al (2019) phologenetic tree ----
 
@@ -119,6 +132,8 @@ for(i in 1:length(FigS20order)){
   FigS20orderlist[[i]] <- tempvec
 }
 
+## 1.8 Manually update BryophytePresence .csv file to reflect family and order species assignments from Liu et al. (2019) ----
+
 #UNFINISHED STARTING HERE -------------
 # NEED (for OrderAlphaScatter.R)
   # From DataProcessing2020.R
@@ -129,4 +144,74 @@ for(i in 1:length(FigS20order)){
     # OrderRichList
   # From OrderBiomePercentSpRich.R
     # MOBPerMatSpecies <- readRDS("Data/MOBPerMatSpecies.rds")
+
+# 2.0 Group orders based on max alpha diversity ----
+## 2.1 Make list of orders and corresponding richness values ----
+### 2.11 Loop through order names and subset MossPresence for each order, store them in a list ----
+MossOrderNames <- unique(MossPresence$Order)
+MossOrderNames <- MossOrderNames[!is.na(MossOrderNames)]
+saveRDS(MossOrderNames, file = "Data/MossOrderNames.rds")
+NumberOrders <- length(MossOrderNames)
+MossOrderList <- list()
+for(i in 1:NumberOrders){
+  ord <- MossOrderNames[i]
+  MossOrderList[[i]] <- subset(MossPresence, Order == ord)
+}
+
+### 2.12 Loop through orders and tally richness for each order, store in a list ----
+MossOrderRichList <- list()
+MossOrderPresList <- list()
+for(i in 1:NumberOrders){
+  MossOrderPresList[[i]] <- tally(group_by(MossOrderList[[i]], CellID))
+  names(MossOrderPresList[[i]])[2] <- "Richness"
+  MossOrderRichList[[i]] <- numeric(15038)
+  MossOrderRichList[[i]][MossOrderPresList[[i]]$CellID] <- MossOrderPresList[[i]]$Richness
+  MossOrderRichList[[i]][which(MossOrderRichList[[i]]==0)] = NA
+}
+
+#### 2.13 Make dataframe for plotting
+# 1.3 Make dataframe for plotting ----
+Lat <- as.vector(LongLatDF$Latitude)
+MossOrdLogAlphaDF <- data.frame("Order" = rep(NA, 330836), 
+                                "Alpha" = rep(NA, 330836),
+                                "LogAlpha" = rep(NA, 330836),
+                                "LogTen" = rep(NA, 330836),
+                                "Percent"  = rep(NA, 330836),
+                                "CellID" = rep((1:15038), 22), 
+                                "Latitude" = rep(Lat, 22))
+
+for(i in 1:length(MossOrderNames)){
+  order <- MossOrderNames[i]
+  totalrich <- MOBMat[order, "Total"]
+  if(order %in% MossOrdRichBelow10){
+    group <- "Least diverse (10 or fewer species)"
+  }else if(order %in% MossOrdRich10to25){
+    group <- "Less diverse (11 - 25 species)"
+  }else if(order %in% MossOrdRich25to100){
+    group <- "More diverse (26 - 100 species)"
+  }else if(order %in% MossOrdRichAbove100){
+    group <- "Most diverse (greater than 100 species)"
+  }
+  list <- MossOrderRichList[[i]]
+  start <- (i-1) * 15038 + 1
+  end <- start + 15037
+  MossOrdLogAlphaDF$Order[start:end] <- order
+  MossOrdLogAlphaDF$Group[start:end] <- group
+  for(j in 1:15038){
+    index <- (i-1)*15038+j
+    alpha <- as.numeric(list[j])
+    log <- log(alpha)
+    logten <- log10(alpha)
+    percent <- (alpha/totalrich) * 100
+    MossOrdLogAlphaDF$LogAlpha[index] <- log
+    MossOrdLogAlphaDF$Alpha[index] <- alpha
+    MossOrdLogAlphaDF$LogTen[index] <- logten
+    MossOrdLogAlphaDF$Percent[index] <- percent
+  }
+}
+
+
+
+# 3.0 Biome analysis ----
+# 4.0 Latitude analysis ----
 

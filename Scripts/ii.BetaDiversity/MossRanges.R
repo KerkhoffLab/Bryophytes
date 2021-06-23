@@ -68,7 +68,7 @@ colnames(MossRangeDF) <- c("Longitude", "Latitude", "Median")
 
 MossRangeMap <- ggplot() + geom_tile(data=MossRangeDF, aes(x=Longitude, y=Latitude, fill=Median)) +   
   scale_fill_gradientn(name="Median Range Size", colours=cols, na.value="transparent") +
-  coord_equal() + geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() + 
+  coord_equal() + geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.0) + theme_void() + 
   theme(legend.text=element_text(size=20), legend.title=element_text(size=23))
 MossRangeMap
 

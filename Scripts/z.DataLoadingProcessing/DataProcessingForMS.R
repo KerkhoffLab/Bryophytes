@@ -61,92 +61,95 @@ for(i in 1:length(MossOrderNames)){
 saveRDS(MossOrderRichList, file = "Data/MossOrderRichList.rds")
 
 # ?.0 Biome MOSS Alpha Diversity Data -------------------------------------------------------------
-# ?.1 Create dataframes for each biome with cell coordinates and richness
-#Coniferous Forests
-AlphaConFor <- raster::extract(MossRichnessRaster, Coniferous_Forests, df = TRUE, cellnumbers = TRUE)
-colnames(AlphaConFor) <- c("Type", "CellID", "Alpha")
-AlphaConFor$Type <- "Coniferous_Forests"
-AlphaConForVec <- AlphaConFor$CellID
-AlphaConFor <- merge(AlphaConFor, LongLatDF)
-saveRDS(AlphaConForVec, "Data/Moss_Coniferous_Forests_Vec.rds")
 
-#Dry Forest
-AlphaDryFor <- raster::extract(MossRichnessRaster, Dry_Forest, df = TRUE, cellnumbers = TRUE)
-colnames(AlphaDryFor) <- c("Type", "CellID", "Alpha")
-AlphaDryFor$Type <- "Dry_Forest"
-AlphaDryForVec <- AlphaDryFor$CellID
-AlphaDryFor <- merge(AlphaDryFor, LongLatDF)
-saveRDS(AlphaDryForVec, "Data/Moss_Dry_Forest_Vec.rds")
+#WEIGHTED DATAFRAME --------------------------------------------------------
+#Coniferous Forests --------------------------------------------------------
+WeightedConFor <- raster::extract(LongLatBetaRaster, Coniferous_Forests, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+colnames(WeightedConFor) <- c("Type", "CellID", "Beta", "Weight")
+WeightedConFor$Type <- "Coniferous_Forests"
+WeightedConForVec <- WeightedConFor$CellID
 
-#Mediterranean Woodlands
-AlphaMedWood <- raster::extract(MossRichnessRaster, Mediterranean_Woodlands, df = TRUE, cellnumbers = TRUE)
-colnames(AlphaMedWood) <- c("Type", "CellID", "Alpha")
-AlphaMedWood$Type <- "Mediterranean_Woodlands"
-AlphaMedWoodVec <- AlphaMedWood$CellID
-AlphaMedWood <- merge(AlphaMedWood, LongLatDF)
-saveRDS(AlphaMedWoodVec, "Data/Moss_Mediterranean_Woodlands_Vec.rds")
+ConForCellID <- unique(WeightedConForVec)
 
-#Moist Forest
-AlphaMoistFor <- raster::extract(MossRichnessRaster, Moist_Forest, df = TRUE, cellnumbers = TRUE)
-colnames(AlphaMoistFor) <- c("Type", "CellID", "Alpha")
-AlphaMoistFor$Type <- "Moist_Forest"
-AlphaMoistForVec <- AlphaMoistFor$CellID
-AlphaMoistFor <- merge(AlphaMoistFor, LongLatDF)
-saveRDS(AlphaMoistForVec, "Data/Moss_Moist_Forest_Vec.rds")
+for(i in ConForCellID){
+  vec <- WeightedConFor$Weight[which(BiomeBetaCellsClean$CellID == i)]
+  if(length(vec) > 1){
+    max <- max(vec)
+    drop <- which(WeightedConFor$CellID == i & WeightedConFor$Weight != max)
+    BiomeBetaCellsClean <- BiomeBetaCellsClean[-drop,]
+  }
+}
 
-#Savannas
-AlphaSavanna <- raster::extract(MossRichnessRaster, Savannas, df = TRUE, cellnumbers = TRUE)
-colnames(AlphaSavanna) <- c("Type", "CellID", "Alpha")
-AlphaSavanna$Type <- "Savannas"
-AlphaSavannaVec <- AlphaSavanna$CellID
-AlphaSavanna <- merge(AlphaSavanna, LongLatDF)
-saveRDS(AlphaSavannaVec, "Data/Moss_Savannas_Vec.rds")
 
-#Taiga
-AlphaTaiga <- raster::extract(MossRichnessRaster, Taiga, df = TRUE, cellnumbers = TRUE)
-colnames(AlphaTaiga) <- c("Type", "CellID", "Alpha")
-AlphaTaiga$Type <- "Taiga"
-AlphaTaigaVec <- AlphaTaiga$CellID
-AlphaTaiga <- merge(AlphaTaiga, LongLatDF)
-saveRDS(AlphaTaigaVec, "Data/Moss_Taiga_Vec.rds")
+#Dry Forest ----------------------------------------------------------------
+WeightedDryFor <- raster::extract(LongLatBetaRaster, Dry_Forest, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+colnames(WeightedDryFor) <- c("Type", "CellID", "Beta", "Weight")
+WeightedDryFor$Type <- "Dry_Forest"
+WeightedDryForVec <- WeightedDryFor$CellID
 
-#Temperate Grasslands
-AlphaTempGrass <- raster::extract(MossRichnessRaster, Temperate_Grasslands, df = TRUE, cellnumbers = TRUE)
-colnames(AlphaTempGrass) <- c("Type", "CellID", "Alpha")
-AlphaTempGrass$Type <- "Temperate_Grasslands"
-AlphaTempGrassVec <- AlphaTempGrass$CellID
-AlphaTempGrass <- merge(AlphaTempGrass, LongLatDF)
-saveRDS(AlphaTempGrassVec, "Data/Moss_Temperate_Grasslands_Vec.rds")
+#Mediterranean Woodlands ---------------------------------------------------
+WeightedMedWood <- raster::extract(LongLatBetaRaster, Mediterranean_Woodlands, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+colnames(WeightedMedWood) <- c("Type", "CellID", "Beta", "Weight")
+WeightedMedWood$Type <- "Mediterranean_Woodlands"
+WeightedMedWoodVec <- WeightedMedWood$CellID
 
-#Temperate Mixed
-AlphaTempMix <- raster::extract(MossRichnessRaster, Temperate_Mixed, df = TRUE, cellnumbers = TRUE)
-colnames(AlphaTempMix) <- c("Type", "CellID", "Alpha")
-AlphaTempMix$Type <- "Temperate_Mixed"
-AlphaTempMixVec <- AlphaTempMix$CellID
-AlphaTempMix <- merge(AlphaTempMix, LongLatDF)
-saveRDS(AlphaTempMixVec, "Data/Moss_Temperate_Mixed_Vec.rds")
+#Moist Forest --------------------------------------------------------------
+WeightedMoistFor <- raster::extract(LongLatBetaRaster, Moist_Forest, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+colnames(WeightedMoistFor) <- c("Type", "CellID", "Beta", "Weight")
+WeightedMoistFor$Type <- "Moist_Forest"
+WeightedMoistForVec <- WeightedMoistFor$CellID
 
-#Tropical Grasslands
-AlphaTropGrass <- raster::extract(MossRichnessRaster, Tropical_Grasslands, df = TRUE, cellnumbers = TRUE)
-colnames(AlphaTropGrass) <- c("Type", "CellID", "Alpha")
-AlphaTropGrass$Type <- "Tropical_Grasslands"
-AlphaTropGrassVec <- AlphaTropGrass$CellID
-AlphaTropGrass <- merge(AlphaTropGrass, LongLatDF)
-saveRDS(AlphaTropGrassVec, "Data/Moss_Tropical_Grasslands_Vec.rds")
+#Savannas ------------------------------------------------------------------
+WeightedSavanna <- raster::extract(LongLatBetaRaster, Savannas, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+colnames(WeightedSavanna) <- c("Type", "CellID", "Beta", "Weight")
+WeightedSavanna$Type <- "Savannas"
+WeightedSavannaVec <- WeightedSavanna$CellID
 
-#Tundra
-AlphaTundra <- raster::extract(MossRichnessRaster, Tundra, df = TRUE, cellnumbers = TRUE)
-colnames(AlphaTundra) <- c("Type", "CellID", "Alpha")
-AlphaTundra$Type <- "Tundra"
-AlphaTundraVec <- AlphaTundra$CellID
-AlphaTundra <- merge(AlphaTundra, LongLatDF)
-saveRDS(AlphaTundraVec, "Data/Moss_Tundra_Vec.rds")
+#Taiga ---------------------------------------------------------------------
+WeightedTaiga <- raster::extract(LongLatBetaRaster, Taiga, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+colnames(WeightedTaiga) <- c("Type", "CellID", "Beta", "Weight")
+WeightedTaiga$Type <- "Taiga"
+WeightedTaigaVec <- WeightedTaiga$CellID
 
-#Xeric Woodlands
-AlphaXericWood <- raster::extract(MossRichnessRaster, Xeric_Woodlands, df = TRUE, cellnumbers = TRUE)
-colnames(AlphaXericWood) <- c("Type", "CellID", "Alpha")
-AlphaXericWood$Type <- "Xeric_Woodlands"
-AlphaXericWoodVec <- AlphaXericWood$CellID
-AlphaXericWood <- merge(AlphaXericWood, LongLatDF)
-saveRDS(AlphaXericWoodVec, "Data/Moss_Xeric_Woodlands_Vec.rds")
+#Temperate Grasslands ------------------------------------------------------
+WeightedTempGrass <- raster::extract(LongLatBetaRaster, Temperate_Grasslands, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+colnames(WeightedTempGrass) <- c("Type", "CellID", "Beta", "Weight")
+WeightedTempGrass$Type <- "Temperate_Grasslands"
+WeightedTempGrassVec <- WeightedTempGrass$CellID
+
+#Temperate Mixed -----------------------------------------------------------
+WeightedTempMix <- raster::extract(LongLatBetaRaster, Temperate_Mixed, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+colnames(WeightedTempMix) <- c("Type", "CellID", "Beta", "Weight")
+WeightedTempMix$Type <- "Temperate_Mixed"
+WeightedTempMixVec <- WeightedTempMix$CellID
+
+#Tropical Grasslands -------------------------------------------------------
+WeightedTropGrass <- raster::extract(LongLatBetaRaster, Tropical_Grasslands, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+colnames(WeightedTropGrass) <- c("Type", "CellID", "Beta", "Weight")
+WeightedTropGrass$Type <- "Tropical_Grasslands"
+WeightedTropGrassVec <- WeightedTropGrass$CellID
+
+#Tundra --------------------------------------------------------------------
+WeightedTundra <- raster::extract(LongLatBetaRaster, Tundra, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+colnames(WeightedTundra) <- c("Type", "CellID", "Beta", "Weight")
+WeightedTundra$Type <- "Tundra"
+WeightedTundraVec <- WeightedTundra$CellID
+
+#Xeric Woodlands -----------------------------------------------------------
+WeightedXericWood <- raster::extract(LongLatBetaRaster, Xeric_Woodlands, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+colnames(WeightedXericWood) <- c("Type", "CellID", "Beta", "Weight")
+WeightedXericWood$Type <- "Xeric_Woodlands"
+WeightedXericWoodVec <- WeightedXericWood$CellID
+
+
+#Bind biome dataframes -----------------------------------------------------
+BiomeBetaCellsWeighted <- bind_rows(WeightedConFor, WeightedDryFor, WeightedMedWood,
+                                    WeightedMoistFor,WeightedSavanna, WeightedTaiga, 
+                                    WeightedTempGrass, WeightedTempMix,WeightedTropGrass,
+                                    WeightedTundra, WeightedXericWood)
+
+#Choose one biome per cell (cells with multiple biomes go to biome with higher proportion coverage)
+BiomeBetaCellsClean <- BiomeBetaCellsWeighted
+
+
 

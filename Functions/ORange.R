@@ -42,7 +42,7 @@ ORange <- function(order = "all", range, cont = "both", cells = "center"){
   NotRangeCells[RangeVec] <- NA
   NotRangeCells <- complete.cases(NotRangeCells)
   
-  #Default is total richness of all orders
+  #Default is total richness of all bryophyte orders
   if(order == "all"){
     orange <- readRDS("Data/RichnessVec.rds")
     orange[NotRangeCells] <- NA
@@ -57,8 +57,8 @@ ORange <- function(order = "all", range, cont = "both", cells = "center"){
     #Set all of the cells that aren't in the range/biome of interest to NA
     orange <- OrderRichList[[orderindex]]
     orange[NotRangeCells] <- NA
-  }
-  
+    
   return(orange)
+  }
 }
 

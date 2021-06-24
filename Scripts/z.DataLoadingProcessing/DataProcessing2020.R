@@ -23,7 +23,6 @@ BlankRas <-raster("Data/blank_100km_raster.tif")
 RichnessRaster <- readRDS("Data/RichnessRaster.rds")
 CellVec <- c(1:15038)
 LongLatDF <- readRDS("Data/LongLatDF.rds")
-RichnessRaster <- readRDS("Data/RichnessRaster.rds")
 
 # Source function
 source("Functions/ORange.R")

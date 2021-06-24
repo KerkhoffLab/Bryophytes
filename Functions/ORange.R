@@ -17,27 +17,50 @@ ORange <- function(taxa = "bryophytes", order = "all", range, cont = "both", cel
   
   #load file containing CellIDs in the range/biome of interest
   RangeVec <- vector()
-  if(cells == "center"){
-    if(cont == "both"){
-      file <- paste("Data/", range, "Vec.rds", sep = "")
-      RangeVec <- readRDS(file)
-    }else if(cont == "North America"){
-      NorthAmBiomeRichList <- readRDS("Data/NorthAmBiomeList.rds")
-      index <- which(BiomeNames == range)
-      RangeVec <- NorthAmBiomeList[[index]]
-    }else if(cont == "South America"){
-      SouthAmBiomeList <- readRDS("Data/SouthAmBiomeList.rds")
-      index <- which(BiomeNames == range)
-      RangeVec <- SouthAmBiomeList[[index]]
+  if(taxa == "bryophytes"){
+    if(cells == "center"){
+      if(cont == "both"){
+        file <- paste("Data/", range, "Vec.rds", sep = "")
+        RangeVec <- readRDS(file)
+      }else if(cont == "North America"){
+        NorthAmBiomeRichList <- readRDS("Data/NorthAmBiomeList.rds")
+        index <- which(BiomeNames == range)
+        RangeVec <- NorthAmBiomeList[[index]]
+      }else if(cont == "South America"){
+        SouthAmBiomeList <- readRDS("Data/SouthAmBiomeList.rds")
+        index <- which(BiomeNames == range)
+        RangeVec <- SouthAmBiomeList[[index]]
+      }
+    }else if(cells == "clean"){
+      #will have to add code for continents with clean weighted cells if needed later
+      if(cont == "both"){
+        file <- paste("Data/", range, "CleanVec.rds", sep = "")
+        RangeVec <- readRDS(file)
+      }
     }
-  }else if(cells == "clean"){
-    #will have to add code for continents with clean weighted cells if needed later
-    if(cont == "both"){
-      file <- paste("Data/", range, "CleanVec.rds", sep = "")
-      RangeVec <- readRDS(file)
+  }else if(taxa == "mosses"){
+    if(cells == "center"){
+      if(cont == "both"){
+        file <- paste("Data/Moss", range, "Vec.rds", sep = "")
+        RangeVec <- readRDS(file)
+      }else if(cont == "North America"){
+        NorthAmBiomeRichList <- readRDS("Data/NorthAmBiomeList.rds")
+        index <- which(BiomeNames == range)
+        RangeVec <- NorthAmBiomeList[[index]]
+      }else if(cont == "South America"){
+        SouthAmBiomeList <- readRDS("Data/SouthAmBiomeList.rds")
+        index <- which(BiomeNames == range)
+        RangeVec <- SouthAmBiomeList[[index]]
+      }
+    }else if(cells == "clean"){
+      #will have to add code for continents with clean weighted cells if needed later
+      if(cont == "both"){
+        file <- paste("Data/Moss_", range, "Clean_Vec.rds", sep = "")
+        RangeVec <- readRDS(file)
+      }
     }
   }
-
+  
   #Make a new vector that contains only the cells that aren't in the range/biome of interest
   NotRangeCells <- c(1:15038)
   NotRangeCells[RangeVec] <- NA

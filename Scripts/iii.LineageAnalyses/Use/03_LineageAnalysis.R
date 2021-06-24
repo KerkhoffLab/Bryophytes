@@ -37,6 +37,9 @@ library(png)
 MossPresence <- readRDS("Data/MossPresence.rds")
 OrderNames <- readRDS("Data/OrderNames.rds")
 MossOrderNames <- readRDS("Data/MossOrderNames.rds")
+MossOrderRichList <- readRDS("Data/MossOrderRichList.rds")
+MossRichnessVec <- readRDS("Data/MossRichnessVec.rds")
+MossCellRichness <- readRDS("Data/MossCellRichness.rds")
 
 ## 0.3 Source function
 source("Functions/ORange.R")
@@ -149,29 +152,11 @@ for(i in 1:length(FigS20order)){
     # MOBPerMatSpecies <- readRDS("Data/MOBPerMatSpecies.rds")
 
 # 2.0 Group orders based on max alpha diversity ----
-## 2.1 Make MossOrderRichList (for ORange function) ----
-MossOrderList <- list()
-for(i in 1:length(MossOrderNames)){
-  ord <- MossOrderNames[i]
-  MossOrderList[[i]] <- subset(BryophytePresence, Order == ord)
-}
 
-MossOrderRichList <- list()
-MossOrderPresList <- list()
-for(i in 1:length(MossOrderNames)){
-  MossOrderPresList[[i]] <- tally(group_by(MossOrderList[[i]], CellID))
-  names(MossOrderPresList[[i]])[2] <- "Richness"
-  MossOrderRichList[[i]] <- numeric(15038)
-  MossOrderRichList[[i]][MossOrderPresList[[i]]$CellID] <- MossOrderPresList[[i]]$Richness
-  MossOrderRichList[[i]][which(MossOrderRichList[[i]]==0)] = NA
-}
-
-saveRDS(MossOrderRichList, file = "Data/MossOrderRichList.rds")
-
-## 2.2 Create a dataframe including each moss order, it's alpha diversity in each cell, and the biome associated with that cell ----
+## 2.2 Create a dataframe including each moss order, its alpha diversity in each cell, and the biome associated with that cell ----
 ### If a cell has more than one biome, then the biome assigned is the one that covers the largest proportion of the cell
 nrows <- 3639196
-MossOrderBiomDF <- data.frame(rep(NA,nrows))
+MossOrderBiomeDF <- data.frame(rep(NA,nrows))
 names(MossOrderBiomeDF)[1] <- "Alpha"
 MossOrderBiomeDF$Alpha <- NA
 MossOrderBiomeDF$CellID <- NA
@@ -182,14 +167,14 @@ start <- 1
 end <- 15038
 o <- MossOrderNames[1]
 b <- BiomeNames[1]
-MossOrderBiomeDF$Alpha[start:end] <- ORange(o,b, "clean")
+MossOrderBiomeDF$Alpha[start:end] <- ORange("mosses",o,b, "clean")
 MossOrderBiomeDF$CellID[start:end] <- c(1:15038)
 MossOrderBiomeDF$Biome[start:end] <- b
 MossOrderBiomeDF$Order[start:end] <- o
 
 #start <- end + 1
 #end <- start + 15037
-#MossOrderBiomeDF$Alpha[start:end] <- ORange(o, b, "clean")
+#MossOrderBiomeDF$Alpha[start:end] <- ORange("mosses",o, b, "clean")
 #MossOrderBiomeDF$CellID[start:end]<- c(1:15038)
 #MossOrderBiomeDF$Biome[start:end] <- b
 #MossOrderBiomeDF$Order[start:end] <- o
@@ -198,7 +183,7 @@ for(j in 2:length(BiomeNames)){
   b <- BiomeNames[j]
     start <- end + 1
   end <- start + 15037
-  MossOrderBiomeDF$Alpha[start:end] <- ORange(o, b,"clean")
+  MossOrderBiomeDF$Alpha[start:end] <- ORange("mosses",o, b,"clean")
   MossOrderBiomeDF$CellID[start:end]<- c(1:15038)
   MossOrderBiomeDF$Biome[start:end] <- b
   MossOrderBiomeDF$Order[start:end] <- o
@@ -210,8 +195,7 @@ for(m in 2:length(MossOrderNames)){
     b <- BiomeNames[n]
     start <- end + 1
     end <- start + 15037
-    c <- ContinentNames[p]
-    MossOrderBiomeDF$Alpha[start:end] <- ORange(o, b, "clean")
+    MossOrderBiomeDF$Alpha[start:end] <- ORange("mosses",o, b, "clean")
     MossOrderBiomeDF$CellID[start:end]<- c(1:15038)
     MossOrderBiomeDF$Biome[start:end] <- b
     MossOrderBiomeDF$Order[start:end] <- o

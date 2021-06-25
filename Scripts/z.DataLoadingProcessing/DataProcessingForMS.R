@@ -5,6 +5,114 @@
 # 0.0 Load Packages
 
 #### ROUGH ORDER ####
+# ?.0 BETA DIVERSITY CODE --- move to BetaDiversity Script -----
+install.packages("reshape2")
+install.packages("vegan")
+library(reshape2)
+library(vegan)
+MossRichness <- tally(group_by(MossPresence, CellID))
+saveRDS(MossRichness, file = "Data/MossRichness.rds")
+
+SpeciesCellID <- MossPresence[,c(1,4)]
+melted <- melt(SpeciesCellID, id=c("Species", "CellID"), na.rm = TRUE)
+
+CellID <- MossRichness$CellID
+cellvector <- c(1:15038)
+neighbor <- function(cellvector) {(adjacent(BlankRas, cellvector, directions=8, pairs=FALSE, target=CellID, sorted=TRUE, include=FALSE, id=FALSE))}
+neighbors <- lapply(cellvector, neighbor)
+names(neighbors) <- cellvector
+mossneighbors <- neighbors[CellID]
+mossneighborsvect <- unlist(lapply(mossneighbors, length))
+
+MossCellMatrix <- acast(melted, CellID~Species, margins=FALSE)
+MossCellMatrix[MossCellMatrix > 0] <- 1
+
+#Using betadiver to compute B-diversity using Sorensen dissimilarity
+#betadiver(help = TRUE) gives you indices
+MossBetaMat <- betadiver(MossCellMatrix, method = "sor", order = FALSE, help = FALSE)
+saveRDS(MossBetaMat, file="Data/MossBetaMat.rds")
+
+
+#Identify occupied cells that are adjacent to each occuppied cell + convert to vector
+#neighbor <- function(CellVec) {(adjacent(BlankRas, CellVec, directions=8, pairs=FALSE, target=CellID, sorted=TRUE, include=FALSE, id=FALSE))}
+#Neighbors <- lapply(CellVec, neighbor)
+#names(Neighbors) <- CellVec
+
+#bryneighbors <- Neighbors[CellID]
+#bryneighborvect <- unlist(lapply(bryneighbors, length))
+
+#Make beta diversity matrix for all cells
+#BetaMat<-as.matrix(BetaMat)
+#row.names(BetaMat) <- CellID
+#names(BetaMat) <- CellID
+
+Cell8 <- CellID[which(mossneighborvect==8)]
+Neighbors8 <-Neighbors[Cell8]
+Neighbors8 <- data.frame(Neighbors8)
+names(Neighbors8) <- Cell8
+
+Cell7 <- CellID[which(mossneighborvect==7)]
+Neighbors7 <- Neighbors[Cell7]
+Neighbors7 <- data.frame(Neighbors7)
+names(Neighbors7) <- Cell7
+
+MossBetaMat<-as.matrix(MossBetaMat)
+row.names(MossBetaMat) <- CellID
+names(MossBetaMat) <- CellID
+
+MossBetaMat8<- MossBetaMat[!Cell8, !Cell8, drop=TRUE]
+inx8 <- match(as.character(Cell8), rownames(MossBetaMat8))
+MossBetaMat8 <- MossBetaMat8[inx8,inx8]
+
+MossBetaMat7 <- MossBetaMat[!Cell7, !Cell7, drop=TRUE]
+inx7 <- match(as.character(Cell7), rownames(MossBetaMat7))
+MossBetaMat7 <- MossBetaMat7[inx7,inx7]
+
+Cell8CH <- as.character(Cell8)
+Beta8 <- lapply(Cell8CH, function(x)mean(MossBetaMat[x, as.character(Neighbors8[,x])]))
+names(Beta8) <- Cell8CH
+
+Cell7CH <- as.character(Cell7)
+Beta7 <- lapply(Cell7CH, function(x)mean(MossBetaMat[x, as.character(Neighbors7[,x])]))
+names(Beta7) <- Cell7CH
+
+Beta7Vec<-unlist(Beta7)
+Beta8Vec<-unlist(Beta8)
+BetaVec <- rep(0, 15038)
+BetaVec[Cell8]<-Beta8Vec
+BetaVec[Cell7]<-Beta7Vec
+BetaVec[BetaVec==0]<-NA
+BetaVec <- 1-BetaVec
+
+LongLatMossBetaVec <- rep(0, 15038)
+LongLatMossBetaVec[Cell8]<-Beta8Vec
+LongLatMossBetaVec[Cell7]<-Beta7Vec
+LongLatMossBetaVec[LongLatMossBetaVec==0]<-NA
+LongLatMossBetaVec <- 1-LongLatMossBetaVec
+
+LongLatMossBetaRaster <- setValues(BlankRas, LongLatMossBetaVec)
+LongLatMossBetaPoints<-rasterToPoints(LongLatMossBetaRaster)
+LongLatMossBetaDF <- data.frame(LongLatMossBetaPoints)
+colnames(LongLatMossBetaDF) <- c("Longitude", "Latitude", "Beta")
+
+coordinates(LongLatMossBetaDF) <- ~Longitude+Latitude 
+proj4string(LongLatMossBetaDF) <- CRS("+proj=utm +zone=10") 
+MossBetaLongLat <- spTransform(LongLatMossBetaDF, CRS("+proj=longlat")) 
+LongLatMossBetaDF <- data.frame(MossBetaLongLat)
+LongLatMossBetaDF[c("Longitude", "Latitude", "Beta")]
+saveRDS(LongLatMossBetaDF, file = "Data/LongLatMossBetaDF.rds")
+
+MossBetaLongLat <- data.frame(MossBetaLongLat)
+colnames(MossBetaLongLat) <- c("Beta", "Longitude", "Latitude")
+
+
+saveRDS(MossBetaMat, file="Data/MossBetaMat.rds")
+saveRDS(bryneighbors, file = "Data/bryneighbors.rds")
+saveRDS(bryneighborvect, file="Data/bryneighborvect.rds")
+saveRDS(CellID, file="Data/CellID.rds")
+
+saveRDS(LongLatMossBetaRaster, file="Data/LongLatMossBetaRaster.rds")
+
 
 # ?.0 Find order names -------
 OrderNames <- unique(BryophytePresence$Order)
@@ -64,92 +172,264 @@ saveRDS(MossOrderRichList, file = "Data/MossOrderRichList.rds")
 
 #WEIGHTED DATAFRAME --------------------------------------------------------
 #Coniferous Forests --------------------------------------------------------
-WeightedConFor <- raster::extract(LongLatBetaRaster, Coniferous_Forests, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+WeightedConFor <- raster::extract(LongLatMossBetaRaster, Coniferous_Forests, df = TRUE, cellnumbers = TRUE, weight = TRUE)
 colnames(WeightedConFor) <- c("Type", "CellID", "Beta", "Weight")
 WeightedConFor$Type <- "Coniferous_Forests"
 WeightedConForVec <- WeightedConFor$CellID
 
+MossConForClean <- WeightedConFor
 ConForCellID <- unique(WeightedConForVec)
 
 for(i in ConForCellID){
-  vec <- WeightedConFor$Weight[which(BiomeBetaCellsClean$CellID == i)]
+  vec <- MossConForClean$Weight[which(MossConForClean$CellID == i)]
   if(length(vec) > 1){
     max <- max(vec)
-    drop <- which(WeightedConFor$CellID == i & WeightedConFor$Weight != max)
-    BiomeBetaCellsClean <- BiomeBetaCellsClean[-drop,]
+    drop <- which(MossConForClean$CellID == i & MossConForClean$Weight != max)
+    MossConForClean <- MossConForClean[-drop,]
   }
 }
 
+MossConForVec <- MossConForClean$CellID
+
+saveRDS(MossConForClean, "Data/Moss_Coniferous_Forests_Beta_Biome_DF.rds")
+saveRDS(MossConForVec, "Data/Moss_Coniferous_Forests_Clean_Vec.rds")
 
 #Dry Forest ----------------------------------------------------------------
-WeightedDryFor <- raster::extract(LongLatBetaRaster, Dry_Forest, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+WeightedDryFor <- raster::extract(LongLatMossBetaRaster, Dry_Forest, df = TRUE, cellnumbers = TRUE, weight = TRUE)
 colnames(WeightedDryFor) <- c("Type", "CellID", "Beta", "Weight")
 WeightedDryFor$Type <- "Dry_Forest"
 WeightedDryForVec <- WeightedDryFor$CellID
 
+MossDryForClean <- WeightedDryFor
+DryForCellID <- unique(WeightedDryForVec)
+
+for(i in DryForCellID){
+  vec <- MossDryForClean$Weight[which(MossDryForClean$CellID == i)]
+  if(length(vec) > 1){
+    max <- max(vec)
+    drop <- which(MossDryForClean$CellID == i & MossDryForClean$Weight != max)
+    MossDryForClean <- MossDryForClean[-drop,]
+  }
+}
+
+MossDryForVec <- MossDryForClean$CellID
+
+saveRDS(MossDryForClean, "Data/Moss_Dry_Forests_Beta_Biome_DF.rds")
+saveRDS(MossDryForVec, "Data/Moss_Dry_Forests_Clean_Vec.rds")
+
 #Mediterranean Woodlands ---------------------------------------------------
-WeightedMedWood <- raster::extract(LongLatBetaRaster, Mediterranean_Woodlands, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+WeightedMedWood <- raster::extract(LongLatMossBetaRaster, Mediterranean_Woodlands, df = TRUE, cellnumbers = TRUE, weight = TRUE)
 colnames(WeightedMedWood) <- c("Type", "CellID", "Beta", "Weight")
 WeightedMedWood$Type <- "Mediterranean_Woodlands"
 WeightedMedWoodVec <- WeightedMedWood$CellID
 
+MossMedWoodClean <- WeightedMedWood
+MedWoodCellID <- unique(WeightedMedWoodVec)
+
+for(i in MedWoodCellID){
+  vec <- MossMedWoodClean$Weight[which(MossMedWoodClean$CellID == i)]
+  if(length(vec) > 1){
+    max <- max(vec)
+    drop <- which(MossMedWoodClean$CellID == i & MossMedWoodClean$Weight != max)
+    MossMedWoodClean <- MossMedWoodClean[-drop,]
+  }
+}
+
+MossMedWoodVec <- MossMedWoodClean$CellID
+
+saveRDS(MossMedWoodClean, "Data/Moss_Mediterranean_Woodlands_Beta_Biome_DF.rds")
+saveRDS(MossMedWoodVec, "Data/Moss_Mediterranean_Woodlands_Clean_Vec.rds")
+
 #Moist Forest --------------------------------------------------------------
-WeightedMoistFor <- raster::extract(LongLatBetaRaster, Moist_Forest, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+WeightedMoistFor <- raster::extract(LongLatMossBetaRaster, Moist_Forest, df = TRUE, cellnumbers = TRUE, weight = TRUE)
 colnames(WeightedMoistFor) <- c("Type", "CellID", "Beta", "Weight")
 WeightedMoistFor$Type <- "Moist_Forest"
 WeightedMoistForVec <- WeightedMoistFor$CellID
 
+MossMoistForClean <- WeightedMoistFor
+MoistForCellID <- unique(WeightedMoistForVec)
+
+for(i in MoistForCellID){
+  vec <- MossMoistForClean$Weight[which(MossMoistForClean$CellID == i)]
+  if(length(vec) > 1){
+    max <- max(vec)
+    drop <- which(MossMoistForClean$CellID == i & MossMoistForClean$Weight != max)
+    MossMoistForClean <- MossMoistForClean[-drop,]
+  }
+}
+
+MossMoistForVec <- MossMoistForClean$CellID
+
+saveRDS(MossMoistForClean, "Data/Moss_Moist_Forest_Beta_Biome_DF.rds")
+saveRDS(MossMoistForVec, "Data/Moss_Moist_Forest_Clean_Vec.rds")
+
 #Savannas ------------------------------------------------------------------
-WeightedSavanna <- raster::extract(LongLatBetaRaster, Savannas, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+WeightedSavanna <- raster::extract(LongLatMossBetaRaster, Savannas, df = TRUE, cellnumbers = TRUE, weight = TRUE)
 colnames(WeightedSavanna) <- c("Type", "CellID", "Beta", "Weight")
 WeightedSavanna$Type <- "Savannas"
 WeightedSavannaVec <- WeightedSavanna$CellID
 
+MossSavannaClean <- WeightedSavanna
+SavannaCellID <- unique(WeightedSavannaVec)
+
+for(i in SavannaCellID){
+  vec <- MossSavannaClean$Weight[which(MossSavannaClean$CellID == i)]
+  if(length(vec) > 1){
+    max <- max(vec)
+    drop <- which(MossSavannaClean$CellID == i & MossSavannaClean$Weight != max)
+    MossSavannaClean <- MossSavannaClean[-drop,]
+  }
+}
+
+MossSavannaVec <- MossSavannaClean$CellID
+
+saveRDS(MossSavannaClean, "Data/Moss_Savannas_Beta_Biome_DF.rds")
+saveRDS(MossSavannaVec, "Data/Moss_Savannas_Clean_Vec.rds")
+
 #Taiga ---------------------------------------------------------------------
-WeightedTaiga <- raster::extract(LongLatBetaRaster, Taiga, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+WeightedTaiga <- raster::extract(LongLatMossBetaRaster, Taiga, df = TRUE, cellnumbers = TRUE, weight = TRUE)
 colnames(WeightedTaiga) <- c("Type", "CellID", "Beta", "Weight")
 WeightedTaiga$Type <- "Taiga"
 WeightedTaigaVec <- WeightedTaiga$CellID
 
+MossTaigaClean <- WeightedTaiga
+TaigaCellID <- unique(WeightedTaigaVec)
+
+for(i in TaigaCellID){
+  vec <- MossTaigaClean$Weight[which(MossTaigaClean$CellID == i)]
+  if(length(vec) > 1){
+    max <- max(vec)
+    drop <- which(MossTaigaClean$CellID == i & MossTaigaClean$Weight != max)
+    MossTaigaClean <- MossTaigaClean[-drop,]
+  }
+}
+
+MossTaigaVec <- MossTaigaClean$CellID
+
+saveRDS(MossTaigaClean, "Data/Moss_Taiga_Beta_Biome_DF.rds")
+saveRDS(MossTaigaVec, "Data/Moss_Taiga_Clean_Vec.rds")
+
 #Temperate Grasslands ------------------------------------------------------
-WeightedTempGrass <- raster::extract(LongLatBetaRaster, Temperate_Grasslands, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+WeightedTempGrass <- raster::extract(LongLatMossBetaRaster, Temperate_Grasslands, df = TRUE, cellnumbers = TRUE, weight = TRUE)
 colnames(WeightedTempGrass) <- c("Type", "CellID", "Beta", "Weight")
 WeightedTempGrass$Type <- "Temperate_Grasslands"
 WeightedTempGrassVec <- WeightedTempGrass$CellID
 
+MossTempGrassClean <- WeightedTempGrass
+TempGrassCellID <- unique(WeightedTempGrassVec)
+
+for(i in TempGrassCellID){
+  vec <- MossTempGrassClean$Weight[which(MossTempGrassClean$CellID == i)]
+  if(length(vec) > 1){
+    max <- max(vec)
+    drop <- which(MossTempGrassClean$CellID == i & MossTempGrassClean$Weight != max)
+    MossTempGrassClean <- MossTempGrassClean[-drop,]
+  }
+}
+
+MossTempGrassVec <- MossTempGrassClean$CellID
+
+saveRDS(MossTempGrassClean, "Data/Moss_Temperate_Grasslands_Beta_Biome_DF.rds")
+saveRDS(MossTempGrassVec, "Data/Moss_Temperate_Grasslands_Clean_Vec.rds")
+
 #Temperate Mixed -----------------------------------------------------------
-WeightedTempMix <- raster::extract(LongLatBetaRaster, Temperate_Mixed, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+WeightedTempMix <- raster::extract(LongLatMossBetaRaster, Temperate_Mixed, df = TRUE, cellnumbers = TRUE, weight = TRUE)
 colnames(WeightedTempMix) <- c("Type", "CellID", "Beta", "Weight")
 WeightedTempMix$Type <- "Temperate_Mixed"
 WeightedTempMixVec <- WeightedTempMix$CellID
 
+MossTempMixClean <- WeightedTempMix
+TempMixCellID <- unique(WeightedTempMixVec)
+
+for(i in TempMixCellID){
+  vec <- MossTempMixClean$Weight[which(MossTempMixClean$CellID == i)]
+  if(length(vec) > 1){
+    max <- max(vec)
+    drop <- which(MossTempMixClean$CellID == i & MossTempMixClean$Weight != max)
+    MossTempMixClean <- MossTempMixClean[-drop,]
+  }
+}
+
+MossTempMixVec <- MossTempMixClean$CellID
+
+saveRDS(MossTempMixClean, "Data/Moss_Temperate_Mixed_Beta_Biome_DF.rds")
+saveRDS(MossTempMixVec, "Data/Moss_Temperate_Mixed_Clean_Vec.rds")
+
 #Tropical Grasslands -------------------------------------------------------
-WeightedTropGrass <- raster::extract(LongLatBetaRaster, Tropical_Grasslands, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+WeightedTropGrass <- raster::extract(LongLatMossBetaRaster, Tropical_Grasslands, df = TRUE, cellnumbers = TRUE, weight = TRUE)
 colnames(WeightedTropGrass) <- c("Type", "CellID", "Beta", "Weight")
 WeightedTropGrass$Type <- "Tropical_Grasslands"
 WeightedTropGrassVec <- WeightedTropGrass$CellID
 
+MossTropGrassClean <- WeightedTropGrass
+TropGrassCellID <- unique(WeightedTropGrassVec)
+
+for(i in TropGrassCellID){
+  vec <- MossTropGrassClean$Weight[which(MossTropGrassClean$CellID == i)]
+  if(length(vec) > 1){
+    max <- max(vec)
+    drop <- which(MossTropGrassClean$CellID == i & MossTropGrassClean$Weight != max)
+    MossTropGrassClean <- MossTropGrassClean[-drop,]
+  }
+}
+
+MossTropGrassVec <- MossTropGrassClean$CellID
+
+saveRDS(MossTropGrassClean, "Data/Moss_Tropical_Grasslands_Beta_Biome_DF.rds")
+saveRDS(MossTropGrassVec, "Data/Moss_Tropical_Grasslands_Clean_Vec.rds")
+
 #Tundra --------------------------------------------------------------------
-WeightedTundra <- raster::extract(LongLatBetaRaster, Tundra, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+WeightedTundra <- raster::extract(LongLatMossBetaRaster, Tundra, df = TRUE, cellnumbers = TRUE, weight = TRUE)
 colnames(WeightedTundra) <- c("Type", "CellID", "Beta", "Weight")
 WeightedTundra$Type <- "Tundra"
 WeightedTundraVec <- WeightedTundra$CellID
 
+MossTundraClean <- WeightedTundra
+TundraCellID <- unique(WeightedTundraVec)
+
+for(i in TundraCellID){
+  vec <- MossTundraClean$Weight[which(MossTundraClean$CellID == i)]
+  if(length(vec) > 1){
+    max <- max(vec)
+    drop <- which(MossTundraClean$CellID == i & MossTundraClean$Weight != max)
+    MossTundraClean <- MossTundraClean[-drop,]
+  }
+}
+
+MossTundraVec <- MossTundraClean$CellID
+
+saveRDS(MossTundraClean, "Data/Moss_Tundra_Beta_Biome_DF.rds")
+saveRDS(MossTundraVec, "Data/Moss_Tundra_Clean_Vec.rds")
+
 #Xeric Woodlands -----------------------------------------------------------
-WeightedXericWood <- raster::extract(LongLatBetaRaster, Xeric_Woodlands, df = TRUE, cellnumbers = TRUE, weight = TRUE)
+WeightedXericWood <- raster::extract(LongLatMossBetaRaster, Xeric_Woodlands, df = TRUE, cellnumbers = TRUE, weight = TRUE)
 colnames(WeightedXericWood) <- c("Type", "CellID", "Beta", "Weight")
 WeightedXericWood$Type <- "Xeric_Woodlands"
 WeightedXericWoodVec <- WeightedXericWood$CellID
 
+MossXericWoodClean <- WeightedXericWood
+XericWoodCellID <- unique(WeightedXericWoodVec)
 
+for(i in XericWoodCellID){
+  vec <- MossXericWoodClean$Weight[which(MossXericWoodClean$CellID == i)]
+  if(length(vec) > 1){
+    max <- max(vec)
+    drop <- which(MossXericWoodClean$CellID == i & MossXericWoodClean$Weight != max)
+    MossXericWoodClean <- MossXericWoodClean[-drop,]
+  }
+}
+
+MossXericWoodVec <- MossXericWoodClean$CellID
+
+saveRDS(MossXericWoodClean, "Data/Moss_Xeric_Woodlands_Beta_Biome_DF.rds")
+saveRDS(MossXericWoodVec, "Data/Moss_Xeric_Woodlands_Clean_Vec.rds")
+
+##### Not sure if I need this #####
 #Bind biome dataframes -----------------------------------------------------
-BiomeBetaCellsWeighted <- bind_rows(WeightedConFor, WeightedDryFor, WeightedMedWood,
-                                    WeightedMoistFor,WeightedSavanna, WeightedTaiga, 
-                                    WeightedTempGrass, WeightedTempMix,WeightedTropGrass,
-                                    WeightedTundra, WeightedXericWood)
-
-#Choose one biome per cell (cells with multiple biomes go to biome with higher proportion coverage)
-BiomeBetaCellsClean <- BiomeBetaCellsWeighted
+MossBiomeBetaCellsClean <- bind_rows(MossConForClean, MossDryForClean, MossMedWoodClean,
+                                    MossMoistForClean,MossSavannaClean, MossTaigaClean, 
+                                    MossTempGrassClean,MossTempMixClean,MossTropGrassClean,
+                                    MossTundraClean, MossXericWoodClean)
 
 
 

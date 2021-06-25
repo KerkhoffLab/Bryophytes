@@ -55,7 +55,7 @@ ORange <- function(taxa = "bryophytes", order = "all", range, cont = "both", cel
     }else if(cells == "clean"){
       #will have to add code for continents with clean weighted cells if needed later
       if(cont == "both"){
-        file <- paste("Data/Moss_", range, "Clean_Vec.rds", sep = "")
+        file <- paste("Data/Moss_", range, "_Clean_Vec.rds", sep = "")
         RangeVec <- readRDS(file)
       }
     }

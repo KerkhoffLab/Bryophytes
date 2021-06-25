@@ -28,12 +28,12 @@ As an extension of the work done by Carter Powell '20, who mapped alpha diversit
 Our analysis begins with bryophyte presence data from BIEN, which was constructed through species distribution modeling based on occurrence records for 4,802 species. We convert this data to a species-by-cell presence-absence matrix in order to calculate beta diversity using the 'betadiver' function from the *vegan* package. The resulting "BetaMat.rds" file is a Jacccard similarity matrix showing the beta diversity for each pair of cells. Additionally, we load a blank raster file containing 100km by 100km cells, a numeric vector equal to the number of cells in the raster, cell richness (alpha diversity) data, and a vector of the cell IDs for each occuppied cell. 
 
 ```{r}
-BlankRas <-raster("Data/blank_100km_raster.tif")
-CellRichness <- readRDS("Data/CellRichness.rds")
+BlankRas <-raster("../Data/blank_100km_raster.tif")
+CellRichness <- readRDS("../Data/CellRichness.rds")
 CellID <- CellRichness$CellID
 CellVec <- c(1:15038)
 
-BetaMat <- readRDS("Data/BetaMat.rds")
+BetaMat <- readRDS("../Data/BetaMat.rds")
 BetaMat<-as.matrix(BetaMat)
 row.names(BetaMat) <- CellID
 names(BetaMat) <- CellID

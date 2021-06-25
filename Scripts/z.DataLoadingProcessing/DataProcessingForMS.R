@@ -5,114 +5,6 @@
 # 0.0 Load Packages
 
 #### ROUGH ORDER ####
-# ?.0 BETA DIVERSITY CODE --- move to BetaDiversity Script -----
-install.packages("reshape2")
-install.packages("vegan")
-library(reshape2)
-library(vegan)
-MossRichness <- tally(group_by(MossPresence, CellID))
-saveRDS(MossRichness, file = "Data/MossRichness.rds")
-
-SpeciesCellID <- MossPresence[,c(1,4)]
-melted <- melt(SpeciesCellID, id=c("Species", "CellID"), na.rm = TRUE)
-
-CellID <- MossRichness$CellID
-cellvector <- c(1:15038)
-neighbor <- function(cellvector) {(adjacent(BlankRas, cellvector, directions=8, pairs=FALSE, target=CellID, sorted=TRUE, include=FALSE, id=FALSE))}
-neighbors <- lapply(cellvector, neighbor)
-names(neighbors) <- cellvector
-mossneighbors <- neighbors[CellID]
-mossneighborsvect <- unlist(lapply(mossneighbors, length))
-
-MossCellMatrix <- acast(melted, CellID~Species, margins=FALSE)
-MossCellMatrix[MossCellMatrix > 0] <- 1
-
-#Using betadiver to compute B-diversity using Sorensen dissimilarity
-#betadiver(help = TRUE) gives you indices
-MossBetaMat <- betadiver(MossCellMatrix, method = "sor", order = FALSE, help = FALSE)
-saveRDS(MossBetaMat, file="Data/MossBetaMat.rds")
-
-
-#Identify occupied cells that are adjacent to each occuppied cell + convert to vector
-#neighbor <- function(CellVec) {(adjacent(BlankRas, CellVec, directions=8, pairs=FALSE, target=CellID, sorted=TRUE, include=FALSE, id=FALSE))}
-#Neighbors <- lapply(CellVec, neighbor)
-#names(Neighbors) <- CellVec
-
-#bryneighbors <- Neighbors[CellID]
-#bryneighborvect <- unlist(lapply(bryneighbors, length))
-
-#Make beta diversity matrix for all cells
-#BetaMat<-as.matrix(BetaMat)
-#row.names(BetaMat) <- CellID
-#names(BetaMat) <- CellID
-
-Cell8 <- CellID[which(mossneighborvect==8)]
-Neighbors8 <-Neighbors[Cell8]
-Neighbors8 <- data.frame(Neighbors8)
-names(Neighbors8) <- Cell8
-
-Cell7 <- CellID[which(mossneighborvect==7)]
-Neighbors7 <- Neighbors[Cell7]
-Neighbors7 <- data.frame(Neighbors7)
-names(Neighbors7) <- Cell7
-
-MossBetaMat<-as.matrix(MossBetaMat)
-row.names(MossBetaMat) <- CellID
-names(MossBetaMat) <- CellID
-
-MossBetaMat8<- MossBetaMat[!Cell8, !Cell8, drop=TRUE]
-inx8 <- match(as.character(Cell8), rownames(MossBetaMat8))
-MossBetaMat8 <- MossBetaMat8[inx8,inx8]
-
-MossBetaMat7 <- MossBetaMat[!Cell7, !Cell7, drop=TRUE]
-inx7 <- match(as.character(Cell7), rownames(MossBetaMat7))
-MossBetaMat7 <- MossBetaMat7[inx7,inx7]
-
-Cell8CH <- as.character(Cell8)
-Beta8 <- lapply(Cell8CH, function(x)mean(MossBetaMat[x, as.character(Neighbors8[,x])]))
-names(Beta8) <- Cell8CH
-
-Cell7CH <- as.character(Cell7)
-Beta7 <- lapply(Cell7CH, function(x)mean(MossBetaMat[x, as.character(Neighbors7[,x])]))
-names(Beta7) <- Cell7CH
-
-Beta7Vec<-unlist(Beta7)
-Beta8Vec<-unlist(Beta8)
-BetaVec <- rep(0, 15038)
-BetaVec[Cell8]<-Beta8Vec
-BetaVec[Cell7]<-Beta7Vec
-BetaVec[BetaVec==0]<-NA
-BetaVec <- 1-BetaVec
-
-LongLatMossBetaVec <- rep(0, 15038)
-LongLatMossBetaVec[Cell8]<-Beta8Vec
-LongLatMossBetaVec[Cell7]<-Beta7Vec
-LongLatMossBetaVec[LongLatMossBetaVec==0]<-NA
-LongLatMossBetaVec <- 1-LongLatMossBetaVec
-
-LongLatMossBetaRaster <- setValues(BlankRas, LongLatMossBetaVec)
-LongLatMossBetaPoints<-rasterToPoints(LongLatMossBetaRaster)
-LongLatMossBetaDF <- data.frame(LongLatMossBetaPoints)
-colnames(LongLatMossBetaDF) <- c("Longitude", "Latitude", "Beta")
-
-coordinates(LongLatMossBetaDF) <- ~Longitude+Latitude 
-proj4string(LongLatMossBetaDF) <- CRS("+proj=utm +zone=10") 
-MossBetaLongLat <- spTransform(LongLatMossBetaDF, CRS("+proj=longlat")) 
-LongLatMossBetaDF <- data.frame(MossBetaLongLat)
-LongLatMossBetaDF[c("Longitude", "Latitude", "Beta")]
-saveRDS(LongLatMossBetaDF, file = "Data/LongLatMossBetaDF.rds")
-
-MossBetaLongLat <- data.frame(MossBetaLongLat)
-colnames(MossBetaLongLat) <- c("Beta", "Longitude", "Latitude")
-
-
-saveRDS(MossBetaMat, file="Data/MossBetaMat.rds")
-saveRDS(bryneighbors, file = "Data/bryneighbors.rds")
-saveRDS(bryneighborvect, file="Data/bryneighborvect.rds")
-saveRDS(CellID, file="Data/CellID.rds")
-
-saveRDS(LongLatMossBetaRaster, file="Data/LongLatMossBetaRaster.rds")
-
 
 # ?.0 Find order names -------
 OrderNames <- unique(BryophytePresence$Order)
@@ -140,7 +32,7 @@ MossRichnessVec[which(MossRichnessVec==0)]=NA
 # Make moss richness raster for plotting
 MossRichnessRaster <- setValues(BlankRas, MossRichnessVec)
 
-#Save richness and presence data
+# Save richness and presence data
 saveRDS(OrderNames, file = "Data/OrderNames.rds")
 saveRDS(MossCellRichness, file = "Data/MossCellRichness.rds")
 saveRDS(MossRichnessVec, file = "Data/MossRichnessVec.rds")

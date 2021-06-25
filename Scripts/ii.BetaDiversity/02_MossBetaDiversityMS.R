@@ -31,8 +31,6 @@ MossBetaMat<-as.matrix(MossBetaMat)
 row.names(MossBetaMat) <- CellID
 names(MossBetaMat) <- CellID
 
-saveRDS(MossBetaMat, file="Data/MossBetaMat.rds")
-
 
 # 2.0 Calculate pairwise beta diversity for cells with 7 or 8 neighbors ----
 ## 2.1 Identify occupied cells that are adjacent to each occupied cell and convert to vector ----
@@ -84,7 +82,7 @@ BetaVec <- 1-BetaVec
 
 plot(BetaVec, ylab = "Mean Pairwise β-Diversity", xlab = "Cell ID")
 
-#####STOPPED HERE FOR LUNCH#####
+# 3.0 Create a raster and dataframe with longitude and latitude information for mapping ----
 LongLatMossBetaVec <- rep(0, 15038)
 LongLatMossBetaVec[Cell8]<-Beta8Vec
 LongLatMossBetaVec[Cell7]<-Beta7Vec
@@ -101,16 +99,16 @@ proj4string(LongLatMossBetaDF) <- CRS("+proj=utm +zone=10")
 MossBetaLongLat <- spTransform(LongLatMossBetaDF, CRS("+proj=longlat")) 
 LongLatMossBetaDF <- data.frame(MossBetaLongLat)
 LongLatMossBetaDF[c("Longitude", "Latitude", "Beta")]
-saveRDS(LongLatMossBetaDF, file = "Data/LongLatMossBetaDF.rds")
 
 MossBetaLongLat <- data.frame(MossBetaLongLat)
 colnames(MossBetaLongLat) <- c("Beta", "Longitude", "Latitude")
 
-
+# 4.0 Save Files ----
 saveRDS(MossBetaMat, file="Data/MossBetaMat.rds")
 saveRDS(bryneighbors, file = "Data/bryneighbors.rds")
 saveRDS(bryneighborvect, file="Data/bryneighborvect.rds")
 saveRDS(CellID, file="Data/CellID.rds")
-
+saveRDS(LongLatMossBetaDF, file = "Data/LongLatMossBetaDF.rds")
 saveRDS(LongLatMossBetaRaster, file="Data/LongLatMossBetaRaster.rds")
+
 

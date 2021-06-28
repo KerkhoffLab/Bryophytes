@@ -2,7 +2,7 @@
 # Lineage Analysis Code for Moss Manuscript
 # Compiled by Hailey Napier, June 2021
 
-# 0.0 Load Data and Packages -----
+# 0.0 Load Data and Packages, Source Functions -----
 ## 0.1 Load packages ----
 #if (!requireNamespace("BiocManager", quietly = TRUE))
   #install.packages("BiocManager")
@@ -18,7 +18,6 @@ install.packages("png")
 install.packages("phytools")
 install.packages("ape")
 install.packages("tools")
-
 
 library(ggtree)
 library(treeio)
@@ -38,6 +37,13 @@ library(png)
 MossPresence <- readRDS("Data/MossPresence.rds")
 OrderNames <- readRDS("Data/OrderNames.rds")
 MossOrderNames <- readRDS("Data/MossOrderNames.rds")
+MossOrderRichList <- readRDS("Data/MossOrderRichList.rds")
+MossRichnessVec <- readRDS("Data/MossRichnessVec.rds")
+MossCellRichness <- readRDS("Data/MossCellRichness.rds")
+
+## 0.3 Source function
+source("Functions/ORange.R")
+
 
 # 1.0 Read and process Liu et al (2019) phologenetic tree ----
 
@@ -146,6 +152,110 @@ for(i in 1:length(FigS20order)){
     # MOBPerMatSpecies <- readRDS("Data/MOBPerMatSpecies.rds")
 
 # 2.0 Group orders based on max alpha diversity ----
+
+## 2.2 Create a dataframe including each moss order, its alpha diversity in each cell, and the biome associated with that cell ----
+### If a cell has more than one biome, then the biome assigned is the one that covers the largest proportion of the cell
+nrows <- 3639196
+MossOrderBiomeDF <- data.frame(rep(NA,nrows))
+names(MossOrderBiomeDF)[1] <- "Alpha"
+MossOrderBiomeDF$Alpha <- NA
+MossOrderBiomeDF$CellID <- NA
+MossOrderBiomeDF$Order <- NA
+MossOrderBiomeDF$Biome <- NA
+
+start <- 1
+end <- 15038
+o <- MossOrderNames[1]
+b <- BiomeNames[1]
+MossOrderBiomeDF$Alpha[start:end] <- ORange("mosses",o,b, "clean")
+MossOrderBiomeDF$CellID[start:end] <- c(1:15038)
+MossOrderBiomeDF$Biome[start:end] <- b
+MossOrderBiomeDF$Order[start:end] <- o
+
+#start <- end + 1
+#end <- start + 15037
+#MossOrderBiomeDF$Alpha[start:end] <- ORange("mosses",o, b, "clean")
+#MossOrderBiomeDF$CellID[start:end]<- c(1:15038)
+#MossOrderBiomeDF$Biome[start:end] <- b
+#MossOrderBiomeDF$Order[start:end] <- o
+
+for(j in 2:length(BiomeNames)){
+  b <- BiomeNames[j]
+    start <- end + 1
+  end <- start + 15037
+  MossOrderBiomeDF$Alpha[start:end] <- ORange("mosses",o, b,"clean")
+  MossOrderBiomeDF$CellID[start:end]<- c(1:15038)
+  MossOrderBiomeDF$Biome[start:end] <- b
+  MossOrderBiomeDF$Order[start:end] <- o
+}
+
+for(m in 2:length(MossOrderNames)){
+  o <- MossOrderNames[m]
+  for(n in 1:length(BiomeNames)){
+    b <- BiomeNames[n]
+    start <- end + 1
+    end <- start + 15037
+    MossOrderBiomeDF$Alpha[start:end] <- ORange("mosses",o, b, "clean")
+    MossOrderBiomeDF$CellID[start:end]<- c(1:15038)
+    MossOrderBiomeDF$Biome[start:end] <- b
+    MossOrderBiomeDF$Order[start:end] <- o
+  }
+}
+
+saveRDS(MossOrderBiomeDF, file = "Data/MossOrderBiomeDF.rds")
+
+
+# 2.4 Make vectors based on max alpha diversity
+#Make a dataframe to look at numbers for max alpha diversity 
+MossOrderMaxAlpha <- data.frame(tapply(MossOrderBiomeDF$Alpha, MossOrderBiomeDF$Order, max, na.rm = T))
+names(MossOrderMaxAlpha)[1]  <- "MaxAlpha"
+Names <- sort(unique(MossOrderBiomeDF$Order))
+MossOrderMaxAlpha$Names <- Names
+
+# Put order names into vectors based on max alpha diversity 
+MossOrdRichAbove100 <- vector()
+MossOrdRich25to100 <- vector()
+MossOrdRich10to25 <- vector()
+MossOrdRichBelow10 <- vector()
+for(i in 1:length(Names)){
+  name <- Names[i]
+  if(MossOrderMaxAlpha$MaxAlpha[i] > 100){
+    MossOrdRichAbove100 <- c(MossOrdRichAbove100, name)
+  }else if(MossOrderMaxAlpha$MaxAlpha[i] >= 25){
+    MossOrdRich25to100 <- c(MossOrdRich25to100, name)
+  }else if(MossOrderMaxAlpha$MaxAlpha[i] >= 10){
+    MossOrdRich10to25 <- c(MossOrdRich10to25, name)
+  }else if(MossOrderMaxAlpha$MaxAlpha[i] < 10){
+    MossOrdRichBelow10 <- c(MossOrdRichBelow10, name)
+  }
+}
+
+saveRDS(MossOrdRichAbove100, "Data/MossOrdRichAbove100.rds")
+saveRDS(MossOrdRich25to100, "Data/MossOrdRich25to100.rds")
+saveRDS(MossOrdRich10to25, "Data/MossOrdRich10to25.rds")
+saveRDS(MossOrdRichBelow10, "Data/MossOrdRichBelow10.rds")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#####################################
 ## 2.1 Make list of orders and corresponding richness values ----
 ### 2.11 Loop through order names and subset MossPresence for each order, store them in a list ----
 MossOrderNames <- unique(MossPresence$Order)

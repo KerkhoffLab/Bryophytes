@@ -19,6 +19,8 @@ require(dplyr)
 #Load in data (including outlines) and create color gradient 
 BlankRas <-raster("Data/blank_100km_raster.tif")
 BryophytePresence <- read.csv("Data/BryophytePresence_7.2.20(2).csv")
+MossPresence <- readRDS("Data/MossPresence.rds")
+MossRichnessVec <- readRDS("Data/MossRichnessVec.rds")
 cols <- (wes_palette("Zissou1", 500, type = "continuous"))
 
 nw_mount <- shapefile("Data/MapOutlines/Mountains/Koeppen-Geiger_biomes.shp")

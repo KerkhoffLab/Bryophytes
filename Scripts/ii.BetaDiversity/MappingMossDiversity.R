@@ -20,7 +20,7 @@ require(rgdal)
 ## Load blank raster and cell richness data 
 ##Change file depending on if you want to map bryophytes, mosses, liverworts, etc. 
 BlankRas <-raster("Data/blank_100km_raster.tif")
-BetaMat <- readRDS("Data/MossBetaMat.rds")
+BetaMat <- readRDS("Data/MossBetaMat.rds")  #run MossDiversity.R for data
 CellRichness <- readRDS("Data/MossRichness.rds")
 
 

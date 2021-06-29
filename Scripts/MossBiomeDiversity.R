@@ -308,6 +308,20 @@ png("Figures/MossAlphaBiomeMap.png", width = 1000, height = 1000, pointsize = 30
 MossBiomeRichnessMap
 dev.off()
 
+# 3.5 Add lat/long to map --------------------------------------------------
+CoordMossBiomeRichnessMap <- ggplot(fill=biomes_shp$biomes) +            #delete "fill=biomes_shp$biomes if not coloring the biomes
+  geom_tile(data=MossRichnessDF, aes(x=Longitude, y=Latitude, fill=Alpha)) + 
+  scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent") + 
+  coord_equal() +
+  #geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) +           #un-comment for continental outlines
+  #geom_sf(data = nw_mount_sf, size = 0.5, fill=NA) +           #un-comment for mountain outlines
+  geom_sf(data = biomes_sf, size = 0.5, fill=NA) +
+  theme_minimal() +
+  theme(legend.text=element_text(size=20), 
+        legend.title=element_text(size=32), 
+        axis.title = element_blank())
+CoordMossBiomeRichnessMap
+
 
 
 # 4.0 MOSS BIOME BETA MAP --------------------------------------------------

@@ -83,13 +83,16 @@ FullAlpha <- rbind(AlphaMount, AlphaLowland)
 saveRDS(FullAlpha, file="Data/FullAlpha.rds")
 
 AlphaScatterLines <- ggplot(data = FullAlpha, aes(Latitude, Alpha, color=Type)) + 
-  geom_point(shape = 16, size = 3, show.legend=FALSE, alpha=0.8) + 
+  geom_point(shape = 16, size = 3, alpha=0.8) + 
   ylab("Alpha Diversity") + 
   #ylim(0, 800) +
   theme_minimal() + 
   theme(axis.title.y = element_text(size=32), 
         axis.title.x = element_text(size=32),
-        axis.text = element_text(size=20)) + 
+        axis.text = element_text(size=20), 
+        legend.text = element_text(size=32), 
+        legend.position = "bottom", 
+        legend.title = element_blank()) + 
   scale_color_manual(values = c("cyan4", "goldenrod2")) + 
   geom_smooth(size = 2, show.legend = FALSE)
 AlphaScatterLines
@@ -101,12 +104,15 @@ dev.off()
 
 # 1.4 Same plot as above without geom_smooth() lines
 AlphaScatter <- ggplot(data = FullAlpha, aes(Latitude, Alpha, color=Type)) + 
-  geom_point(shape = 16, size = 3, show.legend=FALSE, alpha=0.8) + 
+  geom_point(shape = 16, size = 3, alpha=0.8) + 
   ylab("Alpha Diversity") + 
   #ylim(0, 800) +
   theme_minimal() + 
   theme(axis.title.y = element_text(size=32), 
         axis.title.x = element_text(size=32),
-        axis.text = element_text(size=20)) + 
+        axis.text = element_text(size=20), 
+        legend.text = element_text(size=32), 
+        legend.position = "bottom", 
+        legend.title = element_blank()) + 
   scale_color_manual(values = c("cyan4", "goldenrod2"))
 AlphaScatter

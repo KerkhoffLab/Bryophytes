@@ -292,7 +292,7 @@ nw_bound_sf <- st_as_sf(nw_bound)
 # 3.3 Create map -----------------------------------------------------------
 MossBiomeRichnessMap <- ggplot(fill=biomes_shp$biomes) +            #delete "fill=biomes_shp$biomes if not coloring the biomes
   geom_tile(data=MossRichnessDF, aes(x=Longitude, y=Latitude, fill=Alpha)) + 
-  scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent") + 
+  scale_fill_gradientn(name="Alpha Diversity", colours=cols, na.value="transparent") + 
   coord_equal() +
   #geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) +           #un-comment for continental outlines
   #geom_sf(data = nw_mount_sf, size = 0.5, fill=NA) +           #un-comment for mountain outlines
@@ -311,7 +311,8 @@ dev.off()
 # 3.5 Add lat/long to map --------------------------------------------------
 CoordMossBiomeRichnessMap <- ggplot(fill=biomes_shp$biomes) +            #delete "fill=biomes_shp$biomes if not coloring the biomes
   geom_tile(data=MossRichnessDF, aes(x=Longitude, y=Latitude, fill=Alpha)) + 
-  scale_fill_gradientn(name="α diversity", colours=cols, na.value="transparent") + 
+  scale_fill_gradientn(name="Alpha Diversity", colours=cols, 
+                       na.value="transparent") + 
   coord_equal() +
   #geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) +           #un-comment for continental outlines
   #geom_sf(data = nw_mount_sf, size = 0.5, fill=NA) +           #un-comment for mountain outlines

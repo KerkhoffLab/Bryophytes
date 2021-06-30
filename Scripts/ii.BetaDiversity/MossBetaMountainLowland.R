@@ -33,6 +33,7 @@ nw_bound <- shapefile("Data/MapOutlines/Global_bound/Koeppen-Geiger_biomes.shp")
 # Generate this data below
 BetaMount <- readRDS("Data/MossBetaMount.rds")
 BetaLowland <- readRDS("Data/MossBetaLowland.rds")
+FullAlpha <- readRDS("Data/FullAlpha.rds")
 
 
 # 1.0 Make MossLongLatBetaRaster (from DataProcessing.R) -----------------------
@@ -145,16 +146,41 @@ BetaLowlandScatterplot
 # 2.3 Combine beta mountainous and lowland scatterplots
 FullBeta <- rbind(BetaMount, BetaLowland)
 
-BetaScatter <- ggplot(data = FullBeta, aes(Latitude, Beta, color=Type)) + 
+saveRDS(FullBeta, file="Data/FullBeta.rds")
+
+BetaScatterLines <- ggplot(data = FullBeta, aes(Latitude, Beta, color=Type)) + 
   geom_point(shape = 16, size = 3, alpha=0.8) + 
-  ylab("β diversity") + ylim(0, 0.5) + xlab("Latitude") + 
-  theme_minimal() + theme(axis.title.y = element_text(size=40), axis.title.x = element_text(size=40),  
-                          axis.text = element_text(size=20), legend.text = element_text(size=32), 
-                          legend.position = "bottom", legend.title = element_blank()) + 
-  scale_color_manual(values = c("cyan4", "goldenrod2")) + geom_smooth(size = 2, show.legend = FALSE)
-BetaScatter
+  ylab("Beta Diversity") + 
+  #ylim(0, 0.5) + 
+  xlab("Latitude") + 
+  theme_minimal() + 
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),  
+        axis.text = element_text(size=20), 
+        legend.text = element_text(size=32), 
+        legend.position = "bottom", 
+        legend.title = element_blank()) + 
+  scale_color_manual(values = c("cyan4", "goldenrod2")) + 
+  geom_smooth(size = 2, show.legend = FALSE)
+BetaScatterLines
 
 # save figure
 png("Figures/MossBetaMountLowScatter.png", width = 1500, height = 1000, pointsize = 20)
-BetaScatter
+BetaScatterLines
 dev.off()
+
+# 2.4 Same plot as above without geom_smooth() lines
+BetaScatter <- ggplot(data = FullBeta, aes(Latitude, Beta, color=Type)) + 
+  geom_point(shape = 16, size = 3, alpha=0.8) + 
+  ylab("Beta Diversity") + 
+  #ylim(0, 0.5) + 
+  xlab("Latitude") + 
+  theme_minimal() + 
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),  
+        axis.text = element_text(size=20), 
+        legend.text = element_text(size=32), 
+        legend.position = "bottom", 
+        legend.title = element_blank()) + 
+  scale_color_manual(values = c("cyan4", "goldenrod2"))
+BetaScatter

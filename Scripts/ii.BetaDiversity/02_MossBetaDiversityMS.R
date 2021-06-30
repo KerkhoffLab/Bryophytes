@@ -128,3 +128,34 @@ saveRDS(bryneighborvect, file="Data/bryneighborvect.rds")
 saveRDS(CellID, file="Data/CellID.rds")
 saveRDS(LongLatMossBetaDF, file = "Data/LongLatMossBetaDF.rds")
 saveRDS(LongLatMossBetaRaster, file="Data/LongLatMossBetaRaster.rds")
+
+
+
+
+# UNFINISHED STARTING HERE ================
+# 1.2 weight = T; Cell counted if biome polygon overlaps it, even if it's not the center
+# If cell is covered by multiple biomes, then the biome that covers more of the cell
+# is assigned to it
+
+MossBiomeBetaCleanWeightBV <- ggplot(MossBiomeBetaCellsClean, aes(x=Type, y=Beta, fill=Type, color=Type)) + 
+  geom_boxplot(show.legend = FALSE, fill=biome_cols_11, color="black") +
+  guides(x = guide_axis(angle=30)) +
+  theme_minimal() +        #un-comment whichever theme you want
+  #theme_gray() +
+  #theme_light() +
+  #theme_bw() +
+  geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35,
+              color="gray25") +
+  xlab("Biome") +
+  ylab("Beta Diversity") +  
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),
+        axis.text.y = element_text(size=20), 
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 16))
+MossBiomeBetaCleanWeightBV
+
+png("Figures/MossBetaBiomeCleanWeightBoxViolin.png", width = 1500, height = 1000, pointsize = 20)
+MossBiomeBetaCleanWeightBV
+dev.off()
+
+

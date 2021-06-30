@@ -77,7 +77,8 @@ MossRangeMap <- ggplot() +
   geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
   geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.0) + 
   theme_void() + 
-  theme(legend.text=element_text(size=20), legend.title=element_text(size=23))
+  theme(legend.text=element_text(size=20), legend.title=element_text(size=32), 
+        axis.title = element_blank())
 MossRangeMap
 
 png("Figures/MossRangeMap.png", width = 1000, height = 1000, pointsize = 30)
@@ -92,7 +93,8 @@ CoordMossRangeMap <- ggplot() +
   geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
   geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.0) + 
   theme_minimal() + #alternate: theme_gray()
-  theme(legend.text=element_text(size=20), legend.title=element_text(size=23))
+  theme(legend.text=element_text(size=20), legend.title=element_text(size=32), 
+        axis.title = element_blank())
 CoordMossRangeMap
 
 png("Figures/CoordMossRangeMap.png", width = 1000, height = 1000, pointsize = 30)

@@ -50,7 +50,8 @@ CellVec <- c(1:15038)
 LongLatDF <- readRDS("Data/LongLatDF.rds")
 BiomeRichness <- readRDS("Data/BiomeRichness.rds")
 
-
+# Make and save in section 3.1
+RichnessDF <- readRDS("Data/RichnessDF.rds")
 
 # 1.0 LOAD BIOME SHAPEFILES ------------------------------------------------
 # 1.1 Load entire BIEN_FEE_paper repository (branch: Trait_phylo)

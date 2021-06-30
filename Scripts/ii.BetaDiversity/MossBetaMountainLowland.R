@@ -150,7 +150,8 @@ saveRDS(FullBeta, file="Data/FullBeta.rds")
 
 BetaScatterLines <- ggplot(data = FullBeta, aes(Latitude, Beta, color=Type)) + 
   geom_point(shape = 16, size = 3, alpha=0.8) + 
-  ylab("Beta Diversity") + ylim(0, 0.5) + 
+  ylab("Beta Diversity") + 
+  #ylim(0, 0.5) + 
   xlab("Latitude") + 
   theme_minimal() + 
   theme(axis.title.y = element_text(size=32), 
@@ -171,7 +172,8 @@ dev.off()
 # 2.4 Same plot as above without geom_smooth() lines
 BetaScatter <- ggplot(data = FullBeta, aes(Latitude, Beta, color=Type)) + 
   geom_point(shape = 16, size = 3, alpha=0.8) + 
-  ylab("Beta Diversity") + ylim(0, 0.5) + 
+  ylab("Beta Diversity") + 
+  #ylim(0, 0.5) + 
   xlab("Latitude") + 
   theme_minimal() + 
   theme(axis.title.y = element_text(size=32), 

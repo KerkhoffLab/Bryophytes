@@ -39,6 +39,12 @@ MossOrderRichList <- readRDS("Data/MossOrderRichList.rds")
 MossRichnessVec <- readRDS("Data/MossRichnessVec.rds")
 MossCellRichness <- readRDS("Data/MossCellRichness.rds")
 
+# From 01_BetaDiversityMS.R
+MossBiomeBetaCellsClean <- ("Data/MossBiomeBetaCellsClean.rds")
+
+# ~not sure where this is from~
+LongLatDF <- readRDS("Data/LongLatDF.rds")
+
 ## 0.3 Source function
 source("Functions/ORange.R")
 
@@ -141,7 +147,7 @@ for(i in 1:length(FigS20order)){
 
 # 2.0 Group orders based on max alpha diversity ----
 
-## 2.2 Create a dataframe including each moss order, its alpha diversity in each cell, and the biome associated with that cell ----
+## 2.1 Create a dataframe including each moss order, its alpha diversity in each cell, and the biome associated with that cell ----
 ### If a cell has more than one biome, then the biome assigned is the one that covers the largest proportion of the cell
 nrows <- 3654234 #3639196
 MossOrderBiomeDF <- data.frame(rep(NA,nrows))
@@ -183,9 +189,8 @@ for(m in 2:length(MossOrderNames)){
   }
 }
 
-saveRDS(MossOrderBiomeDF, file = "Data/MossOrderBiomeDF.rds")
 
-## 2.3 Make vectors based on max alpha diversity ----
+## 2.2 Make vectors based on max alpha diversity ----
 ### Make a dataframe to look at numbers for max alpha diversity 
 MossOrderMaxAlpha <- data.frame(tapply(MossOrderBiomeDF$Alpha, MossOrderBiomeDF$Order, max, na.rm = T))
 names(MossOrderMaxAlpha)[1]  <- "MaxAlpha"
@@ -194,114 +199,221 @@ MossOrderMaxAlpha$Names <- Names
 
 ### Put order names into vectors based on max alpha diversity 
 MossOrdRichAbove100 <- vector()
-MossOrdRich25to100 <- vector()
-MossOrdRich10to25 <- vector()
-MossOrdRichBelow10 <- vector()
+MossOrdRich26to100 <- vector()
+MossOrdRich11to25 <- vector()
+MossOrdRich10orBelow <- vector()
 for(i in 1:length(Names)){
   name <- Names[i]
   if(MossOrderMaxAlpha$MaxAlpha[i] > 100){
     MossOrdRichAbove100 <- c(MossOrdRichAbove100, name)
-  }else if(MossOrderMaxAlpha$MaxAlpha[i] >= 25){
-    MossOrdRich25to100 <- c(MossOrdRich25to100, name)
-  }else if(MossOrderMaxAlpha$MaxAlpha[i] >= 10){
-    MossOrdRich10to25 <- c(MossOrdRich10to25, name)
-  }else if(MossOrderMaxAlpha$MaxAlpha[i] < 10){
-    MossOrdRichBelow10 <- c(MossOrdRichBelow10, name)
+  }else if(MossOrderMaxAlpha$MaxAlpha[i] > 25){
+    MossOrdRich26to100 <- c(MossOrdRich26to100, name)
+  }else if(MossOrderMaxAlpha$MaxAlpha[i] > 10){
+    MossOrdRich11to25 <- c(MossOrdRich11to25, name)
+  }else if(MossOrderMaxAlpha$MaxAlpha[i] <= 10){
+    MossOrdRich10orBelow <- c(MossOrdRich10orBelow, name)
   }
 }
 
 saveRDS(MossOrdRichAbove100, "Data/MossOrdRichAbove100.rds")
-saveRDS(MossOrdRich25to100, "Data/MossOrdRich25to100.rds")
-saveRDS(MossOrdRich10to25, "Data/MossOrdRich10to25.rds")
-saveRDS(MossOrdRichBelow10, "Data/MossOrdRichBelow10.rds")
+saveRDS(MossOrdRich26to100, "Data/MossOrdRich26to100.rds")
+saveRDS(MossOrdRich11to25, "Data/MossOrdRich11to25.rds")
+saveRDS(MossOrdRich10orBelow, "Data/MossOrdRich10orBelow.rds")
+
+### Make a dataframe containing order names and richness group categorization
+MossOrdRichGroupsDF <- data.frame(Order = unique(MossPresence$Order), RichGroup = NA)
+for(i in 1:nrow(MossOrdRichGroupsDF)){
+  order = MossOrdRichGroupsDF$Order[i]
+  if(order %in% MossOrdRich10orBelow){
+    MossOrdRichGroupsDF$RichGroup = "Least diverse (10 or fewer species)"
+  }else if(order %in% MossOrdRich11to25){
+    MossOrdRichGroupsDF$RichGroup = "Less diverse (11 - 25 species)"
+  }else if(order %in% MossOrdRich26to100){
+    MossOrdRichGroupsDF$RichGroup = "More diverse (26 - 100 species)"
+  }else if(order %in% MossOrdRichAbove100){
+    MossOrdRichGroupsDF$RichGroup = "Most diverse (greater than 100 species)"
+  }
+}
+
+### Add richness groups to MossOrderBiomeDF and save
+MossOrderBiomeDF <- merge(MossOrderBiomeDF, MossOrdRichGroupsDF, by = "Order")
+saveRDS(MossOrderBiomeDF, file = "Data/MossOrderBiomeDF.rds")
+
+
+# 3.0 Latitude Scatterplot ----
+## 3.1 Add longitude and latitude to MossOrderBiomeDF ----
+MossOrderBiomeLatDF <- merge(MossOrderBiomeDF, LongLatDF, by = "CellID")
+
+## 3.2 Create subsetted dataframes for each richness group ----
+MostDiverseMoss <- MossOrderBiomeLatDF %>%
+  filter(Group == "Most diverse (greater than 100 species)")
+MoreDiverseMoss <- MossOrderBiomeLatDF %>%
+  filter(Group == "More diverse (26 - 100 species)")
+LessDiverseMoss <- MossOrderBiomeLatDF %>%
+  filter(Group == "Less diverse (11 - 25 species)")
+LeastDiverseMoss <- MossOrderBiomeLatDF %>%
+  filter(Group == "Least diverse (10 or fewer species)")
+
+## 3.3 Plot each order richness group in its own plot with a new y-axis scale ----
+### Most diverse orders
+MossOrderMostRich <- ggplot(MostDiverseMoss, 
+                            aes(Latitude, Alpha, color=Order), 
+                            show.legend=TRUE) +
+  geom_point(shape=16, size=5, alpha=0.6) +
+  xlab("Latitude") +
+  ylab("Alpha Diversity") +
+  theme_minimal() +
+  scale_color_manual(values=c("Hypnales" = mossorderpal[7],
+                              "Dicranales" = mossorderpal[10])) + 
+  theme(axis.title.y = element_text(size=29),
+        axis.title.x = element_text(size=29),
+        axis.text = element_text(size=20),
+        plot.title = element_text(size=32, hjust=0.5),
+        legend.title = element_text(size=29),
+        legend.text = element_text(size = 20)) + 
+  labs(title = "Most Diverse (greater than 100 species)")
+MossOrderMostRich
+png("Figures/MossOrderMostRich_AlphaScatter.png", width = 1500, height = 1000,pointsize = 20)
+MossOrderMostRich
+dev.off()
+
+### More diverse orders
+MossOrderMoreRich <- ggplot(MoreDiverseMoss, 
+                            aes(Latitude, Alpha, color=Order), 
+                            show.legend=TRUE) +
+  geom_point(shape=16, size=5, alpha=0.6) +
+  xlab("Latitude") +
+  ylab("Alpha Diversity") +
+  theme_minimal() +
+  scale_color_manual(values=c("Bartramiales" = mossorderpal[6],
+                              "Bryales" = mossorderpal[7],
+                              "Grimmiales" = mossorderpal[8],
+                              "Hookeriales" = mossorderpal[9],
+                              "Orthotrichales" = mossorderpal[4],
+                              "Pottiales" = mossorderpal[2])) +
+  theme(axis.title.y = element_text(size=29),
+        axis.title.x = element_text(size=29),
+        axis.text = element_text(size=20),
+        plot.title = element_text(size=32, hjust=0.5),
+        legend.title = element_text(size=29),
+        legend.text = element_text(size = 20)) +
+  labs(title = "More Diverse (26 - 100 species)")
+MossOrderMoreRich
+png("Figures/MossOrderMoreRich_AlphaScatter.png", width = 1500, height = 1000, pointsize = 20)
+MossOrderMoreRich
+dev.off()
+
+### Less diverse orders
+MossOrderLessRich <- ggplot(LessDiverseMoss, 
+                            aes(Latitude, Alpha, color=Order), 
+                            show.legend=TRUE) +
+  geom_point(shape=16, size=5, alpha=0.6) +
+  xlab("Latitude") +
+  ylab("Alpha Diversity") +
+  #geom_jitter(height = 0.3) +
+  theme_minimal() +
+  scale_color_manual(values=c("Funariales" = mossorderpal[1],
+                              "Hedwigiales" = mossorderpal[2],
+                              "Polytrichales" = mossorderpal[3],
+                              "Sphagnales" = mossorderpal[11])) +
+  theme(axis.title.y = element_text(size=29),
+        axis.title.x = element_text(size=29),
+        axis.text = element_text(size=20),
+        plot.title = element_text(size=32, hjust=0.5),
+        legend.title = element_text(size=29),
+        legend.text = element_text(size = 20)) +
+  labs(title = "Less Diverse (11-25 species)")
+MossOrderLessRich
+png("Figures/MossOrderLessRich_AlphaScatter.png", width = 1500, height = 1000, pointsize = 20)
+MossOrderLessRich
+dev.off()
+
+### Least diverse orders
+MossOrderLeastRich <- ggplot(LeastDiverseMoss, 
+                             aes(Latitude, Alpha, color=Order), 
+                             show.legend=TRUE) +
+  geom_point(shape=16, size=5, alpha=0.6) +
+  xlab("Latitude") +
+  ylab("Alpha Diversity") +
+  #geom_jitter(0.3) +
+  theme_minimal() +
+  scale_color_manual(values=c("Andreaeaeales" = mossorderpal[1],
+                              "Archidiales" = mossorderpal[2],
+                              "Aulacomniales" = mossorderpal[3],
+                              "Bryoxiphales" = mossorderpal[4],
+                              "Buxbaumiales" = mossorderpal[5],
+                              "Gigaspermales" = mossorderpal[6],
+                              "Hypnodendrales" = mossorderpal[7],
+                              "Ptychomniales" = mossorderpal[8],
+                              "Rhizogoniales" = mossorderpal[9],
+                              "Splachnales" = mossorderpal[10])) +
+  theme(axis.title.y = element_text(size=29),
+        axis.title.x = element_text(size=29),
+        axis.text = element_text(size=20),
+        plot.title = element_text(size=32, hjust=0.5),
+        legend.title = element_text(size=29),
+        legend.text = element_text(size = 20)) +
+  labs(title = "Least Diverse (10 or fewer species)")
+MossOrderLeastRich
+png("Figures/MossOrderLeastRich_AlphaScatter.png", width = 1500, height = 1000, pointsize = 20)
+MossOrderLeastRich
+dev.off()
+
+### Arrange the richness group plots into a grid
+OrderAlphaScatter_Grid <- grid.arrange(MossOrderMostRich, MossOrderMoreRich, MossOrderLessRich, MossOrderLeastRich, nrow = 2)
+png("Figures/OrderAlphaScatter_Grid.png", width = 1500, height = 1000, pointsize = 20)
+plot(OrderAlphaScatter_Grid)
+dev.off()
+
+
+# 4.0 Biome Analyses
 
 
 
 # UNFINISHED STARTING HERE ==================================
 
+###CHANGE THIS SO IT WORKS WITH THE DATAFRAME I HAVE ALREADY WRITTEN####
+# 2.0 Find percentage of cells with biome for biomes in each order --------------
+# 2.1 Make a matrix with total cell counts for each order within each biome
+NumberBiomes <- 11
+BiomeNamesAndTotal <- c(BiomeNames, "Total")
 
+#MossOrderBiome = MOB
+MOBMat <- matrix(NA, 22, 12)
+rownames(MOBMat) <- MossOrderNames
+colnames(MOBMat) <- BiomeNamesAndTotal
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#####################################
-## 2.1 Make list of orders and corresponding richness values ----
-### 2.11 Loop through order names and subset MossPresence for each order, store them in a list ----
-MossOrderNames <- unique(MossPresence$Order)
-MossOrderNames <- MossOrderNames[!is.na(MossOrderNames)]
-saveRDS(MossOrderNames, file = "Data/MossOrderNames.rds")
-NumberOrders <- length(MossOrderNames)
-MossOrderList <- list()
 for(i in 1:NumberOrders){
-  ord <- MossOrderNames[i]
-  MossOrderList[[i]] <- subset(MossPresence, Order == ord)
-}
-
-### 2.12 Loop through orders and tally richness for each order, store in a list ----
-MossOrderRichList <- list()
-MossOrderPresList <- list()
-for(i in 1:NumberOrders){
-  MossOrderPresList[[i]] <- tally(group_by(MossOrderList[[i]], CellID))
-  names(MossOrderPresList[[i]])[2] <- "Richness"
-  MossOrderRichList[[i]] <- numeric(15038)
-  MossOrderRichList[[i]][MossOrderPresList[[i]]$CellID] <- MossOrderPresList[[i]]$Richness
-  MossOrderRichList[[i]][which(MossOrderRichList[[i]]==0)] = NA
-}
-
-#### 2.13 Make dataframe for plotting
-# 1.3 Make dataframe for plotting ----
-Lat <- as.vector(LongLatDF$Latitude)
-MossOrdLogAlphaDF <- data.frame("Order" = rep(NA, 330836), 
-                                "Alpha" = rep(NA, 330836),
-                                "LogAlpha" = rep(NA, 330836),
-                                "LogTen" = rep(NA, 330836),
-                                "Percent"  = rep(NA, 330836),
-                                "CellID" = rep((1:15038), 22), 
-                                "Latitude" = rep(Lat, 22))
-
-for(i in 1:length(MossOrderNames)){
   order <- MossOrderNames[i]
-  totalrich <- MOBMat[order, "Total"]
-  if(order %in% MossOrdRichBelow10){
-    group <- "Least diverse (10 or fewer species)"
-  }else if(order %in% MossOrdRich10to25){
-    group <- "Less diverse (11 - 25 species)"
-  }else if(order %in% MossOrdRich25to100){
-    group <- "More diverse (26 - 100 species)"
-  }else if(order %in% MossOrdRichAbove100){
-    group <- "Most diverse (greater than 100 species)"
-  }
-  list <- MossOrderRichList[[i]]
-  start <- (i-1) * 15038 + 1
-  end <- start + 15037
-  MossOrdLogAlphaDF$Order[start:end] <- order
-  MossOrdLogAlphaDF$Group[start:end] <- group
-  for(j in 1:15038){
-    index <- (i-1)*15038+j
-    alpha <- as.numeric(list[j])
-    log <- log(alpha)
-    logten <- log10(alpha)
-    percent <- (alpha/totalrich) * 100
-    MossOrdLogAlphaDF$LogAlpha[index] <- log
-    MossOrdLogAlphaDF$Alpha[index] <- alpha
-    MossOrdLogAlphaDF$LogTen[index] <- logten
-    MossOrdLogAlphaDF$Percent[index] <- percent
+  
+  DF <- MossOrderBiomeList[[i]]
+  DF <- DF %>%
+    dplyr::filter(!is.na(DF$Biome))
+  
+  total <- nrow(DF)
+  biome = "Total"
+  MOBMat[order, biome] <- total
+  
+  biomes <- DF %>%
+    dplyr::select(Biome)
+  biomes <- unique(as.vector(biomes$Biome))
+  print(order)
+  print(biomes)
+  
+  for(j in 1:length(biomes)){
+    biome = biomes[j]
+    nbiome <- DF %>%
+      dplyr::filter(DF$Biome == biome)
+    nbiome <- nrow(nbiome)
+    
+    MOBMat[order, biome] <- nbiome
   }
 }
 
+#save matrix
+saveRDS(MOBMat, "Data/MOBMat.rds")
 
 
-# 3.0 Biome analysis ----
-# 4.0 Latitude analysis ----
+
+
 

@@ -92,7 +92,7 @@ betamat <- betadiver(SpeciesCellMatrix, method = "j", order = FALSE, help = FALS
 
 #Save species-cell matrix and beta diversity matrix
 saveRDS(SpeciesCellMatrix, file="Data/SpeciesCellMatrix.rds")
-saveRDS(betamat, file="Data/BetaMat.rds")
+# saveRDS(betamat, file="Data/BetaMat.rds")
 
 #Stop Bryophytes.rmd (all necessary information is loaded) --------------------------------------------------------------
 

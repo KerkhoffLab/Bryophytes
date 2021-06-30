@@ -324,4 +324,4 @@ MossBiomeBetaCellsClean <- bind_rows(MossConForClean, MossDryForClean, MossMedWo
                                     MossTundraClean, MossXericWoodClean)
 saveRDS(MossBiomeBetaCellsClean, "Data/MossBiomeBetaCellsClean")
 
-
+MossBiomeBetaCellsClean

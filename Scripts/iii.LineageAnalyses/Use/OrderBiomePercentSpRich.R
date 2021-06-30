@@ -43,7 +43,7 @@ for(i in 1:NumberOrders){
   DF$Biome <- NA
   for(j in CellID){
     cell <- j
-    biome <- BiomeCellsClean$Type[which(BiomeBetaCellsClean$CellID == cell)]
+    biome <- MossBiomeBetaCellsClean$Type[which(MossBiomeBetaCellsClean$CellID == cell)]
     if(length(biome) > 0){
       DF$Biome[which(DF$CellID == cell)] <- biome
     }
@@ -52,6 +52,7 @@ for(i in 1:NumberOrders){
   MossOrderBiomeList[[i]] <- DF
 }
 
+MossOrderBiomeList[[1]]
 
 # 2.0 Find percentage of cells with biome for biomes in each order --------------
 # 2.1 Make a matrix with total cell counts for each order within each biome

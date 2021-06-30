@@ -156,3 +156,24 @@ MossBetaMap
 png("Figures/MossBetaMap.png", width = 1000, height = 1000, pointsize = 30)
 MossBetaMap
 dev.off()
+
+
+# 2.6 Same map as above with coordinates
+CoordMossBetaMap <- ggplot() +
+  geom_tile(data = dplyr::filter(gplotOutlier, !is.na(value)), 
+            aes(x = x, y = y), fill = "gray25") +
+  geom_tile(data = gplotB, 
+            aes(x = x, y = y, fill = value)) +
+  scale_fill_gradientn(name = "β diversity", colours=cols, 
+                       na.value="transparent", limits = c(0,0.5)) +
+  coord_quickmap() + 
+  geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
+  geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.0) + 
+  theme_minimal() + #alternate: theme_gray()
+  theme(legend.text=element_text(size=20), legend.title=element_text(size=32),
+        axis.title = element_blank())
+CoordMossBetaMap
+
+png("Figures/CoordMossBetaMap.png", width = 1000, height = 1000, pointsize = 30)
+CoordMossBetaMap
+dev.off()

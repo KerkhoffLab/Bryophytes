@@ -42,25 +42,25 @@ saveRDS(MossOrderNames, file = "Data/MossOrderNames.rds")
 saveRDS(MossRichnessRaster, "Data/MossRichnessRaster.rds")
 
 # ?.0 Make MossOrderRichList for ORange function ----
-MossOrderList <- list()
-for(i in 1:length(MossOrderNames)){
-  ord <- MossOrderNames[i]
-  MossOrderList[[i]] <- subset(BryophytePresence, Order == ord)
+OrderList <- list()
+for(i in 1:length(OrderNames)){
+  ord <- OrderNames[i]
+  OrderList[[i]] <- subset(BryophytePresence, Order == ord)
 }
 
-MossOrderRichList <- list()
-MossOrderPresList <- list()
-for(i in 1:length(MossOrderNames)){
-  MossOrderPresList[[i]] <- tally(group_by(MossOrderList[[i]], CellID))
-  names(MossOrderPresList[[i]])[2] <- "Richness"
-  MossOrderRichList[[i]] <- numeric(15038)
-  MossOrderRichList[[i]][MossOrderPresList[[i]]$CellID] <- MossOrderPresList[[i]]$Richness
-  MossOrderRichList[[i]][which(MossOrderRichList[[i]]==0)] = NA
+OrderRichList <- list()
+OrderPresList <- list()
+for(i in 1:length(OrderNames)){
+  OrderPresList[[i]] <- tally(group_by(OrderList[[i]], CellID))
+  names(OrderPresList[[i]])[2] <- "Richness"
+  OrderRichList[[i]] <- numeric(15038)
+  OrderRichList[[i]][OrderPresList[[i]]$CellID] <- OrderPresList[[i]]$Richness
+  OrderRichList[[i]][which(OrderRichList[[i]]==0)] = NA
 }
 
-saveRDS(MossOrderRichList, file = "Data/MossOrderRichList.rds")
+saveRDS(OrderRichList, file = "Data/OrderRichList.rds")
 
-# ?.0 Biome MOSS Alpha Diversity Data -------------------------------------------------------------
+# ?.0 Biome MOSS BETA Diversity Data -------------------------------------------------------------
 
 #WEIGHTED DATAFRAME --------------------------------------------------------
 #Coniferous Forests --------------------------------------------------------
@@ -84,7 +84,7 @@ for(i in ConForCellID){
 MossConForVec <- MossConForClean$CellID
 
 saveRDS(MossConForClean, "Data/Moss_Coniferous_Forests_Beta_Biome_DF.rds")
-saveRDS(MossConForVec, "Data/Moss_Coniferous_Forests_Clean_Vec.rds")
+saveRDS(MossConForVec, "Data/Coniferous_ForestsCleanVec.rds")
 
 #Dry Forest ----------------------------------------------------------------
 WeightedDryFor <- raster::extract(LongLatMossBetaRaster, Dry_Forest, df = TRUE, cellnumbers = TRUE, weight = TRUE)
@@ -107,7 +107,7 @@ for(i in DryForCellID){
 MossDryForVec <- MossDryForClean$CellID
 
 saveRDS(MossDryForClean, "Data/Moss_Dry_Forest_Beta_Biome_DF.rds")
-saveRDS(MossDryForVec, "Data/Moss_Dry_Forest_Clean_Vec.rds")
+saveRDS(MossDryForVec, "Data/Dry_ForestCleanVec.rds")
 
 #Mediterranean Woodlands ---------------------------------------------------
 WeightedMedWood <- raster::extract(LongLatMossBetaRaster, Mediterranean_Woodlands, df = TRUE, cellnumbers = TRUE, weight = TRUE)
@@ -130,7 +130,7 @@ for(i in MedWoodCellID){
 MossMedWoodVec <- MossMedWoodClean$CellID
 
 saveRDS(MossMedWoodClean, "Data/Moss_Mediterranean_Woodlands_Beta_Biome_DF.rds")
-saveRDS(MossMedWoodVec, "Data/Moss_Mediterranean_Woodlands_Clean_Vec.rds")
+saveRDS(MossMedWoodVec, "Data/Mediterranean_WoodlandsCleanVec.rds")
 
 #Moist Forest --------------------------------------------------------------
 WeightedMoistFor <- raster::extract(LongLatMossBetaRaster, Moist_Forest, df = TRUE, cellnumbers = TRUE, weight = TRUE)
@@ -153,7 +153,7 @@ for(i in MoistForCellID){
 MossMoistForVec <- MossMoistForClean$CellID
 
 saveRDS(MossMoistForClean, "Data/Moss_Moist_Forest_Beta_Biome_DF.rds")
-saveRDS(MossMoistForVec, "Data/Moss_Moist_Forest_Clean_Vec.rds")
+saveRDS(MossMoistForVec, "Data/Moist_ForestCleanVec.rds")
 
 #Savannas ------------------------------------------------------------------
 WeightedSavanna <- raster::extract(LongLatMossBetaRaster, Savannas, df = TRUE, cellnumbers = TRUE, weight = TRUE)
@@ -176,7 +176,7 @@ for(i in SavannaCellID){
 MossSavannaVec <- MossSavannaClean$CellID
 
 saveRDS(MossSavannaClean, "Data/Moss_Savannas_Beta_Biome_DF.rds")
-saveRDS(MossSavannaVec, "Data/Moss_Savannas_Clean_Vec.rds")
+saveRDS(MossSavannaVec, "Data/Savannas_CleanVec.rds")
 
 #Taiga ---------------------------------------------------------------------
 WeightedTaiga <- raster::extract(LongLatMossBetaRaster, Taiga, df = TRUE, cellnumbers = TRUE, weight = TRUE)
@@ -199,7 +199,7 @@ for(i in TaigaCellID){
 MossTaigaVec <- MossTaigaClean$CellID
 
 saveRDS(MossTaigaClean, "Data/Moss_Taiga_Beta_Biome_DF.rds")
-saveRDS(MossTaigaVec, "Data/Moss_Taiga_Clean_Vec.rds")
+saveRDS(MossTaigaVec, "Data/Taiga_CleanVec.rds")
 
 #Temperate Grasslands ------------------------------------------------------
 WeightedTempGrass <- raster::extract(LongLatMossBetaRaster, Temperate_Grasslands, df = TRUE, cellnumbers = TRUE, weight = TRUE)
@@ -222,7 +222,7 @@ for(i in TempGrassCellID){
 MossTempGrassVec <- MossTempGrassClean$CellID
 
 saveRDS(MossTempGrassClean, "Data/Moss_Temperate_Grasslands_Beta_Biome_DF.rds")
-saveRDS(MossTempGrassVec, "Data/Moss_Temperate_Grasslands_Clean_Vec.rds")
+saveRDS(MossTempGrassVec, "Data/Temperate_GrasslandsCleanVec.rds")
 
 #Temperate Mixed -----------------------------------------------------------
 WeightedTempMix <- raster::extract(LongLatMossBetaRaster, Temperate_Mixed, df = TRUE, cellnumbers = TRUE, weight = TRUE)
@@ -245,7 +245,7 @@ for(i in TempMixCellID){
 MossTempMixVec <- MossTempMixClean$CellID
 
 saveRDS(MossTempMixClean, "Data/Moss_Temperate_Mixed_Beta_Biome_DF.rds")
-saveRDS(MossTempMixVec, "Data/Moss_Temperate_Mixed_Clean_Vec.rds")
+saveRDS(MossTempMixVec, "Data/Temperate_MixedCleanVec.rds")
 
 #Tropical Grasslands -------------------------------------------------------
 WeightedTropGrass <- raster::extract(LongLatMossBetaRaster, Tropical_Grasslands, df = TRUE, cellnumbers = TRUE, weight = TRUE)
@@ -268,7 +268,7 @@ for(i in TropGrassCellID){
 MossTropGrassVec <- MossTropGrassClean$CellID
 
 saveRDS(MossTropGrassClean, "Data/Moss_Tropical_Grasslands_Beta_Biome_DF.rds")
-saveRDS(MossTropGrassVec, "Data/Moss_Tropical_Grasslands_Clean_Vec.rds")
+saveRDS(MossTropGrassVec, "Data/Tropical_GrasslandsCleanVec.rds")
 
 #Tundra --------------------------------------------------------------------
 WeightedTundra <- raster::extract(LongLatMossBetaRaster, Tundra, df = TRUE, cellnumbers = TRUE, weight = TRUE)
@@ -291,7 +291,7 @@ for(i in TundraCellID){
 MossTundraVec <- MossTundraClean$CellID
 
 saveRDS(MossTundraClean, "Data/Moss_Tundra_Beta_Biome_DF.rds")
-saveRDS(MossTundraVec, "Data/Moss_Tundra_Clean_Vec.rds")
+saveRDS(MossTundraVec, "Data/TundraCleanVec.rds")
 
 #Xeric Woodlands -----------------------------------------------------------
 WeightedXericWood <- raster::extract(LongLatMossBetaRaster, Xeric_Woodlands, df = TRUE, cellnumbers = TRUE, weight = TRUE)
@@ -314,14 +314,14 @@ for(i in XericWoodCellID){
 MossXericWoodVec <- MossXericWoodClean$CellID
 
 saveRDS(MossXericWoodClean, "Data/Moss_Xeric_Woodlands_Beta_Biome_DF.rds")
-saveRDS(MossXericWoodVec, "Data/Moss_Xeric_Woodlands_Clean_Vec.rds")
+saveRDS(MossXericWoodVec, "Data/Xeric_WoodlandsCleanVec.rds")
 
-##### Not sure if I need this #####
+#~Use for biome beta box violin plots~
 #Bind biome dataframes -----------------------------------------------------
 MossBiomeBetaCellsClean <- bind_rows(MossConForClean, MossDryForClean, MossMedWoodClean,
                                     MossMoistForClean,MossSavannaClean, MossTaigaClean, 
                                     MossTempGrassClean,MossTempMixClean,MossTropGrassClean,
                                     MossTundraClean, MossXericWoodClean)
-
+saveRDS(MossBiomeBetaCellsClean, "Data/MossBiomeBetaCellsClean")
 
 

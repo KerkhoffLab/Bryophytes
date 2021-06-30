@@ -1,5 +1,4 @@
 #Function to make a vector of alpha diversity values for cellIDs only contained in a specific shapefile (biome/mountain range)
-#Input: taxa = str, taxonomic level; default is all "bryophytes" (currently, the only other option is "mosses")
 #Input: order =  str, order name; default is all orders
 #Input: range = str,  biome/mountain range
 #Input: cont =  str, continent ("both", "North America", "South America"); default is both
@@ -11,13 +10,12 @@
 #Hailey Napier
 #July 16, 2020
 
-ORange <- function(taxa = "bryophytes", order = "all", range, cont = "both", cells = "center"){
+ORange <- function(order = "all", range, cont = "both", cells = "center"){
   #load data (comment out load data commands and add necessary data at top of code for loops with large datasets)
   BiomeNames <- readRDS("Data/BiomeNames.rds")
   
   #load file containing CellIDs in the range/biome of interest
   RangeVec <- vector()
-  if(taxa == "bryophytes"){
     if(cells == "center"){
       if(cont == "both"){
         file <- paste("Data/", range, "Vec.rds", sep = "")
@@ -38,13 +36,6 @@ ORange <- function(taxa = "bryophytes", order = "all", range, cont = "both", cel
         RangeVec <- readRDS(file)
       }
     }
-  }else if(taxa == "mosses"){
-      #will have to add code for continents with clean weighted cells if needed later
-      if(cont == "both"){
-        file <- paste("Data/Moss_", range, "_Clean_Vec.rds", sep = "")
-        RangeVec <- readRDS(file)
-      }
-  }
   
   
   #Make a new vector that contains only the cells that aren't in the range/biome of interest
@@ -53,7 +44,6 @@ ORange <- function(taxa = "bryophytes", order = "all", range, cont = "both", cel
   NotRangeCells <- complete.cases(NotRangeCells)
   
   #Default is total richness of all bryophyte orders
-  if(taxa == "bryophytes"){
     if(order == "all"){
       orange <- readRDS("Data/RichnessVec.rds")
       orange[NotRangeCells] <- NA
@@ -69,23 +59,7 @@ ORange <- function(taxa = "bryophytes", order = "all", range, cont = "both", cel
       orange <- OrderRichList[[orderindex]]
       orange[NotRangeCells] <- NA
     }
-  }else if(taxa == "mosses")
-    if(order == "all"){
-      orange <- readRDS("Data/MossRichnessVec.rds")
-      orange[NotRangeCells] <- NA
-    }else{
-      #Load data
-      MossOrderNames <- readRDS("Data/MossOrderNames.rds")
-      MossOrderRichList <- readRDS("Data/MossOrderRichList.rds")
-      
-      #Find the index for the order of interest in order to access the richness list in MossOrderRichList
-      orderindex <- which(MossOrderNames == order)
-      
-      #Set all of the cells that aren't in the range/biome of interest to NA
-      orange <- MossOrderRichList[[orderindex]]
-      orange[NotRangeCells] <- NA
-    }
     
-  return(orange)
+ return(orange)
 }
 

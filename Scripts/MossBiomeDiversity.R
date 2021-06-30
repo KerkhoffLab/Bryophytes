@@ -428,7 +428,8 @@ MossBiomeRichViolin
 dev.off()
 
 # 4.4 Biome richness boxplot with violins ----------------------------------
-MossBiomeRichBV <- ggplot(MossBiomeRichness, aes(x=Type, y=Alpha, fill=Type, color=Type)) + 
+MossBiomeRichBV <- ggplot(MossBiomeRichness, aes(x=Type, y=Alpha, 
+                                                 fill=Type, color=Type)) + 
   geom_boxplot(show.legend = FALSE, fill=cols7, color="black") +
   guides(x = guide_axis(angle=30)) +
   theme_minimal() +        #un-comment whichever theme you want
@@ -438,7 +439,7 @@ MossBiomeRichBV <- ggplot(MossBiomeRichness, aes(x=Type, y=Alpha, fill=Type, col
   geom_violin(scale="count", show.legend=FALSE, fill="gray", alpha=0.35,
               color="gray25") +
   xlab("Biome") +
-  ylab("Richness") +  
+  ylab("Alpha Diversity") +  
   theme(axis.title.y = element_text(size=32), 
         axis.title.x = element_text(size=32),
         axis.text.y = element_text(size=20), 

@@ -106,8 +106,8 @@ for(i in DryForCellID){
 
 MossDryForVec <- MossDryForClean$CellID
 
-saveRDS(MossDryForClean, "Data/Moss_Dry_Forests_Beta_Biome_DF.rds")
-saveRDS(MossDryForVec, "Data/Moss_Dry_Forests_Clean_Vec.rds")
+saveRDS(MossDryForClean, "Data/Moss_Dry_Forest_Beta_Biome_DF.rds")
+saveRDS(MossDryForVec, "Data/Moss_Dry_Forest_Clean_Vec.rds")
 
 #Mediterranean Woodlands ---------------------------------------------------
 WeightedMedWood <- raster::extract(LongLatMossBetaRaster, Mediterranean_Woodlands, df = TRUE, cellnumbers = TRUE, weight = TRUE)

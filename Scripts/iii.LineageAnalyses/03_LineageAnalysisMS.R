@@ -11,26 +11,24 @@
 #BiocManager::install("rphast")
 install.packages("ggplot2")
 install.packages("ggimage")
+install.packages("ape")
 install.packages("tidyr")
 install.packages("dplyr")
 install.packages("gridExtra")
 install.packages("png")
 install.packages("phytools")
-install.packages("ape")
 install.packages("tools")
-
-library(ggtree)
-library(treeio)
+install.packages("grid")
 library(ggplot2)
 library(ggimage)
 library(ape)
-library(phytools)
 library(tidyr)
 library(dplyr)
-library(tools)
-library(grid)
 library(gridExtra)
 library(png)
+library(phytools)
+library(tools)
+library(grid)
 
 ## 0.2 Load data (generated in data processing script ***not yet finished***) ----
 # From DataProcessing2020.R
@@ -167,10 +165,16 @@ start <- 1
 end <- 15038
 o <- MossOrderNames[1]
 b <- BiomeNames[1]
-MossOrderBiomeDF$Alpha[start:end] <- ORange("mosses",o,b, "clean")
+MossOrderBiomeDF$Alpha[start:end] <- ORange("mosses",o,b,"clean")
 MossOrderBiomeDF$CellID[start:end] <- c(1:15038)
 MossOrderBiomeDF$Biome[start:end] <- b
 MossOrderBiomeDF$Order[start:end] <- o
+
+#TESTING -----
+unique(ORange("bryophytes",o,b,"clean"))
+o
+b
+MossOrderRichList[[22]]
 
 #start <- end + 1
 #end <- start + 15037
@@ -203,7 +207,6 @@ for(m in 2:length(MossOrderNames)){
 }
 
 saveRDS(MossOrderBiomeDF, file = "Data/MossOrderBiomeDF.rds")
-
 
 # 2.4 Make vectors based on max alpha diversity
 #Make a dataframe to look at numbers for max alpha diversity 

@@ -34,7 +34,7 @@ nw_bound <- shapefile("Data/MapOutlines/Global_bound/Koeppen-Geiger_biomes.shp")
 # Generate this data below
 AlphaMount <- readRDS("Data/MossAlphaMount.rds")
 AlphaLowland <- readRDS("Data/MossAlphaLowland.rds")
-
+FullAlpha <- readRDS("Data/FullAlpha.rds")
 
 
 # 1.0 Make mountainous / lowland ALPHA scatterplots ----------------------------
@@ -46,6 +46,8 @@ AlphaMount$Type <- "Mountain"
 
 AlphaBoundVec <- AlphaMount[, "CellID"]
 AlphaMount <- merge(AlphaMount, LongLatDF)
+
+saveRDS(AlphaMount, file="Data/MossAlphaMount.rds")
 
 AlphaMountScatterplot <- ggplot(AlphaMount, aes(Latitude, Alpha)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "goldenrod2") + ylab("Mountainous α diversity") + ylim (0, 800) + xlab("Latitude") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
 AlphaMountScatterplot
@@ -63,21 +65,48 @@ AlphaLowland$Type <- "Lowland"
 AlphaLowlandVec <- AlphaLowland$CellID
 AlphaLowland <- merge(AlphaLowland, LongLatDF)
 
-AlphaLowlandScatterplot <- ggplot(AlphaLowland, aes(Latitude, Alpha)) + geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + ylab("Lowland α diversity") + ylim(0, 800) + xlab("Latitude") + theme_minimal() + theme(axis.title.y = element_text(size=32), axis.title.x = element_text(size=32),  axis.text = element_text(size=20))
+saveRDS(AlphaLowland, file="Data/MossAlphaLowland.rds")
+
+AlphaLowlandScatterplot <- ggplot(AlphaLowland, aes(Latitude, Alpha)) + 
+  geom_point(shape = 16, size = 5, show.legend = FALSE, alpha=0.5, color = "cyan4") + 
+  ylab("Lowland α diversity") + 
+  ylim(0, 800) + xlab("Latitude") + 
+  theme_minimal() + 
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),  
+        axis.text = element_text(size=20))
 AlphaLowlandScatterplot
 
 # 1.3 Combine alpha mountainous and lowland scatterplots
 FullAlpha <- rbind(AlphaMount, AlphaLowland)
 
-AlphaScatter <- ggplot(data = FullAlpha, aes(Latitude, Alpha, color=Type)) + 
+saveRDS(FullAlpha, file="Data/FullAlpha.rds")
+
+AlphaScatterLines <- ggplot(data = FullAlpha, aes(Latitude, Alpha, color=Type)) + 
   geom_point(shape = 16, size = 3, show.legend=FALSE, alpha=0.8) + 
-  ylab("α diversity") + ylim(0, 800) +
-  theme_minimal() + theme(axis.title.y = element_text(size=40), axis.title.x = element_blank(),  
-                          axis.text = element_text(size=20)) + 
-  scale_color_manual(values = c("cyan4", "goldenrod2")) + geom_smooth(size = 2, show.legend = FALSE)
-AlphaScatter
+  ylab("Alpha Diversity") + 
+  #ylim(0, 800) +
+  theme_minimal() + 
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),
+        axis.text = element_text(size=20)) + 
+  scale_color_manual(values = c("cyan4", "goldenrod2")) + 
+  geom_smooth(size = 2, show.legend = FALSE)
+AlphaScatterLines
 
 # save figure
 png("Figures/MossAlphaMountLowScatter.png", width = 1500, height = 1000, pointsize = 20)
-AlphaScatter
+AlphaScatterLines
 dev.off()
+
+# 1.4 Same plot as above without geom_smooth() lines
+AlphaScatter <- ggplot(data = FullAlpha, aes(Latitude, Alpha, color=Type)) + 
+  geom_point(shape = 16, size = 3, show.legend=FALSE, alpha=0.8) + 
+  ylab("Alpha Diversity") + 
+  #ylim(0, 800) +
+  theme_minimal() + 
+  theme(axis.title.y = element_text(size=32), 
+        axis.title.x = element_text(size=32),
+        axis.text = element_text(size=20)) + 
+  scale_color_manual(values = c("cyan4", "goldenrod2"))
+AlphaScatter

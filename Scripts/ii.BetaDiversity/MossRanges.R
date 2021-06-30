@@ -21,6 +21,8 @@ BlankRas <-raster("Data/blank_100km_raster.tif")
 BryophytePresence <- read.csv("Data/BryophytePresence_7.2.20(2).csv")
 MossPresence <- readRDS("Data/MossPresence.rds")
 MossRichnessVec <- readRDS("Data/MossRichnessVec.rds")
+MossCellRange <- readRDS("Data/MossCellRange.rds")
+MossRangeRaster <- readRDS("Data/MossRangeRaster.rds")
 cols <- (wes_palette("Zissou1", 500, type = "continuous"))
 
 nw_mount <- shapefile("Data/MapOutlines/Mountains/Koeppen-Geiger_biomes.shp")
@@ -68,12 +70,32 @@ MossRangeDF <- rasterToPoints(MossRangeRaster)
 MossRangeDF <- data.frame(MossRangeDF)
 colnames(MossRangeDF) <- c("Longitude", "Latitude", "Median")
 
-MossRangeMap <- ggplot() + geom_tile(data=MossRangeDF, aes(x=Longitude, y=Latitude, fill=Median)) +   
+MossRangeMap <- ggplot() + 
+  geom_tile(data=MossRangeDF, aes(x=Longitude, y=Latitude, fill=Median)) +   
   scale_fill_gradientn(name="Median Range Size", colours=cols, na.value="transparent") +
-  coord_equal() + geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.0) + theme_void() + 
+  coord_equal() + 
+  geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
+  geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.0) + 
+  theme_void() + 
   theme(legend.text=element_text(size=20), legend.title=element_text(size=23))
 MossRangeMap
 
 png("Figures/MossRangeMap.png", width = 1000, height = 1000, pointsize = 30)
 MossRangeMap
 dev.off()
+
+#add coordinates to map
+CoordMossRangeMap <- ggplot() + 
+  geom_tile(data=MossRangeDF, aes(x=Longitude, y=Latitude, fill=Median)) +   
+  scale_fill_gradientn(name="Median Range Size", colours=cols, na.value="transparent") +
+  coord_equal() + 
+  geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) + 
+  geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.0) + 
+  theme_minimal() + #alternate: theme_gray()
+  theme(legend.text=element_text(size=20), legend.title=element_text(size=23))
+CoordMossRangeMap
+
+png("Figures/CoordMossRangeMap.png", width = 1000, height = 1000, pointsize = 30)
+CoordMossRangeMap
+dev.off()
+

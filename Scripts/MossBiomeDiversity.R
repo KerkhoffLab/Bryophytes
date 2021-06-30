@@ -316,12 +316,15 @@ CoordMossBiomeRichnessMap <- ggplot(fill=biomes_shp$biomes) +            #delete
   #geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) +           #un-comment for continental outlines
   #geom_sf(data = nw_mount_sf, size = 0.5, fill=NA) +           #un-comment for mountain outlines
   geom_sf(data = biomes_sf, size = 0.5, fill=NA) +
-  theme_minimal() +
+  theme_minimal() + #alternate: theme_gray()
   theme(legend.text=element_text(size=20), 
         legend.title=element_text(size=32), 
         axis.title = element_blank())
 CoordMossBiomeRichnessMap
 
+png("Figures/CoordMossAlphaBiomeMap.png", width = 1000, height = 1000, pointsize = 30)
+CoordMossBiomeRichnessMap
+dev.off()
 
 
 # 4.0 MOSS BIOME BETA MAP --------------------------------------------------

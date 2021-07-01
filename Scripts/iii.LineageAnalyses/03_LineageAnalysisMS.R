@@ -1,14 +1,9 @@
 # 03 Lineage Analysis
 # Lineage Analysis Code for Moss Manuscript
-# Compiled by Hailey Napier, June 2021
+# Compiled by Hailey Napier, June and July 2021
 
 # 0.0 Load Data and Packages, Source Functions -----
 ## 0.1 Load packages ----
-#if (!requireNamespace("BiocManager", quietly = TRUE))
-  #install.packages("BiocManager")
-#BiocManager::install("ggtree")
-#BiocManager::install("treeio")
-#BiocManager::install("rphast")
 install.packages("ggplot2")
 install.packages("ggimage")
 install.packages("ape")
@@ -19,6 +14,7 @@ install.packages("png")
 install.packages("phytools")
 install.packages("tools")
 install.packages("grid")
+install.packages("circlize")
 library(ggplot2)
 library(ggimage)
 library(ape)
@@ -29,6 +25,7 @@ library(png)
 library(phytools)
 library(tools)
 library(grid)
+library(circlize)
 
 ## 0.2 Load data (generated in data processing script ***not yet finished***) ----
 # From DataProcessing2020.R
@@ -366,52 +363,242 @@ plot(OrderAlphaScatter_Grid)
 dev.off()
 
 
-# 4.0 Biome Analyses
+# 4.0 Biome Analyses ----
+## 4.1 Make moss order/species dataframe ----
+MossOrdSpecBioDF <- data.frame("Species" = rep(NA, 2976), "Order" = rep(NA, 2976))
+end <- 0
+for(i in 1:NumberOrders){
+  order <- MossOrderNames[i]
+  species_list <- MossOrderSpeciesList[[i]]
+  number_species <- length(species_list)
+  start <- end + 1
+  end <- end + number_species
+  MossOrdSpecBioDF$Species[start:end] <- species_list
+  MossOrdSpecBioDF$Order[start:end] <- order
+}
+
+## 4.2 Add biome column for the biome where each species is most abundant ----
+MossOrdSpecBioDF$Biome <- NA
+tempDF <- data.frame(Species = NA, Order = NA, Biome = NA)
+for(i in 1:nrow(MossOrdSpecBioDF)){
+  order <- MossOrdSpecBioDF$Order[i]
+  species <- MossOrdSpecBioDF$Species[i]
+  biomenumcells <- vector()
+  for(j in 1:length(BiomeNames)){
+    biome <- BiomeNames[j]
+    ab <- SpBiMat[species,biome]
+    if(ab == 0){
+      ab = NA
+    }
+    biomenumcells[j] <- ab
+  }
+  if(sum(biomenumcells, na.rm = T) > 0){
+    biomeindex <- which(biomenumcells == max(biomenumcells, na.rm = T))
+    maxbiome <- BiomeNames[biomeindex]
+    if(length(maxbiome) == 1){
+      MossOrdSpecBioDF$Biome[which(MossOrdSpecBioDF$Species == species)] <- maxbiome
+    }else if(length(maxbiome) > 1){
+      multimaxone <- maxbiome[1]
+      MossOrdSpecBioDF$Biome[which(MossOrdSpecBioDF$Species == species)] <- multimaxone
+      multimaxtwo <- maxbiome[2]
+      tempDF <- tempDF %>% add_row(Species = species, Order = order, Biome = multimaxtwo)
+    }
+  }
+}
+
+### Add in species that have the same max abundance value in multiple biomes
+MossOrdSpecBioDF <- bind_rows(MossOrdSpecBioDF, tempDF)
+
+### Omit species where biome == NA
+MossOrdSpecBioDF <- MossOrdSpecBioDF[complete.cases(MossOrdSpecBioDF), ]
+
+### Save MossOrdSpecBioDF
+saveRDS(MossOrdSpecBioDF, "Data/MossOrdSpecBioDF.rds")
+
+## 4.3 Make moss biome circle plot ----
+### Load colors
+biome_cols_11 <- c("#D8B70A", "#972D15", "#A2A475", "#81A88D", "#02401B",
+                   "#446455", "#FDD262", "#D3DDDC", "#C7B19C", "#798E87", 
+                   "#C27D38")
+grid.col <- c(Coniferous_Forests = "#D8B70A", Dry_Forest = "#972D15", 
+              Mediterranean_Woodlands = "#A2A475", Moist_Forest = "#81A88D", 
+              Savannas = "#02401B", Taiga = "#446455", Temperate_Grasslands = "#FDD262", 
+              Temperate_Mixed = "#D3DDDC", Tropical_Grasslands = "#C7B19C", Tundra = "#798E87", 
+              Xeric_Woodlands = "#C27D38", Hypnales = "grey", Porellales = "grey",  
+              Pottiales = "grey", Hookeriales  = "grey", Bryales = "grey", Jungermanniales = "grey", 
+              Andreaeaeales = "grey", Splachnales = "grey", Orthotrichales  =  "grey",  
+              Bartramiales = "grey", Metzgeriales = "grey", Dicranales = "grey", Anthocerotales = "grey",
+              Funariales = "grey", Treubiales = "grey", Archidiales = "grey", Marchantiales = "grey", 
+              Polytrichales = "grey", Aulacomniales = "grey", Fossombroniales = "grey", 
+              Grimmiales = "grey", Hedwigiales = "grey", Bryoxiphiales = "grey", Buxbaumiales  = "grey",
+              Ptychomniales = "grey", Gigaspermales = "grey", Dendrocerotales  = "grey", 
+              Pleuroziales = "grey", Rhizogoniales = "grey", Haplomitriales = "grey", Hypnodendrales  = "grey", 
+              Pallaviciniales = "grey",  Pelliales = "grey", Notothyladales = "grey", Ricciales = "grey", 
+              Ptilidiales = "grey", Sphaerocarpales = "grey", Sphagnales = "grey")
+
+### Make matrix for plotting
+CircleMatAllMoss <- matrix(NA, 22, 11)
+rownames(CircleMatAllMoss) <- MossOrderNames
+colnames(CircleMatAllMoss) <- BiomeNames
+SortedMossOrderNames <- sort(MossOrderNames)
+tallytable <- table(MossOrdSpecBioDF$Order, MossOrdSpecBioDF$Biome)
+
+for(j in 1:NumberOrders){
+  order <- SortedMossOrderNames[j]
+  for(k in 1:NumberBiomes){
+    biome <- BiomeNames[k]
+    richness <- tallytable[j,k]
+    CircleMatAllMoss[order, biome] <-  richness
+  }
+}
+
+### Save matrix for quantitative analysis
+saveRDS(CircleMatAllMoss, "Data/CircleMatAllMoss.rds")
+
+### Plot
+circos.clear()
+png("Figures/CircleMoss.png", width = 1000, height = 1000, pointsize = 20)
+circos.par(start.degree = 0)
+chordDiagram(CircleMatAllMoss, grid.col = grid.col, column.col = biome_cols_11, 
+             directional = 1, direction.type = "arrows", link.arr.type = "big.arrow", 
+             link.arr.length = 0.05, link.largest.ontop = T, annotationTrack = c("grid"), 
+             preAllocateTracks = 1, big.gap = 20, small.gap = 2)
+circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
+  xlim = get.cell.meta.data("xlim")
+  ylim = get.cell.meta.data("ylim")
+  sector.name = get.cell.meta.data("sector.index")
+  circos.text(mean(xlim), ylim[1], sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex=0.5)
+}, bg.border = NA)
+dev.off()
+
+
+## 4.4 Make null model ----
+NullMOBMat <- matrix(NA, 22, 12)
+rownames(NullMOBMat) <- MossOrderNames
+colnames(NullMOBMat) <- BiomeNamesAndTotal
+
+NumberReps <- 1000
+
+for(i in 1:NumberReps){
+  ### Use transform to shuffle order column (assign random order to each species)
+  DF <- transform(MossOrdSpecBioDF, Order = sample(Order))
+  # 4.2.2 Tally species in each order by biome
+  tallytable <- table(DF$Order, DF$Biome)
+  ### Store species richness values for each biome by order in a matrix
+  for(j in 1:NumberOrders){
+    order <- SortedMossOrderNames[j]
+    for(k in 1:NumberBiomes){
+      biome <- BiomeNames[k]
+      richness <- tallytable[j,k]
+      NullMOBMat[order, biome] <- sum(NullMOBMat[order, biome], richness, na.rm = T)
+    }
+  }
+}
+
+## 4.5 Calculate null totals for each order ----
+totals <- rowSums(NullMOBMat, na.rm = T)
+for(i in 1:NumberOrders){
+  order <- MossOrderNames[i]
+  total <- totals[[i]]
+  NullMOBMat[order, "Total"] <- total
+}
+
+## 4.6 Make a percentage matrix for null data ----
+NullMOBPerMat <- NullMOBMat
+
+for(i in 1:NumberOrders){
+  order <- MossOrderNames[i]
+  total <- NullMOBMat[order, "Total"]
+  for(j in 1:NumberBiomes){
+    biome <- BiomeNames[j]
+    biome_abundance <- NullMOBPerMat[order, biome]
+    percent <- biome_abundance/total*100
+    NullMOBPerMat[order, biome] <- percent
+  }
+}
+
+## 4.7 Plot null model data ----
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 # UNFINISHED STARTING HERE ==================================
 
-###CHANGE THIS SO IT WORKS WITH THE DATAFRAME I HAVE ALREADY WRITTEN####
-# 2.0 Find percentage of cells with biome for biomes in each order --------------
-# 2.1 Make a matrix with total cell counts for each order within each biome
+## 4.1 Make a matrix with total cell counts for each order within each biome
 NumberBiomes <- 11
 BiomeNamesAndTotal <- c(BiomeNames, "Total")
 
-#MossOrderBiome = MOB
+### MOB = MossOrderBiome
+### Initialize matrix and set row and column names
 MOBMat <- matrix(NA, 22, 12)
 rownames(MOBMat) <- MossOrderNames
 colnames(MOBMat) <- BiomeNamesAndTotal
 
+### Loop through orders
 for(i in 1:NumberOrders){
   order <- MossOrderNames[i]
   
-  DF <- MossOrderBiomeList[[i]]
+  # Create a temporary subsetted dataframe that includes only the specified order and only the cells where alpha diversity is greater than zero (not NA)
+  DF <- MossOrderBiomeLatDF
   DF <- DF %>%
-    dplyr::filter(!is.na(DF$Biome))
+    dplyr::filter(!is.na(DF$Alpha)) %>%
+    dplyr::filter(Order == order)
   
-  total <- nrow(DF)
+  # Find the total alpha diversity for all of the biomes and put into the "Total" column in MOBMat
+  total <- sum(DF$Alpha)
   biome = "Total"
   MOBMat[order, biome] <- total
   
+  # Make a list of the biomes each order occupies
   biomes <- DF %>%
     dplyr::select(Biome)
   biomes <- unique(as.vector(biomes$Biome))
-  print(order)
-  print(biomes)
   
+  # Loop through each order's biome list
   for(j in 1:length(biomes)){
     biome = biomes[j]
-    nbiome <- DF %>%
-      dplyr::filter(DF$Biome == biome)
-    nbiome <- nrow(nbiome)
     
+    biomeDF <- DF %>%
+      dplyr::filter(DF$Biome == biome)
+    
+    # Calculate the total alpha diversity for each biome
+    nbiome <- sum(biomeDF$Alpha)
+    
+    # Put each biome's total in the matrix
     MOBMat[order, biome] <- nbiome
   }
 }
 
-#save matrix
+### Save matrix
 saveRDS(MOBMat, "Data/MOBMat.rds")
+
+## 4.2 Use MOBMat to calculate percentages and put in a dataframe
+MOBPercentMat <- MOBMat
+for(i in 1:NumberOrders){
+  order <- MossOrderNames[i]
+  total <- MOBPercentMat[order, "Total"]
+  for(j in 1:NumberBiomes){
+    biome <- BiomeNames[j]
+    biome_total <- MOBPercentMat[order, biome]
+    percent <- biome_total/total*100
+    MOBPercentMat[order, biome] <- percent
+  }
+}
+
+
+
+
 
 
 

@@ -471,6 +471,32 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
 }, bg.border = NA)
 dev.off()
 
+## 4.4 Make matrix to show percent of total species richness in each biome ---
+### For quantitative analysis
+MOBPerMatSpecies <- CircleMatAllMoss
+MOBPerMatSpecies <- cbind(MOBPerMatSpecies, NA)
+colnames(MOBPerMatSpecies)[12] <- "Total"
+totals <- rowSums(MOBPerMatSpecies, na.rm = T)
+### Loop through each order
+for(i in 1:NumberOrders){
+  order <- MossOrderNames[i]
+  total <- totals[[i]]
+  ### Put summed species richness in "Total" column of matrix
+  MOBPerMatSpecies[order, "Total"] <- total
+  ### Loop through each biome
+  for(j in 1:NumberBiomes){
+    biome <- BiomeNames[j]
+    ### Find total species richness for the biome and order of interest
+    biome_abundance <- MOBPerMatSpecies[order, biome]
+    ### Calculate the percentage of total species richness the biome
+    percent <- biome_abundance/total*100
+    ### Put percentage of total species richness into matrix
+    MOBPerMatSpecies[order, biome] <- percent
+  }
+}
+
+### Save matrix
+saveRDS(MOBPerMatSpecies, "Data/MOBPerMatSpecies.rds")
 
 ## 4.4 Make null model ----
 NullMOBMat <- matrix(NA, 22, 12)
@@ -516,9 +542,6 @@ for(i in 1:NumberOrders){
     NullMOBPerMat[order, biome] <- percent
   }
 }
-
-
-##### NOT FINISHED #####
 
 ## 4.7 Null model analysis ----
 ### Divide each cell by number of reps to get null mean
@@ -580,7 +603,7 @@ for(i in 1:NumberOrders){
   }
 }
 
-# 4.8 Plotting Z-Scores
+# 4.8 Plotting Z-Scores ----
 ## Make a dataframe for plotting
 MOBZScoreDFBiomeSD <- data.frame(Order = rep(NA, 242), Biome = rep(NA, 242), ZScore = rep(NA, 242), Group = rep(NA, 242))
 rownumber <- 0
@@ -624,87 +647,3 @@ ZScoreDotBiomeSD
 png("Figures/ZScoreDotBiomeSD.png", width = 1500, height = 1000, pointsize = 20)
 ZScoreDotBiomeSD
 dev.off()
-
-
-
-
-
-
-
-
-
-
-
-
-
-# UNFINISHED STARTING HERE ==================================
-
-## 4.1 Make a matrix with total cell counts for each order within each biome
-NumberBiomes <- 11
-BiomeNamesAndTotal <- c(BiomeNames, "Total")
-
-### MOB = MossOrderBiome
-### Initialize matrix and set row and column names
-MOBMat <- matrix(NA, 22, 12)
-rownames(MOBMat) <- MossOrderNames
-colnames(MOBMat) <- BiomeNamesAndTotal
-
-### Loop through orders
-for(i in 1:NumberOrders){
-  order <- MossOrderNames[i]
-  
-  # Create a temporary subsetted dataframe that includes only the specified order and only the cells where alpha diversity is greater than zero (not NA)
-  DF <- MossOrderBiomeLatDF
-  DF <- DF %>%
-    dplyr::filter(!is.na(DF$Alpha)) %>%
-    dplyr::filter(Order == order)
-  
-  # Find the total alpha diversity for all of the biomes and put into the "Total" column in MOBMat
-  total <- sum(DF$Alpha)
-  biome = "Total"
-  MOBMat[order, biome] <- total
-  
-  # Make a list of the biomes each order occupies
-  biomes <- DF %>%
-    dplyr::select(Biome)
-  biomes <- unique(as.vector(biomes$Biome))
-  
-  # Loop through each order's biome list
-  for(j in 1:length(biomes)){
-    biome = biomes[j]
-    
-    biomeDF <- DF %>%
-      dplyr::filter(DF$Biome == biome)
-    
-    # Calculate the total alpha diversity for each biome
-    nbiome <- sum(biomeDF$Alpha)
-    
-    # Put each biome's total in the matrix
-    MOBMat[order, biome] <- nbiome
-  }
-}
-
-### Save matrix
-saveRDS(MOBMat, "Data/MOBMat.rds")
-
-## 4.2 Use MOBMat to calculate percentages and put in a dataframe
-MOBPercentMat <- MOBMat
-for(i in 1:NumberOrders){
-  order <- MossOrderNames[i]
-  total <- MOBPercentMat[order, "Total"]
-  for(j in 1:NumberBiomes){
-    biome <- BiomeNames[j]
-    biome_total <- MOBPercentMat[order, biome]
-    percent <- biome_total/total*100
-    MOBPercentMat[order, biome] <- percent
-  }
-}
-
-
-
-
-
-
-
-
-

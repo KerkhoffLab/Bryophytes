@@ -28,21 +28,17 @@ library(grid)
 library(circlize)
 
 ## 0.2 Load data (generated in data processing script ***not yet finished***) ----
-# From DataProcessing2020.R
+### From 01_BetaDiversityMS.R
+MossBiomeBetaCellsClean <- ("Data/MossBiomeBetaCellsClean.rds")
+### From DataProcessingForMS.R
+LongLatDF <- readRDS("Data/LongLatDF.rds")
 MossPresence <- readRDS("Data/MossPresence.rds")
 OrderNames <- readRDS("Data/OrderNames.rds")
 MossOrderNames <- readRDS("Data/MossOrderNames.rds")
-MossOrderRichList <- readRDS("Data/MossOrderRichList.rds")
-MossRichnessVec <- readRDS("Data/MossRichnessVec.rds")
 MossCellRichness <- readRDS("Data/MossCellRichness.rds")
+MossRichnessVec <- readRDS("Data/MossRichnessVec.rds")
 
-# From 01_BetaDiversityMS.R
-MossBiomeBetaCellsClean <- ("Data/MossBiomeBetaCellsClean.rds")
-
-# ~not sure where this is from~
-LongLatDF <- readRDS("Data/LongLatDF.rds")
-
-## 0.3 Source function
+## 0.3 Source function ----
 source("Functions/ORange.R")
 
 

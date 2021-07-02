@@ -6,6 +6,20 @@
 
 #### ROUGH ORDER ####
 
+# ?.0 Create dataframe including coordinates for each cell ----
+LongLatRaster <- setValues(BlankRas, CellVec)
+LongLatPoints<-rasterToPoints(LongLatRaster)
+LongLatDF <- data.frame(LongLatPoints)
+colnames(LongLatDF) <- c("Longitude", "Latitude", "CellID")
+
+coordinates(LongLatDF) <- ~Longitude+Latitude 
+proj4string(LongLatDF) <- CRS("+proj=utm +zone=10") 
+LongLat <- spTransform(LongLatDF, CRS("+proj=longlat")) 
+LongLatDF <- data.frame(LongLat)
+LongLatDF[c("Longitude", "Latitude", "CellID")]
+LongLatDF <- subset(LongLatDF, select = -c(optional))
+saveRDS(LongLatDF, "Data/LongLatDF.rds")
+
 # ?.0 Find order names -------
 OrderNames <- unique(BryophytePresence$Order)
 OrderNames <- OrderNames[!is.na(OrderNames)]
@@ -41,7 +55,7 @@ saveRDS(MossPresence, file = "Data/MossPresence.rds")
 saveRDS(MossOrderNames, file = "Data/MossOrderNames.rds")
 saveRDS(MossRichnessRaster, "Data/MossRichnessRaster.rds")
 
-# ?.0 Make MossOrderRichList for ORange function ----
+# ?.0 Make OrderRichList for ORange function ----
 OrderList <- list()
 for(i in 1:length(OrderNames)){
   ord <- OrderNames[i]

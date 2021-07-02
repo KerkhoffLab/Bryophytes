@@ -482,7 +482,7 @@ NumberReps <- 1000
 for(i in 1:NumberReps){
   ### Use transform to shuffle order column (assign random order to each species)
   DF <- transform(MossOrdSpecBioDF, Order = sample(Order))
-  # 4.2.2 Tally species in each order by biome
+  ### Tally species in each order by biome
   tallytable <- table(DF$Order, DF$Biome)
   ### Store species richness values for each biome by order in a matrix
   for(j in 1:NumberOrders){
@@ -495,7 +495,7 @@ for(i in 1:NumberReps){
   }
 }
 
-## 4.5 Calculate null totals for each order ----
+## 4.5 Calculate null species richness totals for each order ----
 totals <- rowSums(NullMOBMat, na.rm = T)
 for(i in 1:NumberOrders){
   order <- MossOrderNames[i]
@@ -503,7 +503,7 @@ for(i in 1:NumberOrders){
   NullMOBMat[order, "Total"] <- total
 }
 
-## 4.6 Make a percentage matrix for null data ----
+## 4.6 Make a percentage of total species richness matrix for null data ----
 NullMOBPerMat <- NullMOBMat
 
 for(i in 1:NumberOrders){
@@ -517,9 +517,113 @@ for(i in 1:NumberOrders){
   }
 }
 
-## 4.7 Plot null model data ----
 
+##### NOT FINISHED #####
 
+## 4.7 Null model analysis ----
+### Divide each cell by number of reps to get null mean
+NullMOBMat <- NullMOBMat/NumberReps
+NullMeanTable <- apply(NullMOBMat, 2, mean)
+
+### Observed data -- number of species in each biome
+ObsMeanTable <- colMeans(CircleMatAllMoss)
+ObsSDTable <- apply(CircleMatAllMoss, 2, sd)
+
+### Make a matrix for comparing observed and null means and SDs
+MOBStats <- matrix(NA, 11, 4)
+rownames(MOBStats) <- BiomeNames
+colnames(MOBStats) <- c("ObsMean", "ObsSD", "NullMean", "ZScore")
+
+for(i in 1:NumberBiomes){
+  biome <- BiomeNames[i]
+  MOBStats[biome, "ObsMean"] <- ObsMeanTable[[i]]
+  MOBStats[biome, "ObsSD"]<- ObsSDTable[[i]]
+  MOBStats[biome, "NullMean"]<- NullMeanTable[[i]]
+  zscore <- ((MOBStats[biome, "ObsMean"] - MOBStats[biome, "NullMean"])/MOBStats[biome, "ObsSD"])
+  MOBStats[biome, "ZScore"] <- zscore
+}
+
+### Compare observered and null percentages of species richness
+NullPerMeanTable <- apply(NullMOBPerMat, 2, mean)
+
+ObsPerMeanTable <- apply(MOBPerMatSpecies, 2, mean)
+ObsPerSDTable <- apply(MOBPerMatSpecies, 2, sd)
+
+PerMOBStats <- matrix(NA, 11, 4)
+rownames(PerMOBStats) <- BiomeNames
+colnames(PerMOBStats) <- c("ObsMean", "ObsSD", "NullMean", "ZScore")
+
+for(i in 1:NumberBiomes){
+  biome <- BiomeNames[i]
+  PerMOBStats[biome, "ObsMean"] <- ObsPerMeanTable[[i]]
+  PerMOBStats[biome, "ObsSD"]<- ObsPerSDTable[[i]]
+  PerMOBStats[biome, "NullMean"]<- NullPerMeanTable[[i]]
+  zscore <- ((MOBStats[biome, "ObsMean"] - PerMOBStats[biome, "NullMean"])/PerMOBStats[biome, "ObsSD"])
+  PerMOBStats[biome, "ZScore"] <- zscore
+}
+
+### Orders
+### Is this (single) order overrepresented in this biome?
+#### Make a zscore matrix
+BiomeSD <- apply(CircleMatAllMoss, 2, sd)
+
+MOBZMatBiomeSD <- CircleMatAllMoss
+for(i in 1:NumberOrders){
+  order <- MossOrderNames[i]
+  for(j in 1:NumberBiomes){
+    biome <- BiomeNames[j]
+    sd <- BiomeSD[j]
+    nullpercent <- NullMOBPerMat[order, biome]
+    obspercent <- MOBPerMatSpecies[order, biome]
+    zscore <- ((nullpercent - obspercent)/sd)
+    MOBZMatBiomeSD[order, biome] <- zscore
+  }
+}
+
+# 4.8 Plotting Z-Scores
+## Make a dataframe for plotting
+MOBZScoreDFBiomeSD <- data.frame(Order = rep(NA, 242), Biome = rep(NA, 242), ZScore = rep(NA, 242), Group = rep(NA, 242))
+rownumber <- 0
+for(i in 1:NumberOrders){
+  order <- MossOrderNames[i]
+  if(order %in% MossOrdRichBelow10){
+    group <- "Least diverse (10 or fewer species)"
+  }else if(order %in% MossOrdRich10to25){
+    group <- "Less diverse (11 - 25 species)"
+  }else if(order %in% MossOrdRich25to100){
+    group <- "More diverse (26 - 100 species)"
+  }else if(order %in% MossOrdRichAbove100){
+    group <- "Most diverse (greater than 100 species)"
+  }
+  for(j in 1:NumberBiomes){
+    biome <- BiomeNames[j]
+    zscore <- MOBZMatBiomeSD[order,biome]
+    rownumber <- rownumber + 1
+    MOBZScoreDFBiomeSD$Order[rownumber] <- order
+    MOBZScoreDFBiomeSD$Biome[rownumber] <- biome
+    MOBZScoreDFBiomeSD$ZScore[rownumber] <- zscore
+    MOBZScoreDFBiomeSD$Species_Richness[rownumber] <- group
+  }
+}
+
+## Doptplot
+ZScoreDotBiomeSD <- ggplot(data = MOBZScoreDFBiomeSD, aes(x = Biome, y = ZScore, fill = Species_Richness)) +
+  geom_dotplot(binaxis = "y", stackdir= "center", 
+               dotsize = 0.5, alpha = 0.8, binwidth = 0.25) +
+  theme(legend.position = "right") +
+  theme_minimal() +
+  labs(fill = "Species Richness Level") +
+  scale_fill_brewer(palette="Greens") +
+  theme(axis.text.x = element_text(angle = 45,  hjust = 1, size =11)) +
+  theme(axis.title.x = element_text(size = 15)) +
+  theme(axis.title.y = element_text(size = 15)) + 
+  theme(legend.title = element_text(size = 15)) + 
+  theme(legend.text = element_text(size = 11)) +
+  geom_hline(yintercept = -2, color = "darkblue", linetype = "dashed")
+ZScoreDotBiomeSD
+png("Figures/ZScoreDotBiomeSD.png", width = 1500, height = 1000, pointsize = 20)
+ZScoreDotBiomeSD
+dev.off()
 
 
 

@@ -356,7 +356,7 @@ for(i in 1:NumberOrders){
   }
   for(j in 1:NumberBiomes){
     biome <- BiomeNames[j]
-    zscore <- MOBZMat[order,biome]
+    zscore <- MOBZMatAllSD[order,biome]
     rownumber <- rownumber + 1
     MOBZScoreDFAllSD$Order[rownumber] <- order
     MOBZScoreDFAllSD$Biome[rownumber] <- biome

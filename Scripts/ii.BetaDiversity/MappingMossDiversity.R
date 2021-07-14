@@ -19,9 +19,12 @@ require(rgdal)
 
 ## Load blank raster and cell richness data 
 ##Change file depending on if you want to map bryophytes, mosses, liverworts, etc. 
-BlankRas <-raster("Data/blank_100km_raster.tif")
+BlankRas <- raster("Data/blank_100km_raster.tif")
 BetaMat <- readRDS("Data/MossBetaMat.rds")  #run MossDiversity.R for data
 CellRichness <- readRDS("Data/MossRichness.rds")
+
+# 0.1 Run through section 2.5 for data
+gplotOutlier <- readRDS("Data/gplotOutlier.rds")
 
 
 # 1.0 Extract cell IDs and create vector for all cells -----------------------------------------------------------------------------------------
@@ -139,8 +142,10 @@ OutlierBetaMap
 
 # 2.5 Map beta diversity with values over 0.5 shown in dark grey (how many values over 0.5?)
 source("Functions/gplot_data.R")
-gplotB<- gplot_data(BetaRaster)
-gplotOutlier<- gplot_data(OutlierBetaRaster)
+gplotB <- gplot_data(BetaRaster)
+gplotOutlier <- gplot_data(OutlierBetaRaster)
+
+saveRDS(gplotOutlier, file="Data/gplotOutlier.rds")
 
 MossBetaMap <- ggplot() +
   geom_tile(data = dplyr::filter(gplotOutlier, !is.na(value)), 

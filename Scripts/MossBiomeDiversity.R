@@ -43,6 +43,7 @@ MossRichBM <- readRDS("Data/MossRichBM.rds")
 MossRichBM2 <- readRDS("Data/MossRichBM2.rds")
 MossAllBiomeMount <- readRDS("Data/MossAllBiomeMount")
 MossBiomePanelRichness <- readRDS("Data/MossBiomePanelRichness.rds")
+gplotOutlier <- readRDS("Data/gplotOutlier.rds") #run through MappingMossDiversity.R section 2.5 for data
 
 
 
@@ -329,31 +330,53 @@ dev.off()
 
 
 # 4.0 MOSS BIOME BETA MAP --------------------------------------------------
-### FIRST RUN MAPPINGMOSSDIVERSITY.R ###
 MossBiomeBetaMap <- ggplot() +
   geom_tile(data = dplyr::filter(gplotOutlier, !is.na(value)), 
             aes(x = x, y = y), fill = "gray25") +
   geom_tile(data = gplotB, 
             aes(x = x, y = y, fill = value)) +
-  scale_fill_gradientn(name = "β diversity", colours=cols, na.value="transparent", limits = c(0,0.5)) +
+  scale_fill_gradientn(name = "Beta diversity", colours=cols, na.value="transparent", limits = c(0,0.5)) +
   coord_quickmap() + 
   #geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) +                   #un-comment for continental boundaries
   #geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() +  #un-comment for mountains
   geom_sf(data = biomes_sf, size = 0.5, fill=NA) +
-  theme(legend.text=element_text(size=20), legend.title=element_text(size=32), axis.title = element_blank())
+  theme(legend.text=element_text(size=20), 
+        legend.title=element_text(size=32), 
+        axis.title = element_blank())
 MossBiomeBetaMap
 
 png("Figures/MossBetaBiomeMap.png", width = 1000, height = 1000, pointsize = 30)
 MossBiomeBetaMap
 dev.off()
 
+# 4.1 Add lat/long to map --------------------------------------------------
+CoordMossBiomeBetaMap <- ggplot() +
+  geom_tile(data = dplyr::filter(gplotOutlier, !is.na(value)), 
+            aes(x = x, y = y), fill = "gray25") +
+  geom_tile(data = gplotB, 
+            aes(x = x, y = y, fill = value)) +
+  scale_fill_gradientn(name = "Beta diversity", colours=cols, na.value="transparent", limits = c(0,0.5)) +
+  coord_quickmap() + 
+  #geom_sf(data = nw_bound_sf, size = 0.5, fill=NA) +                   #un-comment for continental boundaries
+  #geom_sf(data = nw_mount_sf, size = 0.5, alpha=0.1) + theme_void() +  #un-comment for mountains
+  geom_sf(data = biomes_sf, size = 0.5, fill=NA) +
+  theme_minimal() + #alternate: theme_gray()
+  theme(legend.text=element_text(size=20), 
+        legend.title=element_text(size=32), 
+        axis.title = element_blank())
+CoordMossBiomeBetaMap
 
-# 4.0 MAKE PLOTS -----------------------------------------------------------
+png("Figures/CoordMossBetaBiomeMap.png", width = 1000, height = 1000, pointsize = 30)
+CoordMossBiomeBetaMap
+dev.off()
+
+
+# 5.0 MAKE PLOTS -----------------------------------------------------------
 # Using richness values of cells whose centers are within each biome
 # Load data
 MossBiomeRichness <- readRDS("Data/MossBiomeRichness.rds")
 
-# 4.1 Biome richness scatterplot -------------------------------------------
+# 5.1 Biome richness scatterplot -------------------------------------------
 MossBiomeRichScatter <- ggplot(MossBiomeRichness, aes(Latitude, Alpha, color=Type), show.legend=TRUE) +
   geom_point(shape=16, size=2.5, alpha=0.5) +
   scale_color_manual(values=c("Coniferous_Forests"="#D8B70A", 
@@ -382,7 +405,7 @@ MossBiomeRichScatter
 dev.off()
 
 
-# 4.2 Biome richness boxplot -----------------------------------------------
+# 5.2 Biome richness boxplot -----------------------------------------------
 MossBiomeRichBox <- ggplot(MossBiomeRichness, aes(x=Type, y=Alpha, fill=Type)) + 
   geom_boxplot(show.legend = FALSE, fill=cols7) +
   guides(x = guide_axis(angle=30)) +
@@ -399,7 +422,7 @@ png("Figures/MossAlphaBiomeBox.png", width = 1500, height = 1000, pointsize = 20
 MossBiomeRichBox
 dev.off()
 
-# 4.3 Biome richness violin plot -------------------------------------------
+# 5.3 Biome richness violin plot -------------------------------------------
 MossBiomeRichViolin <- ggplot(MossBiomeRichness, 
                           aes(x=Type, y=Alpha, fill=Type)) +
   geom_violin(scale="count", show.legend = FALSE) +
@@ -428,7 +451,7 @@ png("Figures/MossAlphaBiomeViolin.png", width = 1500, height = 1000, pointsize =
 MossBiomeRichViolin
 dev.off()
 
-# 4.4 Biome richness boxplot with violins ----------------------------------
+# 5.4 Biome richness boxplot with violins ----------------------------------
 MossBiomeRichBV <- ggplot(MossBiomeRichness, aes(x=Type, y=Alpha, 
                                                  fill=Type, color=Type)) + 
   geom_boxplot(show.legend = FALSE, fill=cols7, color="black") +
@@ -452,8 +475,8 @@ MossBiomeRichBV
 dev.off()
 
 
-# 4.5 Biome and mountainous richness scatterplots --------------------------
-# 4.5.1 Black circles around mountainous regions ---------------------------
+# 5.5 Biome and mountainous richness scatterplots --------------------------
+# 5.5.1 Black circles around mountainous regions ---------------------------
 MossBiomeMountRichScatter <- ggplot(MossBiomeMountRichness, aes(Latitude, Alpha, color=Type, shape=Type), show.legend=TRUE) +
   geom_point(size=2.5, alpha=0.5) +
   scale_shape_manual(values=c("Coniferous_Forests"=16, 
@@ -508,7 +531,7 @@ MossBiomeMountRichScatter
 dev.off()
 
 
-# 4.5.2 Change shape of mountainous/lowland regions ------------------------
+# 5.5.2 Change shape of mountainous/lowland regions ------------------------
 MossRichBMScatter <- ggplot(MossRichBM, 
                                     aes(Latitude, Alpha, color=Type, 
                                         shape=Region), show.legend=TRUE) +
@@ -552,7 +575,7 @@ MossRichBMScatter
 dev.off()
 
 
-# 4.5.3 3-D Biome and mountainous richness scatterplot ---------------------
+# 5.5.3 3-D Biome and mountainous richness scatterplot ---------------------
 #Code adapted from MossLMToo.R
 #Load packages
 require(plotly)
@@ -597,7 +620,7 @@ axz <- list(
 f1 <- f1 %>% layout(scene = list(xaxis=axx,yaxis=axy,zaxis=axz))
 f1
 
-# 4.5.4 Biome and mountainous richness scatterplot w/ more control ---------
+# 5.5.4 Biome and mountainous richness scatterplot w/ more control ---------
 #Not really working - probably scrap DF
 MossRichBMScatter2 <- ggplot(show.legend=TRUE) +
   geom_point(data=MossRichBM2, aes(Latitude1, Alpha1, color=Type), 
@@ -638,7 +661,7 @@ MossRichBMScatter2 <- ggplot(show.legend=TRUE) +
 MossRichBMScatter2
 
 
-# 4.5.5 Trying again to get more control over shapes + colors --------------
+# 5.5.5 Trying again to get more control over shapes + colors --------------
 #Grr this is also not working
 MountVec <- vector(mode="character", length=1133)
 MountVec[1:260] <- "#000000"
@@ -690,11 +713,11 @@ MossRichBMScatter3
 
 
 
-# 5.0 Panels of different biomes with all biomes in gray -------------------
+# 6.0 Panels of different biomes with all biomes in gray -------------------
 ###IN PROGRESS###
 #I'll have to make separate DFs for each biome with AllBiomes, make a column to mark each biome+all as that biome, then bind_rows, divide by that biome marker
 
-# 5.1 Make dataframes ------------------------------------------------------
+# 6.1 Make dataframes ------------------------------------------------------
 # 5.1.1 Make DFs with each biome and all occurrences together; 
   #one new column with name of biome in order to panel it out by that biome but with all occurrences also shown in each panel
 MossBiomeRichnessAllBiomes <- MossBiomeRichness
@@ -733,14 +756,14 @@ TundraDF$Biome <- "Tundra"
 XericWoodDF <- bind_rows(MossBiomeRichnessAllBiomes, AlphaXericWood)
 XericWoodDF$Biome <- "Xeric Woodlands"
 
-# 5.1.2 Bind all biomes together -------------------------------------------
+# 6.1.2 Bind all biomes together -------------------------------------------
 MossBiomePanelRichness <- bind_rows(ConForDF, DryForDF, MedWoodDF, MoistForDF,
                                     SavannaDF, TaigaDF, TempGrassDF, TempMixDF,
                                     TropGrassDF, TundraDF, XericWoodDF)
 
 saveRDS(MossBiomePanelRichness, file="Data/MossBiomePanelRichness.rds")
 
-# 5.1.3 Make DF (same as above but also with montane cells) ----------------
+# 6.1.3 Make DF (same as above but also with montane cells) ----------------
 AlphaMount <- raster::extract(MossRichnessRaster, nw_mount, df = TRUE, cellnumbers = TRUE)
 colnames(AlphaMount) <- c("Type", "CellID", "Alpha")
 AlphaMount$Type <-"Montane"
@@ -793,7 +816,7 @@ MossBiomeMountPanelRichness <- bind_rows(MountConForDF, MountDryForDF,
 #saveRDS(MossBiomeMountPanelRichness, file="Data/MossBiomeMountPanelRichness.rds")
 
 
-# 5.2 Plot richness by latitude paneled by biome (w/ all points gray) ------
+# 6.2 Plot richness by latitude paneled by biome (w/ all points gray) ------
 MossBiomePanelScatter <- ggplot(MossBiomePanelRichness,
                                  aes(Latitude, Alpha, color=Type, alpha=Type,
                                      fill=Type)) +
@@ -838,7 +861,7 @@ MossBiomePanelScatter
 dev.off()
 
 
-# 5.3 Make same plot as 5.2 but w/ black circles around montane cells ------
+# 6.3 Make same plot as 5.2 but w/ black circles around montane cells ------
 MossBiomeMountPanelScatter <- ggplot(MossBiomeMountPanelRichness,
                                 aes(Latitude, Alpha, color=Type, alpha=Type,
                                     fill=Type, shape=Type, size=Type)) +
@@ -907,7 +930,7 @@ MossBiomeMountPanelScatter <- ggplot(MossBiomeMountPanelRichness,
 MossBiomeMountPanelScatter
 
 
-# 6.0 New color scheme -----------------------------------------------------
+# 7.0 New color scheme -----------------------------------------------------
 MossBiomeMountPanelScatter2 <- ggplot(MossBiomeMountPanelRichness,
                                      aes(Latitude, Alpha, color=Type, alpha=Type,
                                          fill=Type, shape=Type, size=Type)) +
@@ -987,6 +1010,3 @@ scale_color_manual(values=c("Coniferous_Forests"="#271a5b",
         axis.text = element_text(size=10)) +
   facet_wrap(~Biome)
 MossBiomeMountPanelScatter2
-
-
-# 5.3 Divide by montane/lowland areas --------------------------------------

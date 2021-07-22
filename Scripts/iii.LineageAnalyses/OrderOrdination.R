@@ -23,6 +23,8 @@ MossOrderCellMat200<-MossOrderCellMat[rowSums(MossOrderCellMat)>299,]
 ord<-metaMDS(MossOrderCellMat200, trymax=100)
 ordCells<-as.data.frame(ord$points)
 ordOrders<-as.data.frame(ord$species)
+ordOrders$Order<-row.names(ordOrders)
+ordOrders$AvgRich<-colSums(MossOrderCellMat200)/length(MossOrderCellMat200[,1])
 
 # 5.0 Bring in Biome data for visualization
 biomeCells<-readRDS("Data/BiomeCellsDF.rds")
@@ -44,10 +46,38 @@ ggplot(na.omit(ordCells), aes(MDS1, MDS2, color=Biome, show.legend=TRUE)) +
                               "Tropical_Grasslands"="#C7B19C",
                               "Tundra"="#798E87",
                               "Xeric_Woodlands"="#C27D38")) +
-  #stat_ellipse() +
+  stat_ellipse() +
   theme_minimal()
 
+pal1 <- wes_palette("Darjeeling1")
+pal2 <- wes_palette("Chevalier1")
+mossorderpal <- c(pal1, pal2, wes_palette("IsleofDogs1"),
+                  wes_palette("Cavalcanti1"))
 
+ggplot(na.omit(ordOrders), aes(MDS1, MDS2, color=Order, size=AvgRich, show.legend=TRUE)) +
+  geom_point() +
+  scale_color_manual(values=c("Hypnales" = mossorderpal[2],
+                              "Dicranales" = mossorderpal[1],
+                              "Bryales" = mossorderpal[6],
+                              "Pottiales" = mossorderpal[4],
+                              "Grimmiales" = mossorderpal[5],
+                              "Orthotrichales" = mossorderpal[3],
+                              "Bartramiales" = mossorderpal[7],
+                              "Polytrichiales" = mossorderpal[8],
+                              "Hookeriales" = mossorderpal[16],
+                              "Funariales" = mossorderpal[10],
+                              "Sphagnales" = mossorderpal[11],
+                              "Hedwigiales" = mossorderpal[12],
+                              "Rhizogoniales" = mossorderpal[13],
+                              "Splachnales" = mossorderpal[19],
+                              "Andreaeaeales" = mossorderpal[15],
+                              "Aulacomniales" = mossorderpal[9],
+                              "Buxbaumiales" = mossorderpal[17],
+                              "Hypnodendrales" = mossorderpal[20],
+                              "Gigaspermales" = mossorderpal[14],
+                              "Bryoxiphiales" = mossorderpal[18],
+                              "Archidiales" = "magenta")) +
+  theme_minimal()
   
 
 
